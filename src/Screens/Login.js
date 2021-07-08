@@ -25,10 +25,13 @@ mutation login_passenger($email: String!, $password:String!){
 `
 
 export const Login=()=> {
-  const [email,setEmail] = useState("")
-  const [password,setPassword] = useState("")
+  //State
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const {setUser} = useUsuario()
+  //Server requests
   const [login] = useMutation(LOGIN_PASSENGER,{
+      fetchPolicy: "no-cache",
       onCompleted:({LoginPassenger})=>{
         console.log(LoginPassenger);
         setUser(LoginPassenger)
@@ -37,6 +40,7 @@ export const Login=()=> {
         console.log(error);
       }
   })
+  //React render
   return (
     <View style={styles.contenedor}>
       <Image source={require('../../assets/images/bimo-banner.jpeg')} style={styles.logo} />

@@ -2,10 +2,6 @@
   package="com.bimodriver">
 
     <uses-permission android:name="android.permission.INTERNET" />
-<<<<<<< HEAD
-
-    <application
-=======
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -21,21 +17,12 @@
 
     <application
       android:usesCleartextTraffic="true"
->>>>>>> a77b2b6158a9353d0e74a93a3bfe369a08caadeb
       android:name=".MainApplication"
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
       android:theme="@style/AppTheme">
-<<<<<<< HEAD
-      <activity
-        android:name=".MainActivity"
-        android:label="@string/app_name"
-        android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
-        android:launchMode="singleTask"
-        android:windowSoftInputMode="adjustResize">
-=======
 
       <service android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationRegistrationService"/>
 
@@ -53,16 +40,11 @@
         android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
         android:windowSoftInputMode="adjustResize"
         android:screenOrientation="portrait">
->>>>>>> a77b2b6158a9353d0e74a93a3bfe369a08caadeb
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-<<<<<<< HEAD
-    </application>
-</manifest>
-=======
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
 
       <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyD9O9e1DGWPIpB2r3snXW5jssuhk38B3vc"/>
@@ -70,4 +52,3 @@
     </application>
 
 </manifest>
->>>>>>> a77b2b6158a9353d0e74a93a3bfe369a08caadeb

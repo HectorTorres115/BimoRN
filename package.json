@@ -10,10 +10,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-<<<<<<< HEAD
-    "react": "17.0.1",
-    "react-native": "0.64.2"
-=======
     "@react-native-firebase/app": "^12.1.0",
     "@react-native-firebase/messaging": "^12.1.0",
     "react": "17.0.1",
@@ -44,7 +40,6 @@
     "react-navigation-material-bottom-tabs": "^2.3.0",
     "redux": "^4.0.5",
     "subscriptions-transport-ws": "0.9.16"
->>>>>>> a77b2b6158a9353d0e74a93a3bfe369a08caadeb
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

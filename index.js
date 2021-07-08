@@ -5,10 +5,6 @@
 import {AppRegistry} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
-<<<<<<< HEAD
-
-AppRegistry.registerComponent(appName, () => App);
-=======
 import messaging from '@react-native-firebase/messaging'
 import { Notification } from './src/Functions/ShowNotification'
 
@@ -26,4 +22,3 @@ messaging().onMessage(async payload=>{
 AppRegistry.registerComponent(appName, () => App);
 
 
->>>>>>> a77b2b6158a9353d0e74a93a3bfe369a08caadeb
