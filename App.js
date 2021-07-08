@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
@@ -110,3 +111,63 @@ const styles = StyleSheet.create({
 });
 
 export default App;
+=======
+import * as React from 'react'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import { ApolloProvider } from 'react-apollo'
+import { client } from './src/Clients/client'
+import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
+
+//pantallas
+import { Login } from './src/Screens/Login'
+import { Registro } from './src/Screens/Registro'
+import { Mapas } from './src/Screens/Mapas'
+// import SplashScreen from './Screens/SplashScreen';
+
+const LoginStack = createStackNavigator();
+const MainStack = createStackNavigator();
+
+
+const LoginStackScreen = ()=> (
+  <LoginStack.Navigator headerMode='none' >
+    <LoginStack.Screen name="Login" component={Login} />
+    <LoginStack.Screen name="Register" component={Registro} />
+  </LoginStack.Navigator>
+)
+
+const MainStackScreen = ()=> (
+  <MainStack.Navigator headerMode='none'>
+    <MainStack.Screen name="Mapas" component={Mapas} />
+  </MainStack.Navigator>
+)
+
+export default ()=> (
+  <UsuarioProvider>
+    <App></App>
+  </UsuarioProvider>
+)
+
+function App() {
+  const {usuario} = useUsuario();
+
+  if(usuario == null){
+    return (
+      <ApolloProvider client={client} >
+        <NavigationContainer>
+          <LoginStackScreen/>
+        </NavigationContainer>
+      </ApolloProvider>
+    )
+  } else{
+    return(
+      <ApolloProvider client={client} >
+        <NavigationContainer>
+          <MainStackScreen/>
+        </NavigationContainer>
+      </ApolloProvider>
+    )
+  }
+
+}
+>>>>>>> a77b2b6158a9353d0e74a93a3bfe369a08caadeb
