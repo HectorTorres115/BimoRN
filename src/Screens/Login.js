@@ -1,13 +1,16 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { StyleSheet, Text, View, Button, TextInput, Pressable, Image, TouchableOpacity  } from 'react-native'
 //Apollo
 import gql from 'graphql-tag'
 import {useMutation} from 'react-apollo'
 import {GetDeviceToken} from '../Functions/GetDeviceToken'
 //Authentication
-import { SetUser as SetStorageUser } from '../Functions/UserStorage'
+import { SetUser } from '../Functions/UserStorage'
 //Context
 import { useUsuario } from '../Context/UserContext'
+import { requestPermission } from '../Functions/MapsPermissions'
+//geolocalizacion
+import Geolocation from '@react-native-community/geolocation'
 
 const LOGIN_PASSENGER = gql`
 mutation login_passenger($email: String!, $password:String!){
@@ -24,10 +27,19 @@ mutation login_passenger($email: String!, $password:String!){
   }
 `
 
+
 export const Login=()=> {
-  //State
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  useEffect(()=>{
+    requestPermission().then(()=>{
+      console.log('permisos aceptados')
+    }).catch(()=>console.log('permisos denegados'))
+  },[])
+  Geolocation.watchPosition((info) => {
+  //  console.log(info.coords);
+  }, (error) => console.log(error),
+  {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
+  const [email,setEmail] = useState("")
+  const [password,setPassword] = useState("")
   const {setUser} = useUsuario()
   //Server requests
   const [login] = useMutation(LOGIN_PASSENGER,{
@@ -35,6 +47,7 @@ export const Login=()=> {
       onCompleted:({LoginPassenger})=>{
         console.log(LoginPassenger);
         setUser(LoginPassenger)
+        SetUser(LoginPassenger)
       },
       onError:(error)=>{
         console.log(error);
