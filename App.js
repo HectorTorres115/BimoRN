@@ -36,7 +36,7 @@ export default ()=> (
 
 function App() {
   const {usuario} = useUsuario();
-
+  console.log(usuario);
   if(usuario == null){
     return (
       <ApolloProvider client={client} >

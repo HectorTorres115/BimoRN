@@ -9,7 +9,9 @@ export const UsuarioProvider = (props) => {
     //Did mount
     useEffect(() => {
         GetUser()
-        .then((data) => setUser(data))
+        .then((data) => {
+            setUser(data)
+        })
         .catch((err) => console.log(err))
     }, [])
     
