@@ -9,6 +9,7 @@ import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
 import { Login } from './src/Screens/Login'
 import { Registro } from './src/Screens/Registro'
 import { Mapas } from './src/Screens/Mapas'
+import { Animation } from './src/Screens/Animation'
 // import SplashScreen from './Screens/SplashScreen';
 
 const LoginStack = createStackNavigator();
@@ -23,8 +24,9 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none'>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Animation'}>
     <MainStack.Screen name="Mapas" component={Mapas} />
+    <MainStack.Screen name="Animation" component={Animation} />
   </MainStack.Navigator>
 )
 

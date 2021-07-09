@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import { Button } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
@@ -7,7 +7,9 @@ import MapView, {Marker} from 'react-native-maps'
 import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
 import { useUsuario } from '../Context/UserContext'
 import { useLazyQuery, useQuery } from 'react-apollo'
-import Geolocation from '@react-native-community/geolocation'
+//Animated marker
+import {DriverMarker} from '../Components/DriverMarker'
+import { Animated, Easing } from 'react-native'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -18,6 +20,26 @@ query{
 `
 
 export const Mapas = () => {
+    //Animacion
+    const [animacion] = useState(new Animated.Value(0));
+    const spin = animacion.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg']
+    })
+    //Lifecycle methods
+    useEffect(() => {
+        console.log('Component did mount')
+        Animated.loop(
+            Animated.timing(animacion, {
+                toValue: 1, 
+                duration: 3000, 
+                easing: Easing.linear, 
+                useNativeDriver: true
+            })
+        ).start();
+    }, [])
+    //Global state
+    const {setUser} = useUsuario();
     //State
     const globalMarker = useRef(React.Component);
     const driverMarker = useRef(React.Component);
@@ -29,24 +51,23 @@ export const Mapas = () => {
         longitudeDelta: 0.08
     });
     const [drivers, setDrivers] = useState([]);
-    const [driverLocation,setDriverLocation] = useState({longitude: -107.45220333333332,latitude: 24.82172166666667});
-    const {usuario,setUser} = useUsuario([]);
-    const [query_drivers] = useLazyQuery(QUERY_DRIVERS,{
+    const [driverLocation, setDriverLocation] = useState({
+        longitude: -107.45220333333332,
+        latitude: 24.82172166666667
+    });
+    //Server requests
+    useQuery(QUERY_DRIVERS, {
+        partialRefetch: true,
+        pollInterval: 4000,
         fetchPolicy:'no-cache',
         onCompleted:({GetCities})=>{
-            console.log(GetCities);
+            console.log('Polled');
             setDrivers(GetCities)
           },
           onError:(error)=>{
             console.log(error);
           }
     })
-    
-    Geolocation.watchPosition(async (info) => {
-         console.log(info.coords);
-            await query_drivers()
-        }, (error) => console.log(error),
-        {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
 
     async function drawMarkers(object){
         if(location.length < 1){
@@ -57,16 +78,6 @@ export const Mapas = () => {
             setLocation([]);
         }
     }
-
-    function animateMarker() {
-        let duration = 1000
-        globalMarker.current.animateMarkerToCoordinate(location[0], duration)
-    }
-
-    // setInterval(async () => {
-    //     await query_drivers()
-    //     console.log('imprimiendo conductores')
-    // }, 4000);
 
     return(
         <>
@@ -80,13 +91,22 @@ export const Mapas = () => {
                 return <Marker ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
             })} 
             {drivers.map(coord => {
-                return <Marker coordinate = {{latitude:coord.lat,longitude:coord.lng}} pinColor={coord.color}/>
+                return <Marker coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
-            <Marker ref = {driverMarker} coordinate = {driverLocation} tracksViewChanges={true} image={require('../../assets/images/delorean.png')} rotation={(240)} />
+            <MapView.Marker.Animated
+            style={{transform: [{rotate: spin}] }}
+            ref = {driverMarker} 
+            coordinate = {driverLocation} 
+            image={require('../../assets/images/map-taxi.png')} 
+            />
         </MapView>
         <Button title = "Animate marker" onPress = {() => animateMarker()}/>
-        <Button title = "Usuario" onPress = {() => setUser(null)}/>
-        <DriverLocationUpdated setter={setDriverLocation} driverId={2} driverMarker= {driverMarker} duration={4000} />
+        <Button title = "Rotate" onPress = {() => rotateMarker()}/>
+        <DriverLocationUpdated 
+        setter={setDriverLocation} 
+        driverId={2} 
+        driverMarker= {driverMarker} 
+        duration={4000} />
         </>
     )
 }
