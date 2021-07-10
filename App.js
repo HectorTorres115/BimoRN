@@ -11,6 +11,16 @@ import { Registro } from './src/Screens/Registro'
 import { Mapas } from './src/Screens/Mapas'
 import { Animation } from './src/Screens/Animation'
 // import SplashScreen from './Screens/SplashScreen';
+//React native paper provider
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+
+const theme = {
+  ...DefaultTheme,
+  dark: true,
+  colors: {
+    ...DefaultTheme.colors,
+  },
+};
 
 const LoginStack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -24,16 +34,18 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none' initialRouteName={'Animation'}>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
     <MainStack.Screen name="Mapas" component={Mapas} />
     <MainStack.Screen name="Animation" component={Animation} />
   </MainStack.Navigator>
 )
 
 export default ()=> (
+  <PaperProvider theme = {theme}>
   <UsuarioProvider>
     <App></App>
   </UsuarioProvider>
+  </PaperProvider>
 )
 
 function App() {
