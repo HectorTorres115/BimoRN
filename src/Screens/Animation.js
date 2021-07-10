@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import {Marker} from 'react-native-maps';
-import { Animated, Easing, Button } from 'react-native'
+import { Animated, Easing, Button, StyleSheet } from 'react-native'
+import { FAB } from 'react-native-paper';
 
 export const Animation = () => {
     //State
@@ -28,6 +29,22 @@ export const Animation = () => {
             animationReference.stop()
             setAnimacion(new Animated.Value(0))
         }}/>
+        <FAB
+        style={styles.fab}
+        small
+        icon="camera"
+        onPress={() => console.log('Pressed')}
+        />
     </Animated.View>
     )
 }
+
+const styles = StyleSheet.create({
+    fab: {
+      position: 'absolute',
+      margin: 16,
+      right: 0,
+      bottom: 0,
+    },
+  })
+  

@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from 'react'
-import { Button } from 'react-native'
+import { Button, StyleSheet } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
 import MapView, {Marker} from 'react-native-maps'
@@ -8,8 +8,8 @@ import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
 import { useUsuario } from '../Context/UserContext'
 import { useLazyQuery, useQuery } from 'react-apollo'
 //Animated marker
-import {DriverMarker} from '../Components/DriverMarker'
 import { Animated, Easing } from 'react-native'
+import { FAB } from 'react-native-paper';
 
 const QUERY_DRIVERS = gql`
 query{
@@ -102,6 +102,12 @@ export const Mapas = () => {
         </MapView>
         <Button title = "Animate marker" onPress = {() => animateMarker()}/>
         <Button title = "Rotate" onPress = {() => rotateMarker()}/>
+        <FAB
+        style={styles.fab}
+        small
+        icon="camera"
+        onPress={() => console.log('Pressed')}
+        />
         <DriverLocationUpdated 
         setter={setDriverLocation} 
         driverId={2} 
@@ -110,3 +116,13 @@ export const Mapas = () => {
         </>
     )
 }
+
+const styles = StyleSheet.create({
+    fab: {
+      position: 'absolute',
+      margin: 16,
+      right: 0,
+      bottom: 0,
+    },
+  })
+  
