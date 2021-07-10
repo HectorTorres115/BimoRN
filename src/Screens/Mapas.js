@@ -2,7 +2,6 @@ import React, {useState, useRef} from 'react'
 import { Button } from 'react-native'
 //Maps
 import MapView, {Marker} from 'react-native-maps'
-// import darkStyle from '../Maps/mapstyle'
 
 export const Mapas = () => {
     //State
@@ -25,12 +24,12 @@ export const Mapas = () => {
         }
     }
 
-    function animateMarker() {
+    async function animateMarker() {
         let duration = 1000
         globalMarker.current.animateMarkerToCoordinate(location[0], duration)
     }
 
-    return(
+    return (
         <>
         <MapView
         onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
