@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
+// import { createStackNavigator } from '@react-navigation/stack'
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { ApolloProvider } from 'react-apollo'
 import { client } from './src/Clients/client'
 import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
@@ -19,11 +20,12 @@ const theme = {
   dark: true,
   colors: {
     ...DefaultTheme.colors,
+    primary: "#16A0DB"
   },
 };
 
-const LoginStack = createStackNavigator();
-const MainStack = createStackNavigator();
+const LoginStack = createDrawerNavigator();
+const MainStack = createDrawerNavigator();
 
 
 const LoginStackScreen = ()=> (
@@ -34,9 +36,10 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Registro'}>
     <MainStack.Screen name="Mapas" component={Mapas} />
     <MainStack.Screen name="Animation" component={Animation} />
+    <MainStack.Screen name="Registro" component={Registro} />
   </MainStack.Navigator>
 )
 
