@@ -34,7 +34,7 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Animation'}>
     <MainStack.Screen name="Mapas" component={Mapas} />
     <MainStack.Screen name="Animation" component={Animation} />
   </MainStack.Navigator>
