@@ -1,6 +1,53 @@
 import React, {useState, useEffect} from 'react'
 import { StyleSheet, Text, View, Button, TextInput, Pressable, Image, TouchableOpacity,Switch, ScrollView  } from 'react-native'
 import { HelperText,TextInput as InputPaper } from 'react-native-paper';
+import gql from 'graphql-tag'
+import {useMutation} from 'react-apollo'
+import { GetDeviceToken } from '../Functions/GetDeviceToken';
+
+const REGISTER_PASSENGER = gql`
+mutation create_passenger($email: String!,$password: String!,$name: String!,$phoneNumber: String!,$genre: String!,$deviceToken: String!) {
+  CreatePassenger(input: { 
+    email: $email
+    password: $password
+    name: $name
+    phoneNumber: $phoneNumber
+    photoUrl: ""
+    isPhoneVerified: false
+    isPushEnabled: false
+    genre: $genre
+    deviceToken: $deviceToken
+    
+  }) {
+    id
+    name
+    password
+  }
+}
+`
+
+const REGISTER_DRIVER = gql`
+mutation create_driver($email: String!,$password: String!,$name: String!,$phoneNumber: String!,$genre: String!,$deviceToken: String!, $brand: String!,$model: String!, $plate: String!) {
+  CreateDriver(input: { 
+    email: $email
+    password: $password
+    name: $name
+    phoneNumber: $phoneNumber
+    photoUrl: ""
+    genre: $genre
+    deviceToken: $deviceToken
+    balance:0
+    brand: $brand
+    model:$model
+    plate: $plate
+    rating: 5.0
+  }) {
+    id
+    name
+    password
+  }
+}
+`
 
 const  firstRender = (props)=> {
   return (
@@ -29,60 +76,6 @@ const  firstRender = (props)=> {
 }
 
 const inputDriver = (props)=> {
-
-// const [name,setName] = useState("")
-// const [email,setEmail] = useState("")
-// const [password,setPassword] = useState("")
-// const [phoneNumber,setPhoneNumber] = useState("")
-
-const validaPassword = () => {
-  // if(props.InputsDriver.password.length >= 6)
-  //   {		
-  //     var mayuscula = false;
-  //     var minuscula = false;
-  //     var numero = false;
-      
-  //     for(var i = 0;i<props.InputsDriver.password.length;i++)
-  //     {
-  //       if(props.InputsDriver.password.charCodeAt(i) >= 65 && props.InputsDriver.password.charCodeAt(i) <= 90)
-  //       {
-  //         mayuscula = true;
-  //       }
-  //       else if(props.InputsDriver.password.charCodeAt(i) >= 97 && props.InputsDriver.password.charCodeAt(i) <= 122)
-  //       {
-  //         minuscula = true;
-  //       }
-  //       else if(props.InputsDriver.password.charCodeAt(i) >= 48 && props.InputsDriver.password.charCodeAt(i) <= 57)
-  //       {
-  //         numero = true;
-  //       }
-
-  //     }
-  //     if(mayuscula == true)
-  //     {
-  //       if(minuscula == true)
-  //       {
-  //         if(numero == true){
-  //           return true
-  //         }
-  //         else{
-  //           return false
-  //         }
-  //       }
-  //       else{
-  //         return false
-  //       }
-        
-  //     }
-  //     else{
-  //       return false
-  //     }
-  //   }
-  //   return false
-
-  return props.InputsDriver.password.includes('a');
-  };
-
   return (
     <>
     <View style={styles.contenedorLogo}>
@@ -93,12 +86,12 @@ const validaPassword = () => {
       <TextInput 
         placeholder="   Nombre" 
         placeholderTextColor="gray" 
-        onChangeText={(name)=> setName(name)} 
+        onChangeText={(name)=> props.InputsDriver.setName(name)} 
         style={styles.input}/> 
         <TextInput 
         placeholder="   Correo" 
         placeholderTextColor="gray" 
-        onChangeText={(email)=> setEmail(email)} 
+        onChangeText={(email)=> props.InputsDriver.setEmail(email)} 
         style={styles.input}/> 
       <TextInput 
         placeholder="   Contaseña" 
@@ -106,20 +99,36 @@ const validaPassword = () => {
         onChangeText={(password)=> props.InputsDriver.setPassword(password)}
         style={styles.input} 
         secureTextEntry= {true}/> 
-          <HelperText visible={validaPassword()}  style={styles.textoPassword}> Longitud minima de 6 caracteres, y contener al menos una letra mayúscula, una minúscula y un dígito </HelperText>
+        
         <TextInput 
         placeholder="   Telefono" 
         placeholderTextColor="gray" 
-        onChangeText={(phoneNumber)=> setPhoneNumber(phoneNumber)}
+        onChangeText={(phoneNumber)=> props.InputsDriver.setPhoneNumber(phoneNumber)}
         style={styles.input} 
         secureTextEntry= {true}/> 
         <TextInput 
+          placeholder="   Genero" 
+          placeholderTextColor="gray" 
+          onChangeText={(genre)=> props.InputsDriver.setGenre(genre)}
+          style={styles.input}/> 
+        <TextInput 
         placeholder="   Marca Vehiculo" 
         placeholderTextColor="gray" 
-        onChangeText={(phoneNumber)=> setPhoneNumber(phoneNumber)}
-        style={styles.input} 
-        secureTextEntry= {true}/> 
-      <Pressable  style={styles.boton} onPress={()=> login({variables:{email,password, name, phoneNumber}})} >
+        onChangeText={(brand)=> props.InputsDriver.setPhoneNumber(brand)}
+        style={styles.input} /> 
+        <TextInput 
+        placeholder="   Modelo Vehiculo" 
+        placeholderTextColor="gray" 
+        onChangeText={(model)=> props.InputsDriver.setPhoneNumber(model)}
+        style={styles.input} /> 
+        <TextInput 
+        placeholder="   Placa Vehiculo" 
+        placeholderTextColor="gray" 
+        onChangeText={(plate)=> props.InputsDriver.setPhoneNumber(plate)}
+        style={styles.input} /> 
+      <Pressable  style={styles.boton} onPress={async ()=> props.registerDriver({variables:{email: props.InputsDriver.email,password: props.InputsDriver.password, 
+          name: props.InputsDriver.name, phoneNumber: props.InputsDriver.phoneNumber, genre: props.InputsDriver.genre,
+          deviceToken: await GetDeviceToken(), brand: props.InputsDriver.brand, model: props.InputsDriver.model, plate: props.InputsDriver.plate }})} >
         <Text style={styles.texto}>Registrarse</Text>
       </Pressable>
       <Pressable  style={styles.boton} onPress={()=> props.setShouldFirstRender(true)} >
@@ -132,11 +141,6 @@ const validaPassword = () => {
 
 const inputPassenger = (props)=> {
 
-//   const [name,setName] = useState("")
-// const [email,setEmail] = useState("")
-// const [password,setPassword] = useState("")
-// const [phoneNumber,setPhoneNumber] = useState("")
-
   return (
     <>
     <View style={styles.contenedorLogo}>
@@ -147,26 +151,32 @@ const inputPassenger = (props)=> {
         <TextInput 
           placeholder="   Nombre" 
           placeholderTextColor="gray" 
-          onChangeText={(name)=> setName(name)} 
+          onChangeText={(name)=> props.InputsPassenger.setName(name)} 
           style={styles.input}/> 
           <TextInput 
           placeholder="   Correo" 
           placeholderTextColor="gray" 
-          onChangeText={(email)=> setEmail(email)} 
+          onChangeText={(email)=> props.InputsPassenger.setEmail(email)} 
           style={styles.input}/> 
         <TextInput 
           placeholder="   Contaseña" 
           placeholderTextColor="gray" 
-          onChangeText={(password)=> setPassword(password)}
+          onChangeText={(password)=> props.InputsPassenger.setPassword(password)}
           style={styles.input} 
           secureTextEntry= {true}/> 
         <TextInput 
           placeholder="   Telefono" 
           placeholderTextColor="gray" 
-          onChangeText={(phoneNumber)=> setPhoneNumber(phoneNumber)}
-          style={styles.input} 
-          secureTextEntry= {true}/> 
-        <Pressable  style={styles.boton} onPress={()=> login({variables:{email,password, name, phoneNumber}})} >
+          onChangeText={(phoneNumber)=> props.InputsPassenger.setPhoneNumber(phoneNumber)}
+          style={styles.input}/> 
+        <TextInput 
+          placeholder="   Genero" 
+          placeholderTextColor="gray" 
+          onChangeText={(genre)=> props.InputsPassenger.setGenre(genre)}
+          style={styles.input}/> 
+        <Pressable  style={styles.boton} onPress={ async ()=> props.registerPassenger({variables:{email: props.InputsPassenger.email,password: props.InputsPassenger.password, 
+          name: props.InputsPassenger.name, phoneNumber: props.InputsPassenger.phoneNumber, genre: props.InputsPassenger.genre,
+          deviceToken: await GetDeviceToken() }})} >
           <Text style={styles.texto}>Registrarse</Text>
         </Pressable>
         <Pressable  style={styles.boton} onPress={()=> props.setShouldFirstRender(true)} >
@@ -197,13 +207,42 @@ const [name,setName] = useState("")
 const [email,setEmail] = useState("")
 const [password,setPassword] = useState("")
 const [phoneNumber,setPhoneNumber] = useState("")
+const [genre,setGenre] = useState("")
+const [brand,setBrand] = useState("")
+const [model,setModel] = useState("")
+const [plate,setPlate] = useState("")
 const [shouldShowChofer, setShouldShowChofer] = useState(true);
 const [shouldFirstRender, setShouldFirstRender] = useState(true);
+const [registerPassenger] = useMutation(REGISTER_PASSENGER,{
+  fetchPolicy: "no-cache",
+  onCompleted:({CreatePassenger})=>{
+    console.log(CreatePassenger);
+    // setUser(RegisterPassenger)
+    // SetUser(RegisterPassenger)
+  },
+  onError:(error)=>{
+    console.log(error);
+  }
+})
+const [registerDriver] = useMutation(REGISTER_DRIVER,{
+  fetchPolicy: "no-cache",
+  onCompleted:({CreateDriver})=>{
+    console.log(CreateDriver);
+    // setUser(RegisterPassenger)
+    // SetUser(RegisterPassenger)
+  },
+  onError:(error)=>{
+    console.log(error);
+  }
+})
 
   return (
     <View style={styles.contenedor}> 
         {
-          evaluateStack({shouldFirstRender,shouldShowChofer,setShouldShowChofer,setShouldFirstRender,InputsDriver:{name,setEmail,email,setEmail,password,setPassword,phoneNumber,setPhoneNumber}})
+          evaluateStack({shouldFirstRender,shouldShowChofer,setShouldShowChofer,setShouldFirstRender,
+            InputsDriver:{name,setName,email,setEmail,password,setPassword,phoneNumber,setPhoneNumber,genre,setGenre,brand,setBrand,model,setModel,plate,setPlate},
+            InputsPassenger:{name,setName,email,setEmail,password,setPassword,phoneNumber,setPhoneNumber,genre,setGenre},
+            registerPassenger, registerDriver})
         }
     </View>
   )
@@ -268,7 +307,7 @@ const styles = StyleSheet.create({
     // marginBottom:30
   },
   scroll:{
-    height:500,
+    height:700,
     // flex:1,
     // borderWidth:2,
     // borderColor: 'red',
