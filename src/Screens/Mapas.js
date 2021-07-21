@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from 'react'
-import { Button, StyleSheet } from 'react-native'
+import { Button, StyleSheet, View } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
 import MapView, {Marker} from 'react-native-maps'
@@ -81,25 +81,27 @@ export const Mapas = () => {
 
     return(
         <>
-        <MapView
+        <MapView.Animated
         onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
         onPress = {(e) => drawMarkers(e.nativeEvent.coordinate)}
         // customMapStyle={darkStyle}
-        style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
+        style={{ flex: 1, width: '100%', height: '100%', zIndex: -1}}
         initialRegion = {region}>
             {location.map(coord => {
                 return <Marker ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
             })} 
             {drivers.map(coord => {
-                return <Marker coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
+                return <Marker coordinate = {{latitude: coord.lat, longitude: coord.lng}} pinColor={coord.color}/>
             })}
+            <View style = {{transform: [{perspective: 1000}]}}>
             <MapView.Marker.Animated
-            style={{transform: [{rotate: spin}] }}
+            style={{transform: [{rotate: spin}]}}
             ref = {driverMarker} 
             coordinate = {driverLocation} 
             image={require('../../assets/images/map-taxi.png')} 
             />
-        </MapView>
+            </View>
+        </MapView.Animated>
         <Button title = "Animate marker" onPress = {() => animateMarker()}/>
         <Button title = "Rotate" onPress = {() => rotateMarker()}/>
         <FAB

@@ -6,30 +6,31 @@ import Geolocation from '@react-native-community/geolocation';
 
 export const Animation = () => {
     //State
-    const [compassHeading, setCompassHeading] = useState(0);
     const [animacion, setAnimacion] = useState(new Animated.Value(0));
-    const spin = animacion.interpolate({inputRange: [0, 1], outputRange: ['0deg', `360deg`]})
-    //Lifecycle methods
+    const [compassHeading, setCompassHeading] = useState(0);
+    //Animation states
+    const spinRight = animacion.interpolate({inputRange: [0, 1], outputRange: ['0deg', `90deg`]})
+    const spinLeft = animacion.interpolate({inputRange: [0, 1], outputRange: ['0deg', `-90deg`]})
+    const spinTotalRight = animacion.interpolate({inputRange: [0, 1], outputRange: ['0deg', `360deg`]})
+    const spinTotalLeft = animacion.interpolate({inputRange: [0, 1], outputRange: ['0deg', `-360deg`]})
     const animationReference = Animated.timing(animacion, {
-        toValue: compassHeading, 
+        toValue: 1, 
         duration: 500, 
         easing: Easing.linear, 
         useNativeDriver: true
     })
-
+    //Heading
     Geolocation.watchPosition((info) => {
         setCompassHeading(info.coords.heading)
-        animationReference.start()
-        // console.log(info)
     }, (error) => console.log(error),
     {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
 
     //React render
     return (
     // <Animated.View style={{transform: [{rotate: spin}]}, {perspective: 1000}}>
-    <Animated.View style={{perspective: 1000}}>
+    <Animated.View style= {{perspective: 1000}}>
         <Animated.Image
-        style={{transform: [{rotate: spin}] }}
+        style={{transform: [{rotate: spinRight}] }}
         // style={{transform: [{rotate: `${360 - compassHeading}deg`}]}}
         source = {require('../../assets/images/map-taxi.png')}
         />
@@ -38,12 +39,6 @@ export const Animation = () => {
             animationReference.stop()
             setAnimacion(new Animated.Value(0))
         }}/>
-        <FAB
-        style={styles.fab}
-        small
-        icon="camera"
-        onPress={() => console.log(compassHeading)}
-        />
     </Animated.View>
     )
 }
