@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect, useLayoutEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, InteractionManager} from 'react-native'
+import { Button, StyleSheet, View, TextInput, Alert, Switch, Text, InteractionManager, RefreshControlBase } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
 import MapView, {Marker , Polyline, Camera} from 'react-native-maps'
@@ -19,11 +19,10 @@ import decodePolyline from 'decode-google-map-polyline'
 import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
 
 
-
 const QUERY_DRIVERS = gql`
 query{
     GetCities{
-      lat, lng, indexH3, driver{name, email, isOnline}
+      lat, lng, indexH3, driver{name, email}
     }
   }
 `
@@ -45,7 +44,26 @@ mutation get_current_info($object: JSON){
     }
   }
 `
-
+const UPDATE_STATUS = gql`
+mutation update_driver_status($id: Int!, $status: Boolean!){
+    UpdateDriver(input:{
+      id:$id, 
+      isOnline:$status
+    }){
+      id
+      email
+      name
+      isOnline
+      phoneNumber
+      photoUrl
+      brand
+      model
+      plate
+      rating
+      genre
+    }
+  }
+`
 const GET_HEXAGONS = gql`
 mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
     GetHexagons(
@@ -85,7 +103,7 @@ mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
   }
   `
 
-export const Mapas = ({navigation}) => {
+export const MapasDriver = ({navigation}) => {
     //geolocation
     // Geolocation.watchPosition((info) => {
     //     //  console.log(info.coords);
@@ -93,7 +111,7 @@ export const Mapas = ({navigation}) => {
     //     //setOrigin(info.coords);
     //     }, (error) => console.log(error),
     //     {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
-
+    
     useEffect(() => {
 
         handleAndroidBackButton(() => backAction(setUser))
@@ -103,7 +121,7 @@ export const Mapas = ({navigation}) => {
     InteractionManager.runAfterInteractions(()=>{
         setTimeout(() => {
             console.log("actualizando posicion")
-        }, 4000);
+        }, 1000);
     })
 
     //Referencias
@@ -111,11 +129,12 @@ export const Mapas = ({navigation}) => {
     const globalMapView = useRef(React.Component);
     const driverMarker = useRef(React.Component);
     
-    const {setUser} = useUsuario();
+    const {usuario,setUser} = useUsuario();
     const {address,setAddress} = useAddress()
     //State
     const [coords,setCoords] = useState(null);
     const [flag,setFlag] = useState(false);
+    const [isonline,setIsOnline] = useState(false);
     const [location, setLocation] = useState([]);
     const [search,setSearch] = useState({});
     const [origin,setOrigin] = useState({});
@@ -178,6 +197,17 @@ export const Mapas = ({navigation}) => {
             const shortAddress = GetRouteInfo.startAdress.split(',')
 
             setOrigin({name: shortAddress[0]})
+        },
+        onError:(error)=>{
+          console.log(error);
+        }
+    })
+
+    const [update_driver_status] = useMutation(UPDATE_STATUS,{
+        fetchPolicy: "no-cache",
+        onCompleted:({UpdateDriver})=>{
+            console.log(UpdateDriver)
+            setIsOnline(UpdateDriver.isOnline)
         },
         onError:(error)=>{
           console.log(error);
@@ -262,6 +292,12 @@ export const Mapas = ({navigation}) => {
         }
     }
 
+    async function drawHexagons(){
+        
+        get_hexagons({variables:{ lat:address.latitude,lng: address.longitude,res: 7,jumps: 1}});
+
+    }
+
     async function getCurrentDirection() {
         
         if(address !== null){
@@ -301,12 +337,8 @@ export const Mapas = ({navigation}) => {
             {location.map(coord => {
                 return <Marker key = {coord.lat} ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
             })} 
-            {drivers.map(city => {
-
-                if(city.driver.isOnline == true){
-                    return <Marker key = {city.lat} coordinate = {{latitude:city.lat, longitude:city.lng}} pinColor={city.color}/>
-                }
-
+            {drivers.map(coord => {
+                return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
             {hexagons.map(hexagon => {
                 return <Polyline key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
@@ -317,6 +349,7 @@ export const Mapas = ({navigation}) => {
         {/* <Button title = "Animate marker" onPress = {() => animateMarker()}/>
         <Button title = "Rotate" onPress = {() => rotateMarker()}/>     */}
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
+        <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
@@ -324,20 +357,20 @@ export const Mapas = ({navigation}) => {
             onPress={() => navigation.openDrawer()}
             />
         </View>    
-        <View style={styles.inputsContainer}>
-            {/* <EvaluateCoords navigation={navigation}/> */}
-            <TextInput 
-                placeholder="   Origen" 
-                placeholderTextColor="gray" 
-                value= {origin.name}
-                style={styles.input} 
-                onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
-            <TextInput 
-            placeholder="   Destino" 
-            placeholderTextColor="gray" 
-            value= {destination.name}
-            style={styles.input}
-            onPressIn= {()=> navigation.navigate("FindAddress",{setter:setDestination, setter_search: setSearch, search})} /> 
+        <View style={styles.switchContainer}>
+            <Text style={styles.text}>En linea</Text>
+            <Switch
+                trackColor={{ false: "#767577", true: "#81b0ff" }}
+                thumbColor={isonline ? "#f5dd4b" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={(status)=> {
+                    setIsOnline(status)
+                    update_driver_status({variables:{id:usuario.id,status}})
+                    // console.log(status)
+                    }
+                }
+                value={isonline}
+            />
         </View> 
         <DriverLocationUpdated 
         setter={setDriverLocation} 
@@ -364,6 +397,15 @@ const styles = StyleSheet.create({
         height: "10%",
         width: "20%"
     },
+    switchContainer:{
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        alignItems: "flex-end",
+        position: "absolute",
+        height: "5%",
+        width: "100%"
+    },
     inputsContainer:{
         height: 120,
         position: "absolute",
@@ -386,6 +428,9 @@ const styles = StyleSheet.create({
         borderRadius:25,
         margin: 5,
         height: "50%",
+      },
+      text:{
+          margin: 5
       }
   })
   

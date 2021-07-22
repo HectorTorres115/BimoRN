@@ -12,9 +12,9 @@ import { requestPermission } from '../Functions/MapsPermissions'
 //geolocalizacion
 import Geolocation from '@react-native-community/geolocation'
 
-const LOGIN_PASSENGER = gql`
-mutation login_passenger($email: String!, $password:String!){
-    LoginPassenger(input: {
+const LOGIN_DRIVER = gql`
+mutation login_driver($email: String!, $password:String!){
+    LoginDriver(input: {
       email: $email,
       password: $password
     }) {
@@ -23,12 +23,17 @@ mutation login_passenger($email: String!, $password:String!){
       deviceToken
       genre
       photoUrl
+      city{
+          id
+          indexH3
+          lat
+          lng
+      }
     }
   }
 `
 
-
-export const Login=({navigation})=> {
+export const LoginDriver=()=> {
   useEffect(()=>{
     requestPermission().then(()=>{
       console.log('permisos aceptados')
@@ -42,12 +47,12 @@ export const Login=({navigation})=> {
   const [password,setPassword] = useState("")
   const {setUser} = useUsuario()
   //Server requests
-  const [login] = useMutation(LOGIN_PASSENGER,{
+  const [login_driver] = useMutation(LOGIN_DRIVER,{
       fetchPolicy: "no-cache",
-      onCompleted:({LoginPassenger})=>{
-        console.log(LoginPassenger);
-        setUser(LoginPassenger)
-        SetUser(LoginPassenger)
+      onCompleted:({LoginDriver})=>{
+        console.log(LoginDriver);
+        setUser(LoginDriver)
+        SetUser(LoginDriver)
       },
       onError:(error)=>{
         console.log(error);
@@ -71,14 +76,11 @@ export const Login=({navigation})=> {
         <TouchableOpacity>
           <Text style={styles.forgot}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
-      <Pressable  style={styles.boton} onPress={()=> login({variables:{email,password}})} >
+      <Pressable  style={styles.boton} onPress={()=> login_driver({variables:{email,password}})} >
         <Text style={styles.texto}>Iniciar Sesión</Text>
       </Pressable>
       <TouchableOpacity>
           <Text style={styles.registrarse}>Registrarse</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={()=> navigation.navigate("LoginDriver")}>
-          <Text style={styles.registrarse}>Iniciar sesion como conductor</Text>
       </TouchableOpacity>
       <Image source={require('../../assets/images/bimo-footter.jpeg')} style={styles.logo} />
     </View>

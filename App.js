@@ -9,6 +9,8 @@ import { AddressProvider , useAddress } from './src/Context/AddressContext'
 
 //pantallas
 import { Login } from './src/Screens/Login'
+import { LoginDriver } from './src/Screens/LoginDriver'
+import { MapasDriver } from './src/Screens/MapasDriver'
 import { Registro } from './src/Screens/Registro'
 import { Mapas } from './src/Screens/Mapas'
 import { Animation } from './src/Screens/Animation'
@@ -30,6 +32,7 @@ const theme = {
 
 const LoginStack = createStackNavigator();
 const MainStack = createStackNavigator();
+const DriverStack = createStackNavigator();
 // const LoginStack = createDrawerNavigator();
 // const MainStack = createDrawerNavigator();
 
@@ -37,6 +40,7 @@ const MainStack = createStackNavigator();
 const LoginStackScreen = ()=> (
   <LoginStack.Navigator headerMode='none' >
     <LoginStack.Screen name="Login" component={Login} />
+    <LoginStack.Screen name="LoginDriver" component={LoginDriver} />
     <LoginStack.Screen name="Register" component={Registro} />
   </LoginStack.Navigator>
 )
@@ -48,6 +52,12 @@ const MainStackScreen = ()=> (
     <MainStack.Screen name="Registro" component={Registro} />
     <MainStack.Screen name="FindAddress" component={FindAddress} />
   </MainStack.Navigator>
+)
+
+const DriverStackScreen = ()=> (
+  <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
+    <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
+  </DriverStack.Navigator>
 )
 
 export default ()=> (
@@ -83,13 +93,24 @@ function App() {
       </ApolloProvider>
     )
   } else{
-    return(
-      <ApolloProvider client={client} >
-        <NavigationContainer>
-          <MainStackScreen/>
-        </NavigationContainer>
-      </ApolloProvider>
-    )
+    if(usuario.__typename=="Passenger"){
+        return(
+          <ApolloProvider client={client} >
+            <NavigationContainer>
+              <MainStackScreen/>
+            </NavigationContainer>
+          </ApolloProvider>
+        )
+    }else if (usuario.__typename=="Driver"){
+      
+      return(
+        <ApolloProvider client={client} >
+          <NavigationContainer>
+            <DriverStackScreen/>
+          </NavigationContainer>
+        </ApolloProvider>
+      )
+    }
   }
 
 }
