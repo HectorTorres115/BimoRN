@@ -1,18 +1,16 @@
 import React, {useState, useRef, useEffect, useLayoutEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert } from 'react-native'
+import { Button, StyleSheet, View, TextInput, Alert, Text } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
-import MapView, {Marker , Polyline, Camera} from 'react-native-maps'
-// import darkStyle from '../Maps/mapstyle'
+import MapView, {Marker, Polyline} from 'react-native-maps'
 import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
 import { useUsuario } from '../Context/UserContext'
-import { useMutation, useQuery } from 'react-apollo'
-//Animated marker
-import { Animated, Easing } from 'react-native'
-import { FAB } from 'react-native-paper';
-import Geolocation from '@react-native-community/geolocation'
 import { useAddress } from '../Context/AddressContext'
+import { useMutation, useQuery } from 'react-apollo'
+import { FAB } from 'react-native-paper';
 import decodePolyline from 'decode-google-map-polyline'
+// import Geolocation from '@react-native-community/geolocation'
+import Geolocation from 'react-native-geolocation-service'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -41,49 +39,58 @@ mutation get_current_info($object: JSON){
 `
 
 export const Mapas = ({navigation}) => {
-    //geolocation
-    // Geolocation.watchPosition((info) => {
-    //     //  console.log(info.coords);
-    //     setCoords(info.coords);
-    //     //setOrigin(info.coords);
-    //     }, (error) => console.log(error),
-    //     {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
-    
-
+    //Config objects
+    const geolocationConfig = {
+        enableHighAccuracy: true, 
+        distanceFilter: 0, 
+        useSignificantChanges: false, 
+        maximumAge: 0
+    }
+    const initialCameraConfig = {
+        center: {
+            longitude: -107.45220333333332, 
+            latitude: 24.82172166666667,
+            latitudeDelta: 0.08, 
+            longitudeDelta: 0.08
+        },
+        pitch: 1,
+        heading: 0,
+        zoom: 12,
+        altitude: 0
+    }
+    //Lifecycle methods
+    useEffect(() => {
+        console.log(`Component did mount`)
+    }, [])
+    //Geolocation
+    Geolocation.watchPosition(
+        ({coords}) => {setCoords(coords)},
+        (error) => {console.log(error)},
+        {options: geolocationConfig}
+    )
     //Referencias
     const globalMarker = useRef(React.Component);
     const globalMapView = useRef(React.Component);
     const driverMarker = useRef(React.Component);
-    
-    const {setUser} = useUsuario();
-    const {address,setAddress} = useAddress()
+    //Global states
+    const {usuario, setUser} = useUsuario();
+    const {address, setAddress} = useAddress();
     //State
-    const [coords,setCoords] = useState(null);
+    const [coords, setCoords] = useState(null);
     const [location, setLocation] = useState([]);
-    const [search,setSearch] = useState({});
-    const [origin,setOrigin] = useState({});
-    const [destination,setDestination] = useState({});
-    const [region] = useState({
-        longitude: -107.45220333333332,
-        latitude: 24.82172166666667,
-        latitudeDelta: 0.08,
-        longitudeDelta: 0.08
-    });
+    const [search, setSearch] = useState({});
+    const [origin, setOrigin] = useState({});
+    const [destination, setDestination] = useState({});
+    const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
+    const [driverLocation, setDriverLocation] = useState({longitude: -107.45220333333332,latitude: 24.82172166666667});
     const [drivers, setDrivers] = useState([]);
-    const [driverLocation, setDriverLocation] = useState({
-        longitude: -107.45220333333332,
-        latitude: 24.82172166666667
-    });
-    const [route,setRoute] = useState({});
-    const [polyline,setPolyline] = useState([]);
+    const [route, setRoute] = useState({});
+    const [polyline, setPolyline] = useState([]);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
-        partialRefetch: true,
-        pollInterval: 4000,
         fetchPolicy:'no-cache',
         onCompleted:({GetCities})=>{
-            console.log('Polled');
             setDrivers(GetCities)
           },
           onError:(error)=>{
@@ -94,80 +101,27 @@ export const Mapas = ({navigation}) => {
     const [get_route_info] = useMutation(DRAW_ROUTE,{
         fetchPolicy: "no-cache",
         onCompleted:({GetRouteInfo})=>{
-        //console.log(globalMapView);
+        console.log(GetRouteInfo)
         setRoute(GetRouteInfo)
         setPolyline(decodePolyline(GetRouteInfo.polyline))
-        globalMapView.current.animateCamera({
-            center:{coords},
-            zoom:18,
-            pitch: 20,
-            heading: coords.heading
-        },
-        {
-            duration:1000
-        })
-
+        animateCameraToPolylineCenter()
         },
         onError:(error)=>{
           console.log(error);
         }
     })
 
-    const [get_current_info] = useMutation(CURRENT_ADDRESS,{
+    const [get_current_info] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
         onCompleted:({GetRouteInfo})=>{
-
             const shortAddress = GetRouteInfo.startAdress.split(',')
-
             setOrigin({name: shortAddress[0]})
         },
-        onError:(error)=>{
+        onError: (error)=>{
           console.log(error);
         }
     })
-
-    const CustomInput = ()=>{
-        useEffect(()=>{
-            console.log("componente montado custom input")
-        },[])
-
-        return(
-            <TextInput 
-            placeholder="   Origen" 
-            placeholderTextColor="gray" 
-            value= {origin.name}
-            style={styles.input} 
-            onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
-        )
-    }
-
-    const EvaluateCoords = ({navigation})=> {
-
-        if(coords == null){
-            console.log("no hay localizacion")
-            // getCurrentDirection()
-            return (
-                <TextInput 
-                placeholder="   Origen" 
-                placeholderTextColor="gray" 
-                value= {"Ubicacion Actual"}
-                style={styles.input} />
-            )
-        }else{
-            // console.log("Ya hay localizacion")
-            return (
-                // <TextInput 
-                // placeholder="   Origen" 
-                // placeholderTextColor="gray" 
-                // value= {origin.name}
-                // style={styles.input} 
-                // onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
-                <CustomInput/>
-            )
-        }
-
-    }
-
+    //Callbacks for components on mapview
     async function drawMarkers(object){
         if(location.length < 1){
             setLocation([...location, {color: "#00FF00", ...object}])
@@ -194,7 +148,6 @@ export const Mapas = ({navigation}) => {
     }
 
     async function getCurrentDirection() {
-        
         if(address !== null){
             get_current_info({variables:{
                 "object":{  
@@ -203,13 +156,25 @@ export const Mapas = ({navigation}) => {
                     }
                 }
             })
-            // const address = await globalMapView.current.addressForCoordinate(coords.latitude,coords.longitude)
-            // console.log(coords)
             return address
-        }else{
+        } else{
             setOrigin({name:"Ubicacion Actual"})
         }
 
+    }
+
+    async function animateCameraToPolylineCenter(){
+        const polylineCenterCoords = polyline[parseInt(polyline.length / 2)];
+        globalMapView.current.animateCamera({
+            center: {
+            latitude: polylineCenterCoords.latitude,
+            longitude: polylineCenterCoords.longitude
+            },
+            pitch: 1,
+            heading: 0,
+            zoom: 13,
+            altitude: 0
+        }, 1000) 
     }
 
     return (
@@ -220,42 +185,31 @@ export const Mapas = ({navigation}) => {
         showsUserLocation = {true}
         onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
         onPress = {(e) => drawMarkers(e.nativeEvent.coordinate)}
-        // camera = {
-        //     {center:{latitude:coords.latitude,longitude: coords.longitude},
-        //     zoom:18,
-        //     pitch: 20,
-        //     heading: coords.heading
-        //     }
-        // }
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
-        initialRegion = {region}>
+        initialCamera = {initialCameraConfig}>
             {location.map(coord => {
-                return <Marker ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
+                return <Marker key = {coord.lat} ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
             })} 
             {drivers.map(coord => {
-                return <Marker coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
+                return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-            
         </MapView>
-        {/* <Button title = "Animate marker" onPress = {() => animateMarker()}/>
-        <Button title = "Rotate" onPress = {() => rotateMarker()}/>     */}
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
             icon="menu"
-            onPress={() => navigation.openDrawer()}
+            onPress={() => navigation.navigate('MapCamera')}
             />
         </View>    
         <View style={styles.inputsContainer}>
-            {/* <EvaluateCoords navigation={navigation}/> */}
             <TextInput 
-                placeholder="   Origen" 
-                placeholderTextColor="gray" 
-                value= {origin.name}
-                style={styles.input} 
-                onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
+            placeholder="   Origen" 
+            placeholderTextColor="gray" 
+            value= {origin.name}
+            style={styles.input} 
+            onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
             <TextInput 
             placeholder="   Destino" 
             placeholderTextColor="gray" 

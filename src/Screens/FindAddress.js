@@ -2,7 +2,8 @@ import React,{ useState, useEffect} from 'react'
 import { StyleSheet, Text, View, FlatList, TextInput, Button, Pressable } from 'react-native'
 import gql from 'graphql-tag'
 import {useMutation} from 'react-apollo'
-import Geolocation from '@react-native-community/geolocation'
+// import Geolocation from '@react-native-community/geolocation'
+import Geolocation from 'react-native-geolocation-service'
 import { useAddress } from '../Context/AddressContext'
 
 const GET_AROUND_PLACES = gql`

@@ -10,7 +10,8 @@ import { SetUser } from '../Functions/UserStorage'
 import { useUsuario } from '../Context/UserContext'
 import { requestPermission } from '../Functions/MapsPermissions'
 //geolocalizacion
-import Geolocation from '@react-native-community/geolocation'
+// import Geolocation from '@react-native-community/geolocation'
+import Geolocation from 'react-native-geolocation-service'
 
 const LOGIN_PASSENGER = gql`
 mutation login_passenger($email: String!, $password:String!){
