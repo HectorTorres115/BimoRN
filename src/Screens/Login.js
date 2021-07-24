@@ -10,7 +10,12 @@ import { SetUser } from '../Functions/UserStorage'
 import { useUsuario } from '../Context/UserContext'
 import { requestPermission } from '../Functions/MapsPermissions'
 //geolocalizacion
+<<<<<<< HEAD
+// import Geolocation from '@react-native-community/geolocation'
+import Geolocation from 'react-native-geolocation-service'
+=======
 import Geolocation from '@react-native-community/geolocation'
+>>>>>>> Hector
 
 const LOGIN_PASSENGER = gql`
 mutation login_passenger($email: String!, $password:String!){
@@ -41,7 +46,9 @@ export const Login=()=> {
   const [email,setEmail] = useState("")
   const [password,setPassword] = useState("")
   const {setUser} = useUsuario()
+  //Server requests
   const [login] = useMutation(LOGIN_PASSENGER,{
+      fetchPolicy: "no-cache",
       onCompleted:({LoginPassenger})=>{
         console.log(LoginPassenger);
         setUser(LoginPassenger)
@@ -51,6 +58,7 @@ export const Login=()=> {
         console.log(error);
       }
   })
+  //React render
   return (
     <View style={styles.contenedor}>
       <Image source={require('../../assets/images/bimo-banner.jpeg')} style={styles.logo} />
