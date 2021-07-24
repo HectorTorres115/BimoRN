@@ -13,13 +13,15 @@ import { LoginDriver } from './src/Screens/LoginDriver'
 import { MapasDriver } from './src/Screens/MapasDriver'
 import { Registro } from './src/Screens/Registro'
 import { Mapas } from './src/Screens/Mapas'
+import { MapCamera } from './src/Screens/MapCamera'
 import { Animation } from './src/Screens/Animation'
 import { FindAddress } from './src/Screens/FindAddress';
 // import SplashScreen from './Screens/SplashScreen';
 //React native paper provider
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
-import Geolocation from '@react-native-community/geolocation'
+// import Geolocation from '@react-native-community/geolocation'
+import Geolocation from 'react-native-geolocation-service'
 
 const theme = {
   ...DefaultTheme,
@@ -32,7 +34,6 @@ const theme = {
 
 const LoginStack = createStackNavigator();
 const MainStack = createStackNavigator();
-const DriverStack = createStackNavigator();
 // const LoginStack = createDrawerNavigator();
 // const MainStack = createDrawerNavigator();
 
@@ -51,6 +52,7 @@ const MainStackScreen = ()=> (
     <MainStack.Screen name="Animation" component={Animation} />
     <MainStack.Screen name="Registro" component={Registro} />
     <MainStack.Screen name="FindAddress" component={FindAddress} />
+    <MainStack.Screen name="MapCamera" component={MapCamera} />
   </MainStack.Navigator>
 )
 
