@@ -10,12 +10,7 @@ import { SetUser } from '../Functions/UserStorage'
 import { useUsuario } from '../Context/UserContext'
 import { requestPermission } from '../Functions/MapsPermissions'
 //geolocalizacion
-<<<<<<< HEAD
-// import Geolocation from '@react-native-community/geolocation'
 import Geolocation from 'react-native-geolocation-service'
-=======
-import Geolocation from '@react-native-community/geolocation'
->>>>>>> Hector
 
 const LOGIN_PASSENGER = gql`
 mutation login_passenger($email: String!, $password:String!){
@@ -28,6 +23,8 @@ mutation login_passenger($email: String!, $password:String!){
       deviceToken
       genre
       photoUrl
+      name
+      phoneNumber
     }
   }
 `

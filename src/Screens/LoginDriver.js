@@ -10,7 +10,7 @@ import { SetUser } from '../Functions/UserStorage'
 import { useUsuario } from '../Context/UserContext'
 import { requestPermission } from '../Functions/MapsPermissions'
 //geolocalizacion
-import Geolocation from '@react-native-community/geolocation'
+import Geolocation from 'react-native-geolocation-service'
 
 const LOGIN_DRIVER = gql`
 mutation login_driver($email: String!, $password:String!){
@@ -28,6 +28,15 @@ mutation login_driver($email: String!, $password:String!){
           indexH3
           lat
           lng
+      }
+      name
+      phoneNumber
+      brand
+      model
+      plate
+      service{
+        id
+        name
       }
     }
   }

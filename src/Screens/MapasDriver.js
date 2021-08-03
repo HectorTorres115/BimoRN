@@ -10,11 +10,11 @@ import { useMutation, useQuery } from 'react-apollo'
 //Animated marker
 import { Animated, Easing } from 'react-native'
 import { FAB } from 'react-native-paper';
-import Geolocation from '@react-native-community/geolocation'
+import Geolocation from 'react-native-geolocation-service'
 
 import { useAddress } from '../Context/AddressContext'
 
-import decodePolyline from 'decode-google-map-polyline'
+import decodePolyline from '../Functions/DecodePolyline'
 
 import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
 
@@ -115,7 +115,9 @@ export const MapasDriver = ({navigation}) => {
     useEffect(() => {
 
         handleAndroidBackButton(() => backAction(setUser))
-  
+        return ()=> {
+            console.log('Componente desmontado')
+        }
     }, [])
 
     InteractionManager.runAfterInteractions(()=>{
@@ -349,7 +351,7 @@ export const MapasDriver = ({navigation}) => {
         {/* <Button title = "Animate marker" onPress = {() => animateMarker()}/>
         <Button title = "Rotate" onPress = {() => rotateMarker()}/>     */}
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
-        <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
+        <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}

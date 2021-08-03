@@ -15,25 +15,20 @@ import { Registro } from './src/Screens/Registro'
 import { Mapas } from './src/Screens/Mapas'
 import { MapCamera } from './src/Screens/MapCamera'
 import { Animation } from './src/Screens/Animation'
-import { FindAddress } from './src/Screens/FindAddress';
+import { FindAddress } from './src/Screens/FindAddress'
+import { FixToCenter } from './src/Screens/FixToCenter'
+import { Chat } from './src/Screens/Chat'
+import { Perfil } from './src/Screens/Perfil'
 // import SplashScreen from './Screens/SplashScreen';
 //React native paper provider
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
-
-// import Geolocation from '@react-native-community/geolocation'
 import Geolocation from 'react-native-geolocation-service'
-
-const theme = {
-  ...DefaultTheme,
-  dark: true,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: "#16A0DB"
-  },
-};
+import ReduxLocationStore from './src/Redux/Redux-location-store';
+import { set_location } from './src/Redux/Redux-actions';
 
 const LoginStack = createStackNavigator();
 const MainStack = createStackNavigator();
+const DriverStack = createStackNavigator();
 // const LoginStack = createDrawerNavigator();
 // const MainStack = createDrawerNavigator();
 
@@ -53,17 +48,21 @@ const MainStackScreen = ()=> (
     <MainStack.Screen name="Registro" component={Registro} />
     <MainStack.Screen name="FindAddress" component={FindAddress} />
     <MainStack.Screen name="MapCamera" component={MapCamera} />
+    <MainStack.Screen name="FixToCenter" component={FixToCenter} />
+    <MainStack.Screen name="Chat" component={Chat} />
+    <MainStack.Screen name="Perfil" component={Perfil} />
   </MainStack.Navigator>
 )
 
 const DriverStackScreen = ()=> (
   <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
+    <DriverStack.Screen name="Perfil" component={Perfil} />
   </DriverStack.Navigator>
 )
 
 export default ()=> (
-  <PaperProvider theme = {theme}>
+  <PaperProvider>
   <UsuarioProvider>
   <AddressProvider>
     <App></App>
@@ -74,16 +73,24 @@ export default ()=> (
 
 function App() {
 
-  const {setAddress} = useAddress();
-  
-  Geolocation.watchPosition((info) => {
-    //  console.log(info.coords);
-    setAddress(info.coords);
-    //setOrigin(info.coords);
-    }, (error) => console.log(error),
-    {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
+  const geolocationConfig = {
+    enableHighAccuracy: true, 
+    distanceFilter: 0, 
+    useSignificantChanges: false, 
+    maximumAge: 0
+  }
 
-  
+  Geolocation.watchPosition(
+    // ({coords}) => {setAddress(coords)},
+    ({coords}) => {
+      ReduxLocationStore.dispatch(set_location(coords))
+    },
+    (error) => {console.log(error)},
+    {options: geolocationConfig}
+  )
+
+  const {setAddress} = useAddress();
+    
   const {usuario} = useUsuario();
   // console.log(usuario);
   if(usuario == null){

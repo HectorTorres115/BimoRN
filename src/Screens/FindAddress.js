@@ -5,6 +5,8 @@ import {useMutation} from 'react-apollo'
 // import Geolocation from '@react-native-community/geolocation'
 import Geolocation from 'react-native-geolocation-service'
 import { useAddress } from '../Context/AddressContext'
+import ReduxLocationStore from '../Redux/Redux-location-store';
+import { set_location } from '../Redux/Redux-actions';
 
 const GET_AROUND_PLACES = gql`
 mutation getAround_places($place: String!,$lat: Float!, $lng: Float!){
@@ -28,6 +30,12 @@ export function FindAddress(props) {
 
     useEffect(()=>{
       console.log("Componente montado")
+      setAddresses([{
+        "__typename":"PlaceInfo",
+        "direction":"",
+        "name":"Fijar ubicación en el mapa",
+        "placeId":"qwerty"
+      }])
       return ()=>{
         console.log("Componente desmontado")
         // setSearch("")
@@ -36,19 +44,25 @@ export function FindAddress(props) {
     const {address,setAddress} = useAddress()
     const [addresses,setAddresses] = useState([]);
     const [search,setSearch] = useState(null);
-    const [coords,setCoords] = useState({});
+    const [coords,setCoords] = useState(ReduxLocationStore.getState());
 
-    Geolocation.watchPosition((info) => {
-        // console.log(info.coords);
-        setCoords(info.coords);
-        }, (error) => console.log(error),
-        {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
+    // Geolocation.watchPosition((info) => {
+    //     // console.log(info.coords);
+    //     setCoords(info.coords);
+    //     }, (error) => console.log(error),
+    //     {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
     
     const [getAround_places] = useMutation(GET_AROUND_PLACES,{
         fetchPolicy: "no-cache",
         onCompleted:({GetAroundPlaces})=>{
           // console.log(GetAroundPlaces);
           const places = GetAroundPlaces.filter((place)=> place !== null)
+          places.push({
+            "__typename":"PlaceInfo",
+            "direction":"",
+            "name":"Fijar ubicación en el mapa",
+            "placeId":"qwerty"
+          })
           setAddresses(places)
         },
         onError:(error)=>{
@@ -73,7 +87,7 @@ export function FindAddress(props) {
                 placeholder="   Search" 
                 placeholderTextColor="gray" 
                 style={styles.input}
-                onChangeText= {(texto)=> getAround_places({variables:{place:texto,lat:coords.latitude,lng:coords.longitude}}) }
+                onChangeText= {(texto)=> getAround_places({variables:{place:texto,lat:ReduxLocationStore.getState().latitude,lng:ReduxLocationStore.getState().longitude}}) }
                 value= {search}
                 // onKeyPress = {(e)=> e.nativeEvent.key("Enter") } 
                 /> 
@@ -92,7 +106,6 @@ export function FindAddress(props) {
                 </>
             ) }
             >
-
             </FlatList>
             
         </View>

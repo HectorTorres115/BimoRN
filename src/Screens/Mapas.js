@@ -8,9 +8,13 @@ import { useUsuario } from '../Context/UserContext'
 import { useAddress } from '../Context/AddressContext'
 import { useMutation, useQuery } from 'react-apollo'
 import { FAB } from 'react-native-paper';
-import decodePolyline from 'decode-google-map-polyline'
+import decodePolyline from '../Functions/DecodePolyline'
 // import Geolocation from '@react-native-community/geolocation'
 import Geolocation from 'react-native-geolocation-service'
+import ReduxLocationStore from '../Redux/Redux-location-store';
+import { set_location } from '../Redux/Redux-actions';
+
+import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -37,25 +41,6 @@ mutation get_current_info($object: JSON){
     }
   }
 `
-const DRAW_ROUTE = gql`
-mutation get_route_info($object: JSON){
-    GetRouteInfo(object: $object) {
-      startAdress
-      endAdress
-      polyline
-      distance
-      time
-    }
-  }
-`
-const CURRENT_ADDRESS = gql`
-mutation get_current_info($object: JSON){
-    GetRouteInfo(object: $object) {
-      startAdress
-    }
-  }
-`
-
 export const Mapas = ({navigation}) => {
     //Config objects
     const geolocationConfig = {
@@ -78,14 +63,19 @@ export const Mapas = ({navigation}) => {
     }
     //Lifecycle methods
     useEffect(() => {
-        console.log(`Component did mount`)
+
+        handleAndroidBackButton(() => backAction(setUser))
+        return ()=> {
+            handleAndroidBackButton(() => backAction(props.navigation.goBack)) 
+            console.log('Componente desmontado')
+        }
     }, [])
     //Geolocation
-    Geolocation.watchPosition(
-        ({coords}) => {setCoords(coords)},
-        (error) => {console.log(error)},
-        {options: geolocationConfig}
-    )
+    // Geolocation.watchPosition(
+    //     ({coords}) => {setCoords(coords)},
+    //     (error) => {console.log(error)},
+    //     {options: geolocationConfig}
+    // )
     //Referencias
     const globalMarker = useRef(React.Component);
     const globalMapView = useRef(React.Component);
@@ -94,7 +84,7 @@ export const Mapas = ({navigation}) => {
     const {usuario, setUser} = useUsuario();
     const {address, setAddress} = useAddress();
     //State
-    const [coords, setCoords] = useState(null);
+    const [coords, setCoords] = useState(ReduxLocationStore.getState());
     const [location, setLocation] = useState([]);
     const [search, setSearch] = useState({});
     const [origin, setOrigin] = useState({});
@@ -122,7 +112,7 @@ export const Mapas = ({navigation}) => {
         console.log(GetRouteInfo)
         setRoute(GetRouteInfo)
         setPolyline(decodePolyline(GetRouteInfo.polyline))
-        animateCameraToPolylineCenter()
+        animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
         },
         onError:(error)=>{
           console.log(error);
@@ -156,7 +146,7 @@ export const Mapas = ({navigation}) => {
         } else{
             get_route_info({variables:{
                 "object":{  
-                  "start": coords, 
+                  "start": ReduxLocationStore.getState(), 
                   "end": destination.placeId
                 }
               }
@@ -166,23 +156,24 @@ export const Mapas = ({navigation}) => {
     }
 
     async function getCurrentDirection() {
-        if(address !== null){
+        if(ReduxLocationStore.getState() !== null){
             get_current_info({variables:{
                 "object":{  
-                    "start": address, 
+                    "start": ReduxLocationStore.getState(), 
                     "end": region
                     }
                 }
             })
-            return address
+            return ReduxLocationStore.getState()
         } else{
             setOrigin({name:"Ubicacion Actual"})
         }
 
     }
 
-    async function animateCameraToPolylineCenter(){
+    async function animateCameraToPolylineCenter(polyline){
         const polylineCenterCoords = polyline[parseInt(polyline.length / 2)];
+        console.log(polylineCenterCoords)
         globalMapView.current.animateCamera({
             center: {
             latitude: polylineCenterCoords.latitude,
@@ -214,6 +205,7 @@ export const Mapas = ({navigation}) => {
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
+        <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
