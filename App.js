@@ -1,23 +1,58 @@
-import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import * as React from 'react'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import { ApolloProvider } from 'react-apollo'
+import { client } from './src/Clients/client'
+import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
 
-export default function App() {
-  return (
-    <View style = {styles.container}>
-      <Text style = {styles.text}>Hello world</Text>
-    </View>
-  )
-}
+//pantallas
+import { Login } from './src/Screens/Login'
+import { Registro } from './src/Screens/Registro'
+import { Mapas } from './src/Screens/Mapas'
+// import SplashScreen from './Screens/SplashScreen';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'darkblue'
-  },
-  text: {
-    fontSize: 20,
-    color: 'white'
+const LoginStack = createStackNavigator();
+const MainStack = createStackNavigator();
+
+
+const LoginStackScreen = ()=> (
+  <LoginStack.Navigator headerMode='none' >
+    <LoginStack.Screen name="Login" component={Login} />
+    <LoginStack.Screen name="Register" component={Registro} />
+  </LoginStack.Navigator>
+)
+
+const MainStackScreen = ()=> (
+  <MainStack.Navigator headerMode='none'>
+    <MainStack.Screen name="Mapas" component={Mapas} />
+  </MainStack.Navigator>
+)
+
+export default ()=> (
+  <UsuarioProvider>
+    <App></App>
+  </UsuarioProvider>
+)
+
+function App() {
+  const {usuario} = useUsuario();
+
+  if(usuario == null){
+    return (
+      <ApolloProvider client={client} >
+        <NavigationContainer>
+          <LoginStackScreen/>
+        </NavigationContainer>
+      </ApolloProvider>
+    )
+  } else{
+    return(
+      <ApolloProvider client={client} >
+        <NavigationContainer>
+          <MainStackScreen/>
+        </NavigationContainer>
+      </ApolloProvider>
+    )
   }
-})
+
+}
