@@ -18,6 +18,6 @@ export const backAction = async (set_user) => {
   ])  
 }
 
-export const removeAndroidBackButtonHandler = () => {
-    BackHandler.removeEventListener('hardwareBackPress', () => {});
+export const removeAndroidBackButtonHandler = (navigation) => {
+    BackHandler.removeEventListener('hardwareBackPress', () => navigation.goBack());
 }

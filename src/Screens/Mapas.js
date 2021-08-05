@@ -13,8 +13,7 @@ import decodePolyline from '../Functions/DecodePolyline'
 import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from '../Redux/Redux-location-store';
 import { set_location } from '../Redux/Redux-actions';
-
-import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
+import { backAction, handleAndroidBackButton, removeAndroidBackButtonHandler } from '../Functions/BackHandler'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -63,19 +62,8 @@ export const Mapas = ({navigation}) => {
     }
     //Lifecycle methods
     useEffect(() => {
-
         handleAndroidBackButton(() => backAction(setUser))
-        return ()=> {
-            handleAndroidBackButton(() => backAction(props.navigation.goBack)) 
-            console.log('Componente desmontado')
-        }
     }, [])
-    //Geolocation
-    // Geolocation.watchPosition(
-    //     ({coords}) => {setCoords(coords)},
-    //     (error) => {console.log(error)},
-    //     {options: geolocationConfig}
-    // )
     //Referencias
     const globalMarker = useRef(React.Component);
     const globalMapView = useRef(React.Component);

@@ -18,7 +18,7 @@ mutation get_current_info($object: JSON){
 export const FixToCenter = (props)=>  {
 
     const mapView = useRef(React.Component)
-    const [marker,setMarker] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667})
+    const [marker, setMarker] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667})
     const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.009, longitudeDelta: 0.009});
     const [address,setAddress] = useState({name:"address"})
 

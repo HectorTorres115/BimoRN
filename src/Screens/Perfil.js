@@ -1,10 +1,14 @@
-import React, {useState,useEffect,useRef} from 'react'
-import { StyleSheet,  View, TextInput, Button , Text } from 'react-native'
+import React, {useState, useEffect, useRef} from 'react'
+import { StyleSheet,  View, TextInput, Button , Text, ScrollView } from 'react-native'
 import { Avatar, BottomNavigation  } from 'react-native-paper'
 import { useUsuario } from '../Context/UserContext'
+import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
+import {CardField} from '@stripe/stripe-react-native'
+import AsyncStorage from '@react-native-community/async-storage'
 
 const BasicInfoRoute = () => {
-    const {usuario, setUser} = useUsuario();
+const [card, setCard] = useState({});
+const {usuario} = useUsuario();
 return(    
     <View style={styles.container}>
         <Avatar.Image size={150} source={require('../../assets/images/avatar.jpg')} style= {{marginTop:10}}/>     
@@ -32,11 +36,36 @@ return(
             editable={false}
             style={styles.input}/>     
         </View>
+
+        <View style = {styles.inputContainer}>
+                <CardField
+                postalCodeEnabled={true}
+                placeholder={{number: '4141 4141 4141 4141'}}
+                cardStyle={{backgroundColor: '#FFFFFF', textColor: '#000000'}}
+                style={{ width: '100%', height: 50, marginVertical: 30}}
+                onCardChange={(card) => setCard(card)}
+                />
+                <Button title = 'Save Card' onPress = {async () => {
+                    await AsyncStorage.setItem('@card_obj', JSON.stringify(card))
+                }}/>
+                <Button title = 'Get Card' onPress = {async () => {
+                    try {
+                        const card = await AsyncStorage.getItem('@card_obj')
+                        console.log(card)
+                    } catch (error) {
+                        console.log(error)
+                    }
+                }}/>
+                <Button color = 'red' title = 'Delete Card' onPress = {async () => {
+                    await AsyncStorage.removeItem('@card_obj')
+                }}/>
+        </View>
     </View>
 )};
 
 const CarInfoRoute = () => {
     const {usuario, setUser} = useUsuario();
+    const [card, setCard] = useState([]);
     return(    
         <View style={styles.container}>
             <Avatar.Image size={150} source={require('../../assets/images/avatar.jpg')} style= {{marginTop:10}}/> 
@@ -73,9 +102,18 @@ const CarInfoRoute = () => {
                 style={styles.input}/>  
             </View>
         </View>
-    )};
+)};
 
 export const Perfil = (props) => {
+    //Lifecycle methods
+    useEffect(() => {
+        AsyncStorage.getItem('@Card').then((card) => console.log(card))
+        handleAndroidBackButton(() => props.navigation.goBack())
+        return () => {
+            handleAndroidBackButton(() => backAction(setUser))
+        }
+    }, [])
+
 const [index, setIndex] = useState(0);
 //Global states
 const {usuario, setUser} = useUsuario();
@@ -85,28 +123,14 @@ const [routes] = React.useState([
     { key: 'cinfo', title: 'Informacion Vehiculo', icon: 'car-cog' },
 ]);
 
-const [routesPassenger] = React.useState([
-    { key: 'binfo', title: 'Informacion Basica' },
-]);
-
   const renderScene = BottomNavigation.SceneMap({
     binfo: BasicInfoRoute,
     cinfo: CarInfoRoute,
   });
 
-  const renderScenePassenger = BottomNavigation.SceneMap({
-    binfo: BasicInfoRoute,
-  });
-
   function EvaluateNavigation() {
     if(usuario.__typename=="Passenger"){
         return (
-            // <BottomNavigation
-            // navigationState={{ index, routesPassenger }}
-            // onIndexChange={setIndex}
-            // renderScene={renderScenePassenger}
-            // style={styles.Nav}
-            // />
             <View style={styles.container}>
                 <Avatar.Image size={150} source={require('../../assets/images/avatar.jpg')} style= {{marginTop:10}}/>  
                 <View style={styles.inputContainer}>
@@ -163,6 +187,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         // borderWidth:5,
         // borderColor:'blue'
+    },
+    scrollContainer: {
+        // height: 800,
+        justifyContent: 'center',
+        alignItems: 'center'     
     },
     inputContainer:{
         width:'100%',
