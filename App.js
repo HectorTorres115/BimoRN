@@ -26,6 +26,10 @@ import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from './src/Redux/Redux-location-store';
 import { set_location } from './src/Redux/Redux-actions';
 
+//Stripe
+import { StripeProvider } from '@stripe/stripe-react-native';
+import { stripeUrl } from './src/Clients/client-config'
+
 const LoginStack = createStackNavigator();
 const MainStack = createStackNavigator();
 const DriverStack = createStackNavigator();
@@ -62,6 +66,7 @@ const DriverStackScreen = ()=> (
 )
 
 export default ()=> (
+  <StripeProvider publishableKey={stripeUrl}>
   <PaperProvider>
   <UsuarioProvider>
   <AddressProvider>
@@ -69,6 +74,7 @@ export default ()=> (
   </AddressProvider>
   </UsuarioProvider>
   </PaperProvider>
+  </StripeProvider>
 )
 
 function App() {

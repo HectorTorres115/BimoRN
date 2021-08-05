@@ -18,7 +18,7 @@ mutation get_current_info($object: JSON){
 export const FixToCenter = (props)=>  {
 
     const mapView = useRef(React.Component)
-    const [marker,setMarker] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667})
+    const [marker, setMarker] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667})
     const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.009, longitudeDelta: 0.009});
     const [address,setAddress] = useState({name:"address"})
 
@@ -63,7 +63,7 @@ export const FixToCenter = (props)=>  {
             {/* <TouchableOpacity style={styles.buton} onPress={()=>  setAddresLocation()}>
                   <Text style={styles.text}>{address.name}</Text>
             </TouchableOpacity>    */}
-            <Image source={require('../../assets/images/pin1.png')} style={styles.icon}></Image>
+            <Image source={require('../../assets/images/pin1.jpeg')} style={styles.icon}></Image>
         </View>
     )
 }
