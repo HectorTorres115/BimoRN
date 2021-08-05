@@ -73,7 +73,6 @@ metro.config.js
 yarn.lock
 background.png
 # Android folder
-gradle.properties
 gradle
 gradlew
 gradlew.bat
