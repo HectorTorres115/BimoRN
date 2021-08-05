@@ -44,6 +44,7 @@ return(
                 cardStyle={{backgroundColor: '#FFFFFF', textColor: '#000000'}}
                 style={{ width: '100%', height: 50, marginVertical: 30}}
                 onCardChange={(card) => setCard(card)}
+                onFocus={(focusedField) => {console.log('focusField', focusedField);}}
                 />
                 <Button title = 'Save Card' onPress = {async () => {
                     await AsyncStorage.setItem('@card_obj', JSON.stringify(card))

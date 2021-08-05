@@ -14,6 +14,7 @@ import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from '../Redux/Redux-location-store';
 import { set_location } from '../Redux/Redux-actions';
 import { backAction, handleAndroidBackButton, removeAndroidBackButtonHandler } from '../Functions/BackHandler'
+import { TripUpdated } from '../Listeners/TripUpdated'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -37,6 +38,72 @@ const CURRENT_ADDRESS = gql`
 mutation get_current_info($object: JSON){
     GetRouteInfo(object: $object) {
       startAdress
+    }
+  }
+`
+
+const CREATE_TRIP = gql`
+mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $paymentMethod: Int!, $note: String!){
+    CreateTrip(input:{
+      passengerId:$passengerId
+      tripStatusId:5
+      promocodeId:1
+      commissionTypeId:1
+      origin: $origin
+      destination: $destination
+      paymentMethodId:$paymentMethod
+      note:$note
+    })
+    {
+      id
+      opt
+      driver{
+        id
+        name
+      }
+      passenger{
+        id
+        name
+      }
+      tripStatus{
+        id
+        tripStatus
+      }
+      commissionType{
+        id
+        commissionType
+      }
+      paymentMethod{
+        id
+        paymentMethod
+      }
+      promocode{
+        id
+        code
+        discount
+      }
+      commission
+      commissionValue
+      createdAt
+      currency
+      originVincity
+      originLocationLat
+      originLocationLng
+      destinationVincity
+      destinationLocationLat
+      destinationLocationLng
+      discount
+      distance
+      pickedUpAt
+      droppedOffAt
+      fee
+      feeTaxed
+      feedback
+      note
+      rating
+      rawfee
+      tax
+      tripPolyline
     }
   }
 `
@@ -82,6 +149,8 @@ export const Mapas = ({navigation}) => {
     const [drivers, setDrivers] = useState([]);
     const [route, setRoute] = useState({});
     const [polyline, setPolyline] = useState([]);
+    const [startsuscription, setStartSuscription] = useState(false);
+    const [currenttrip, setCurrentTrip] = useState({});
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -117,6 +186,20 @@ export const Mapas = ({navigation}) => {
           console.log(error);
         }
     })
+
+    const [create_trip] = useMutation(CREATE_TRIP, {
+        fetchPolicy: "no-cache",
+        onCompleted:({CreateTrip})=>{
+            
+            setCurrentTrip(CreateTrip)
+            setStartSuscription(true)
+
+        },
+        onError: (error)=>{
+          console.log(error);
+        }
+    })
+
     //Callbacks for components on mapview
     async function drawMarkers(object){
         if(location.length < 1){
@@ -174,6 +257,14 @@ export const Mapas = ({navigation}) => {
         }, 1000) 
     }
 
+    function EvaluateStartSuscription() {
+        if(startsuscription){
+            return <TripUpdated tripId={setCurrentTrip.tripId}/>
+        }else{
+            return null
+        }
+    }
+
     return (
         <>
         <MapView
@@ -192,6 +283,7 @@ export const Mapas = ({navigation}) => {
             })}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
+        <EvaluateStartSuscription />
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>

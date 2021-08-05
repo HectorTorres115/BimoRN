@@ -18,6 +18,8 @@ import decodePolyline from '../Functions/DecodePolyline'
 
 import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
 
+import { TripCreated } from '../Listeners/TripCreated'
+
 
 const QUERY_DRIVERS = gql`
 query{
@@ -327,6 +329,7 @@ export const MapasDriver = ({navigation}) => {
         showsUserLocation = {true}
         onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
         onPress = {(e) => drawMarkers(e.nativeEvent.coordinate)}
+        showsMyLocationButton = {false}
         // camera = {
         //     {center:{latitude:coords.latitude,longitude: coords.longitude},
         //     zoom:18,
@@ -350,6 +353,7 @@ export const MapasDriver = ({navigation}) => {
         </MapView>
         {/* <Button title = "Animate marker" onPress = {() => animateMarker()}/>
         <Button title = "Rotate" onPress = {() => rotateMarker()}/>     */}
+        <TripCreated />
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>
