@@ -190,8 +190,9 @@ export const Mapas = ({navigation}) => {
     const [create_trip] = useMutation(CREATE_TRIP, {
         fetchPolicy: "no-cache",
         onCompleted:({CreateTrip})=>{
-            
+            // console.log(CreateTrip)
             setCurrentTrip(CreateTrip)
+            
             setStartSuscription(true)
 
         },
@@ -226,6 +227,21 @@ export const Mapas = ({navigation}) => {
         }
     }
 
+    async function createTrip(){
+      if(origin == null || destination == null){
+          Alert.alert("No se ha asignado localizacion")
+      } else{
+        create_trip({variables:{
+              passengerId: usuario.id,
+              "origin": ReduxLocationStore.getState(),
+              "destination":  destination.placeId,
+              paymentMethod:1,
+              note:""
+            }
+          });
+      }
+    }
+
     async function getCurrentDirection() {
         if(ReduxLocationStore.getState() !== null){
             get_current_info({variables:{
@@ -244,7 +260,7 @@ export const Mapas = ({navigation}) => {
 
     async function animateCameraToPolylineCenter(polyline){
         const polylineCenterCoords = polyline[parseInt(polyline.length / 2)];
-        console.log(polylineCenterCoords)
+        
         globalMapView.current.animateCamera({
             center: {
             latitude: polylineCenterCoords.latitude,
@@ -254,12 +270,12 @@ export const Mapas = ({navigation}) => {
             heading: 0,
             zoom: 13,
             altitude: 0
-        }, 1000) 
+        }, {duration: 1000}) 
     }
 
     function EvaluateStartSuscription() {
         if(startsuscription){
-            return <TripUpdated tripId={setCurrentTrip.tripId}/>
+            return <TripUpdated tripId={currenttrip.id}/>
         }else{
             return null
         }
@@ -285,7 +301,8 @@ export const Mapas = ({navigation}) => {
         </MapView>
         <EvaluateStartSuscription />
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
-        <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
+        {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
+        <Button title = "Crear Viaje" onPress = {() => createTrip()}/> 
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}

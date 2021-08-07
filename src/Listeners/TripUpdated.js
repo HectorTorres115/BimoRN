@@ -1,12 +1,13 @@
 import gql from 'graphql-tag'
 import React, { Component } from 'react'
-import {ActivityIndicator} from 'react-native'
+import {ActivityIndicator , Alert} from 'react-native'
 import {subClient} from '../Clients/sub-client'
 import {ApolloProvider, Subscription} from 'react-apollo'
 
+
 const SUSCRIPTION_TRIP = gql`
-subscription trip_updated{
-  TripUpdated{
+subscription trip_updated($tripId: Int!){
+  TripUpdated(id:$tripId){
     id
     opt
     driver{
@@ -67,12 +68,17 @@ export class TripUpdated extends Component {
           variables= {{tripId: this.props.tripId}}
           onSubscriptionData = {(data) => {
               console.log(data.subscriptionData.data)
-              
+              Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
           }}>
           {({loading, error}) => {
               if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
             //   if(loading) return null
-              if(error) return <ActivityIndicator size = 'large' color = 'red'/>
+              if(error) {
+                console.log(error)
+                console.log(this.props.tripId)
+                return <ActivityIndicator size = 'large' color = 'red'/>
+                
+              }
               return null
           }}
           </Subscription>
