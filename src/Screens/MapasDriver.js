@@ -1,22 +1,15 @@
-import React, {useState, useRef, useEffect, useLayoutEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, Switch, Text, InteractionManager, RefreshControlBase } from 'react-native'
+import React, {useState, useRef, useEffect } from 'react'
+import { Button, StyleSheet, View, Alert, Switch, Text } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
-import MapView, {Marker , Polyline, Camera} from 'react-native-maps'
-// import darkStyle from '../Maps/mapstyle'
+import MapView, {Marker, Polyline} from 'react-native-maps'
 import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
 import { useUsuario } from '../Context/UserContext'
 import { useMutation, useQuery } from 'react-apollo'
-//Animated marker
-import { Animated, Easing } from 'react-native'
 import { FAB } from 'react-native-paper';
-import Geolocation from 'react-native-geolocation-service'
-
 import { useAddress } from '../Context/AddressContext'
-
 import decodePolyline from '../Functions/DecodePolyline'
-
-import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
+import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 
 
 const QUERY_DRIVERS = gql`
@@ -104,54 +97,28 @@ mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
   `
 
 export const MapasDriver = ({navigation}) => {
-    //geolocation
-    // Geolocation.watchPosition((info) => {
-    //     //  console.log(info.coords);
-    //     setCoords(info.coords);
-    //     //setOrigin(info.coords);
-    //     }, (error) => console.log(error),
-    //     {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
-    
+    //Lifecycle methods
     useEffect(() => {
-
         handleAndroidBackButton(() => backAction(setUser))
-        return ()=> {
-            console.log('Componente desmontado')
-        }
     }, [])
-
-    InteractionManager.runAfterInteractions(()=>{
-        setTimeout(() => {
-            console.log("actualizando posicion")
-        }, 1000);
-    })
-
     //Referencias
     const globalMarker = useRef(React.Component);
     const globalMapView = useRef(React.Component);
     const driverMarker = useRef(React.Component);
-    
+    //Global states from react context
     const {usuario,setUser} = useUsuario();
-    const {address,setAddress} = useAddress()
+    const {address, setAddress} = useAddress()
     //State
-    const [coords,setCoords] = useState(null);
-    const [flag,setFlag] = useState(false);
-    const [isonline,setIsOnline] = useState(false);
+    const [coords, setCoords] = useState(null);
+    const [flag, setFlag] = useState(false);
+    const [isonline, setIsOnline] = useState(false);
     const [location, setLocation] = useState([]);
-    const [search,setSearch] = useState({});
-    const [origin,setOrigin] = useState({});
-    const [destination,setDestination] = useState({});
-    const [region] = useState({
-        longitude: -107.45220333333332,
-        latitude: 24.82172166666667,
-        latitudeDelta: 0.08,
-        longitudeDelta: 0.08
-    });
+    const [search, setSearch] = useState({});
+    const [origin, setOrigin] = useState({});
+    const [destination, setDestination] = useState({});
+    const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [drivers, setDrivers] = useState([]);
-    const [driverLocation, setDriverLocation] = useState({
-        longitude: -107.45220333333332,
-        latitude: 24.82172166666667
-    });
+    const [driverLocation, setDriverLocation] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667});
     const [route,setRoute] = useState({});
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
@@ -226,49 +193,7 @@ export const MapasDriver = ({navigation}) => {
           console.log(error);
         }
     })
-
-    const CustomInput = ()=>{
-        useEffect(()=>{
-            console.log("componente montado custom input")
-        },[])
-
-        return(
-            <TextInput 
-            placeholder="   Origen" 
-            placeholderTextColor="gray" 
-            value= {origin.name}
-            style={styles.input} 
-            onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
-        )
-    }
-
-    const EvaluateCoords = ({navigation})=> {
-
-        if(coords == null){
-            console.log("no hay localizacion")
-            // getCurrentDirection()
-            return (
-                <TextInput 
-                placeholder="   Origen" 
-                placeholderTextColor="gray" 
-                value= {"Ubicacion Actual"}
-                style={styles.input} />
-            )
-        }else{
-            // console.log("Ya hay localizacion")
-            return (
-                // <TextInput 
-                // placeholder="   Origen" 
-                // placeholderTextColor="gray" 
-                // value= {origin.name}
-                // style={styles.input} 
-                // onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
-                <CustomInput/>
-            )
-        }
-
-    }
-
+    //Functions for components callbacks
     async function drawMarkers(object){
         if(location.length < 1){
             setLocation([...location, {color: "#00FF00", ...object}])
@@ -295,13 +220,10 @@ export const MapasDriver = ({navigation}) => {
     }
 
     async function drawHexagons(){
-        
         get_hexagons({variables:{ lat:address.latitude,lng: address.longitude,res: 7,jumps: 1}});
-
     }
 
     async function getCurrentDirection() {
-        
         if(address !== null){
             get_current_info({variables:{
                 "object":{  
@@ -313,11 +235,12 @@ export const MapasDriver = ({navigation}) => {
             // const address = await globalMapView.current.addressForCoordinate(coords.latitude,coords.longitude)
             // console.log(coords)
             return address
-        }else{
+        } else {
             setOrigin({name:"Ubicacion Actual"})
         }
 
     }
+    //Evaluate methods for custom renders
 
     return(
         <>
@@ -327,13 +250,6 @@ export const MapasDriver = ({navigation}) => {
         showsUserLocation = {true}
         onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
         onPress = {(e) => drawMarkers(e.nativeEvent.coordinate)}
-        // camera = {
-        //     {center:{latitude:coords.latitude,longitude: coords.longitude},
-        //     zoom:18,
-        //     pitch: 20,
-        //     heading: coords.heading
-        //     }
-        // }
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
         initialRegion = {region}>
             {location.map(coord => {
@@ -346,10 +262,7 @@ export const MapasDriver = ({navigation}) => {
                 return <Polyline key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
             })}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-            
         </MapView>
-        {/* <Button title = "Animate marker" onPress = {() => animateMarker()}/>
-        <Button title = "Rotate" onPress = {() => rotateMarker()}/>     */}
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>
@@ -365,7 +278,7 @@ export const MapasDriver = ({navigation}) => {
                 trackColor={{ false: "#767577", true: "#81b0ff" }}
                 thumbColor={isonline ? "#f5dd4b" : "#f4f3f4"}
                 ios_backgroundColor="#3e3e3e"
-                onValueChange={(status)=> {
+                onValueChange={(status) => {
                     setIsOnline(status)
                     update_driver_status({variables:{id:usuario.id,status}})
                     // console.log(status)

@@ -20,5 +20,3 @@ import { Notification } from './src/Functions/ShowNotification'
 // })
 
 AppRegistry.registerComponent(appName, () => App);
-
-
