@@ -94,7 +94,51 @@ mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
       }
     }
   }
-  `
+`
+
+const ACCEPT_TRIP = gql`
+mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
+  UpdateTrip(
+    input: { id: $id, driverId: $driverId, tripStatusId: $tripStatus }
+  ) {
+    id
+    tripStatus {
+      id
+      tripStatus
+    }
+    passenger {
+      id
+      name
+      email
+      photoUrl
+    }
+    driver {
+      id
+      name
+      email
+      photoUrl
+    }
+    commissionType {
+      id
+      commissionType
+    }
+    paymentMethod {
+      id
+      paymentMethod
+    }
+    commissionType {
+      id
+      commissionType
+    }
+    opt
+    createdAt
+    currency
+    discount
+    originVincity
+  }
+}
+
+`
 
 export const MapasDriver = ({navigation}) => {
     //Lifecycle methods
@@ -128,11 +172,11 @@ export const MapasDriver = ({navigation}) => {
         partialRefetch: true,
         pollInterval: 4000,
         fetchPolicy:'no-cache',
-        onCompleted:({GetCities})=>{
+        onCompleted:({GetCities}) => {
             console.log('Polled');
             setDrivers(GetCities)
           },
-          onError:(error)=>{
+          onError:(error) => {
             console.log(error);
           }
     })
@@ -193,6 +237,16 @@ export const MapasDriver = ({navigation}) => {
           console.log(error);
         }
     })
+
+    const [accept_trip] = useMutation(ACCEPT_TRIP,{
+        fetchPolicy: "no-cache",
+        onCompleted:({TripUpdated}) => {
+            console.log(TripUpdated)
+        },
+        onError:(error) => {
+          console.log(error);
+        }
+    })
     //Functions for components callbacks
     async function drawMarkers(object){
         if(location.length < 1){
@@ -218,7 +272,6 @@ export const MapasDriver = ({navigation}) => {
             });
         }
     }
-
     async function drawHexagons(){
         get_hexagons({variables:{ lat:address.latitude,lng: address.longitude,res: 7,jumps: 1}});
     }
@@ -245,7 +298,7 @@ export const MapasDriver = ({navigation}) => {
         if(flag){
             console.log('Flag enabled')
             return (
-                <TripCreated/>
+                <TripCreated userId = {usuario.id} acceptTrip = {accept_trip}/>
             )   
         } else {
             console.log('Flag not enabled')

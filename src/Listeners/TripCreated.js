@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 import React, { Component } from 'react'
-import {ActivityIndicator} from 'react-native'
+import {ActivityIndicator, Button} from 'react-native'
 import {subClient} from '../Clients/sub-client'
 import {ApolloProvider, Subscription} from 'react-apollo'
 
@@ -65,14 +65,18 @@ export class TripCreated extends Component {
           <ApolloProvider client = {subClient}>
           <Subscription subscription = {SUSCRIPTION_TRIP}
           onSubscriptionData = {(data) => {
-              console.log(data.subscriptionData.data)
-              
+              console.log(data.subscriptionData.data.TripCreated)
           }}>
-          {({loading, error}) => {
+          {({loading, error, data}) => {
               if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
-            //   if(loading) return null
               if(error) return <ActivityIndicator size = 'large' color = 'red'/>
-              return null
+              return <Button title = 'Accept trip' onPress = {async () => {
+                await this.props.acceptTrip({variables: {
+                  id: data.TripCreated.id,
+                  tripStatus: 1,
+                  driverId: this.props.userId
+                }})
+              }}/>
           }}
           </Subscription>
           </ApolloProvider>
