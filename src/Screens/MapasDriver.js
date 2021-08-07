@@ -10,7 +10,7 @@ import { FAB } from 'react-native-paper';
 import { useAddress } from '../Context/AddressContext'
 import decodePolyline from '../Functions/DecodePolyline'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
-
+import { TripCreated } from '../Listeners/TripCreated'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -110,7 +110,7 @@ export const MapasDriver = ({navigation}) => {
     const {address, setAddress} = useAddress()
     //State
     const [coords, setCoords] = useState(null);
-    const [flag, setFlag] = useState(false);
+    const [flag, setFlag] = useState(true);
     const [isonline, setIsOnline] = useState(false);
     const [location, setLocation] = useState([]);
     const [search, setSearch] = useState({});
@@ -241,7 +241,17 @@ export const MapasDriver = ({navigation}) => {
 
     }
     //Evaluate methods for custom renders
-
+    function EvaluateTripSubscription() {
+        if(flag){
+            console.log('Flag enabled')
+            return (
+                <TripCreated/>
+            )   
+        } else {
+            console.log('Flag not enabled')
+            return null
+        }
+    }
     return(
         <>
         <MapView
@@ -263,6 +273,7 @@ export const MapasDriver = ({navigation}) => {
             })}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
+        <EvaluateTripSubscription/>
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>
