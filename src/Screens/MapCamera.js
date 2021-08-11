@@ -4,6 +4,8 @@ import MapView, {Marker, Polyline} from 'react-native-maps'
 import Geolocation from 'react-native-geolocation-service'
 import { useMutation } from 'react-apollo'
 import gql from 'graphql-tag'
+import { useUsuario } from '../Context/UserContext'
+import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 
 const DRAW_HEXAGONS = gql`
 mutation draw_hexagons($jumps: Int!, $resolution: Int!, $longitude: Float!, $latitude: Float!){
@@ -18,7 +20,7 @@ mutation draw_hexagons($jumps: Int!, $resolution: Int!, $longitude: Float!, $lat
 }
 `
 
-export const MapCamera = () => {
+export const MapCamera = (props) => {
     //Config objects
     const geolocationConfig = {
         enableHighAccuracy: true, 
@@ -41,12 +43,16 @@ export const MapCamera = () => {
     //Screens states
     const [currentCoords, setCurrentCoords] = useState({});
     const [hexagons, setHexagons] = useState([]);
+    const {setUser} = useUsuario();
     //Refs components
     const mapReference = useRef(React.Component);
     //Lifecycle methods
     useEffect(() => {
-        console.log(`Component did mount`)
-    }, [])
+        handleAndroidBackButton(() => props.navigation.goBack())
+        return () => {
+            handleAndroidBackButton(() => backAction(setUser))
+        }
+      }, [])
     //Geolocation
     Geolocation.watchPosition(
         ({coords}) => {setCurrentCoords(coords)},

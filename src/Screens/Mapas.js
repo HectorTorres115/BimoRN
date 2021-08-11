@@ -13,7 +13,7 @@ import decodePolyline from '../Functions/DecodePolyline'
 import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from '../Redux/Redux-location-store';
 import { set_location } from '../Redux/Redux-actions';
-import { backAction, handleAndroidBackButton, removeAndroidBackButtonHandler } from '../Functions/BackHandler'
+import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
 
 const QUERY_DRIVERS = gql`
@@ -109,12 +109,6 @@ mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $p
 `
 export const Mapas = ({navigation}) => {
     //Config objects
-    const geolocationConfig = {
-        enableHighAccuracy: true, 
-        distanceFilter: 0, 
-        useSignificantChanges: false, 
-        maximumAge: 0
-    }
     const initialCameraConfig = {
         center: {
             longitude: -107.45220333333332, 
@@ -276,8 +270,8 @@ export const Mapas = ({navigation}) => {
     function EvaluateStartSuscription() {
         if(startsuscription){
             return <TripUpdated tripId={currenttrip.id}/>
-        }else{
-            return null
+        } else {
+          return null 
         }
     }
 
@@ -287,8 +281,7 @@ export const Mapas = ({navigation}) => {
         ref = {globalMapView}
         onMapReady = { ()=> getCurrentDirection() }
         showsUserLocation = {true}
-        onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
-        onPress = {(e) => drawMarkers(e.nativeEvent.coordinate)}
+        showsMyLocationButton = {false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
         initialCamera = {initialCameraConfig}>
             {location.map(coord => {
@@ -300,7 +293,6 @@ export const Mapas = ({navigation}) => {
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
         <EvaluateStartSuscription />
-        <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
         <Button title = "Crear Viaje" onPress = {() => createTrip()}/> 
         <View style={styles.fabContainer}>
@@ -312,23 +304,24 @@ export const Mapas = ({navigation}) => {
         </View>    
         <View style={styles.inputsContainer}>
             <TextInput 
-            placeholder="   Origen" 
+            placeholder="Origen" 
             placeholderTextColor="gray" 
             value= {origin.name}
             style={styles.input} 
-            onPressIn= {()=> {navigation.navigate("FindAddress",{setter:setOrigin, setter_search: setSearch, search})}}/>
+            onPressIn= {()=> {navigation.navigate("FindAddress", {setter:setOrigin, setter_search: setSearch, search, drawRoute: drawRoute})}}/>
             <TextInput 
-            placeholder="   Destino" 
+            placeholder="Destino" 
             placeholderTextColor="gray" 
             value= {destination.name}
             style={styles.input}
-            onPressIn= {()=> navigation.navigate("FindAddress",{setter:setDestination, setter_search: setSearch, search})} /> 
-        </View> 
-        <DriverLocationUpdated 
+            onPressIn= {()=> navigation.navigate("FindAddress", {setter:setDestination, setter_search: setSearch, search, drawRoute: drawRoute})} /> 
+        </View>  
+
+        {/* <DriverLocationUpdated 
         setter={setDriverLocation} 
         driverId={2} 
         driverMarker= {driverMarker} 
-        duration={4000} />
+        duration={4000} /> */}
         </>
     )
 }
@@ -371,6 +364,7 @@ const styles = StyleSheet.create({
         borderRadius:25,
         margin: 5,
         height: "50%",
+        paddingLeft: 10
       }
   })
   

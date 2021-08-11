@@ -1,7 +1,6 @@
 import React, {useState, useRef, useEffect } from 'react'
 import { Button, StyleSheet, View, Alert, Switch, Text } from 'react-native'
 import gql from 'graphql-tag'
-//Maps
 import MapView, {Marker, Polyline} from 'react-native-maps'
 import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
 import { useUsuario } from '../Context/UserContext'
@@ -150,7 +149,7 @@ export const MapasDriver = ({navigation}) => {
     const globalMapView = useRef(React.Component);
     const driverMarker = useRef(React.Component);
     //Global states from react context
-    const {usuario,setUser} = useUsuario();
+    const {usuario, setUser} = useUsuario();
     const {address, setAddress} = useAddress()
     //State
     const [coords, setCoords] = useState(null);
@@ -163,7 +162,7 @@ export const MapasDriver = ({navigation}) => {
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [drivers, setDrivers] = useState([]);
     const [driverLocation, setDriverLocation] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667});
-    const [route,setRoute] = useState({});
+    const [route, setRoute] = useState({});
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
 
@@ -311,8 +310,7 @@ export const MapasDriver = ({navigation}) => {
         ref = {globalMapView}
         onMapReady = { ()=> getCurrentDirection() }
         showsUserLocation = {true}
-        onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
-        onPress = {(e) => drawMarkers(e.nativeEvent.coordinate)}
+        showsMyLocationButton = {false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
         initialRegion = {region}>
             {location.map(coord => {

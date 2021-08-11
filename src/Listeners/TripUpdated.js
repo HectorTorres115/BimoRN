@@ -1,8 +1,9 @@
 import gql from 'graphql-tag'
 import React, { Component } from 'react'
-import {ActivityIndicator , Alert} from 'react-native'
+import {ActivityIndicator , Alert, View, Text} from 'react-native'
 import {subClient} from '../Clients/sub-client'
 import {ApolloProvider, Subscription} from 'react-apollo'
+import { Avatar, Card, IconButton} from 'react-native-paper'
 
 
 const SUSCRIPTION_TRIP = gql`
@@ -12,7 +13,12 @@ subscription trip_updated($tripId: Int!){
     opt
     driver{
       id
-      name
+      name,
+      plate,
+      model
+      service, {
+        name
+      }
     }
     passenger{
       id
@@ -60,6 +66,20 @@ subscription trip_updated($tripId: Int!){
   }
 }
 `
+export const TripInfo = ({driver}) =>{
+  return (
+    // <View style = {{backgroundColor: 'gray', width: '100%'}}>
+    //   <Text style = {{fontSize: 20, color : 'black'}}>{driver.service.name}</Text>
+    // </View>
+    <Card.Title
+    title={driver.name}
+    subtitle={driver.name.service}
+    left={(props) => <Avatar.Icon {...props} icon="folder" />}
+    right={(props) => <IconButton {...props} icon="more-vert"/>}
+  />
+  )
+}
+
 export class TripUpdated extends Component {
   render() {
       return (
@@ -68,19 +88,17 @@ export class TripUpdated extends Component {
           variables= {{tripId: this.props.tripId}}
           onSubscriptionData = {(data) => {
               console.log(data.subscriptionData.data)
-              Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
+              // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
           }}>
-          {({loading, error}) => {
+          {({loading, error, data}) => {
               if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
-            //   if(loading) return null
+              // if(loading) return null
               if(error) {
                 console.log(error)
-                console.log(this.props.tripId)
                 return <ActivityIndicator size = 'large' color = 'red'/>
-                
               }
-              return null
-          }}
+              return <TripInfo driver = {data.TripUpdated.driver}/>
+          }}  
           </Subscription>
           </ApolloProvider>
       )

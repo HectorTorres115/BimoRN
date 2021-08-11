@@ -1,21 +1,20 @@
 import React,{ useState, useEffect} from 'react'
-import { StyleSheet, Text, View, FlatList, TextInput, Button, Pressable } from 'react-native'
+import { StyleSheet, Text, View, FlatList, TextInput, Pressable, Touchable } from 'react-native'
 import gql from 'graphql-tag'
-import {useMutation} from 'react-apollo'
-// import Geolocation from '@react-native-community/geolocation'
-import Geolocation from 'react-native-geolocation-service'
-import { useAddress } from '../Context/AddressContext'
+import { useMutation } from 'react-apollo'
 import ReduxLocationStore from '../Redux/Redux-location-store';
-import { set_location } from '../Redux/Redux-actions';
+import { Divider } from 'react-native-paper'
+import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
+import { useUsuario } from '../Context/UserContext';
 
 const GET_AROUND_PLACES = gql`
 mutation getAround_places($place: String!,$lat: Float!, $lng: Float!){
     GetAroundPlaces(
       input: {
-      radius:60000,
-      place:$place,
-      lat:$lat,
-      lng:$lng
+      radius: 60000,
+      place: $place,
+      lat: $lat,
+      lng: $lng
       }
     ) {
       placeId,
@@ -27,45 +26,24 @@ mutation getAround_places($place: String!,$lat: Float!, $lng: Float!){
   
 
 export function FindAddress(props) {
-
-    useEffect(()=>{
-      console.log("Componente montado")
-      setAddresses([{
-        "__typename":"PlaceInfo",
-        "direction":"",
-        "name":"Fijar ubicación en el mapa",
-        "placeId":"qwerty"
-      }])
-      return ()=>{
-        console.log("Componente desmontado")
-        // setSearch("")
+    useEffect(() => {
+      handleAndroidBackButton(() => props.navigation.goBack())
+      return () => {
+          handleAndroidBackButton(() => backAction(setUser))
       }
-    },[]) 
-    const {address,setAddress} = useAddress()
-    const [addresses,setAddresses] = useState([]);
-    const [search,setSearch] = useState(null);
-    const [coords,setCoords] = useState(ReduxLocationStore.getState());
-
-    // Geolocation.watchPosition((info) => {
-    //     // console.log(info.coords);
-    //     setCoords(info.coords);
-    //     }, (error) => console.log(error),
-    //     {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
+    }, []) 
+    
+    const [addresses, setAddresses] = useState([]);
+    const [search, setSearch] = useState(null);
+    const {setUser} = useUsuario(null);
     
     const [getAround_places] = useMutation(GET_AROUND_PLACES,{
         fetchPolicy: "no-cache",
         onCompleted:({GetAroundPlaces})=>{
-          // console.log(GetAroundPlaces);
           const places = GetAroundPlaces.filter((place)=> place !== null)
-          places.push({
-            "__typename":"PlaceInfo",
-            "direction":"",
-            "name":"Fijar ubicación en el mapa",
-            "placeId":"qwerty"
-          })
           setAddresses(places)
         },
-        onError:(error)=>{
+        onError:(error) => {
           console.log(error);
         }
     })
@@ -81,15 +59,19 @@ export function FindAddress(props) {
     }
 
     return (
-        <View style={styles.container}>
+        <View>
             <View style={styles.inputcontainer}>
                 <TextInput 
-                placeholder="   Search" 
+                placeholder="Search" 
                 placeholderTextColor="gray" 
                 style={styles.input}
-                onChangeText= {(texto)=> getAround_places({variables:{place:texto,lat:ReduxLocationStore.getState().latitude,lng:ReduxLocationStore.getState().longitude}}) }
+                onChangeText= {(texto)=> getAround_places({
+                  variables:{
+                    place: texto,lat:ReduxLocationStore.getState().latitude,
+                    lng: ReduxLocationStore.getState().longitude
+                  }
+                })}
                 value= {search}
-                // onKeyPress = {(e)=> e.nativeEvent.key("Enter") } 
                 /> 
             </View>
             
@@ -97,17 +79,23 @@ export function FindAddress(props) {
             data={addresses} 
             key = {(item)=> item.placeId}
             keyExtractor = {(item)=> item.placeId}
-            renderItem = { ({item})=> (
-                <>
+            renderItem = { ({item}) => (
+              <>
+              <View style = {styles.placeContainer}>
                 <Pressable onPress={ ()=> sendPlace(item)}> 
                   <Text style={styles.texto}>{item.name}</Text>
                   <Text style={styles.texto}>{item.direction}</Text>
                 </Pressable>
-                </>
+              </View>
+              <Divider/>
+              </>
             ) }
             >
             </FlatList>
-            
+
+            <Pressable style = {styles.fixLocationContainer} onPressIn = {() => props.navigation.navigate('FixToCenter')}>
+              <Text style = {styles.texto}>Fijar ubicacion en el mapa</Text>
+            </Pressable>
         </View>
     )
 }
@@ -117,8 +105,11 @@ const styles = StyleSheet.create({
         flex:1,
         width:"100%",
         justifyContent: "center",
-        alignItems: "center",
-
+        alignItems: "center"
+    },
+    placeContainer: {
+      width: '95%',
+      margin: 10
     },
     inputcontainer:{
         height:100,
@@ -128,12 +119,12 @@ const styles = StyleSheet.create({
         backgroundColor: "black"
     },
     texto:{
-        fontSize:20,
+        fontSize: 20,
         color: "black"
     },
     input:{
-     backgroundColor:"rgba(255,255,255,1)",
-        borderRadius:5,
+      backgroundColor:"rgba(255,255,255,1)",
+      borderRadius:5,
         borderWidth:2,
         borderColor:"gray",
         fontSize:20,
@@ -142,5 +133,11 @@ const styles = StyleSheet.create({
         borderRadius:25,
         margin: 5,
         height: "50%",
-      }
+        paddingLeft: 20
+      },
+    fixLocationContainer: {
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }
 })

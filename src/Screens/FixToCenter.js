@@ -1,11 +1,10 @@
-import React, {useState,useEffect,useRef} from 'react'
-import { StyleSheet, Text, View , Button, Image, TouchableOpacity, Alert} from 'react-native'
-import MapView , {Marker} from 'react-native-maps' 
-import ReduxLocationStore from '../Redux/Redux-location-store';
-import { set_location } from '../Redux/Redux-actions';
+import React, {useState, useEffect, useRef} from 'react'
+import { StyleSheet, View, Image,Alert} from 'react-native'
+import MapView from 'react-native-maps' 
 import gql from 'graphql-tag'
-import { useMutation, useQuery } from 'react-apollo'
-import { FAB } from 'react-native-paper';
+import { useMutation } from 'react-apollo'
+import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
+import { useUsuario } from '../Context/UserContext'
 
 const CURRENT_ADDRESS = gql`
 mutation get_current_info($object: JSON){
@@ -17,10 +16,18 @@ mutation get_current_info($object: JSON){
 
 export const FixToCenter = (props)=>  {
 
+    useEffect(() => {
+        handleAndroidBackButton(() => props.navigation.goBack())
+        return () => {
+            handleAndroidBackButton(() => backAction(setUser))
+        }
+      }, []) 
+
     const mapView = useRef(React.Component)
+    const {setUser} = useUsuario()
     const [marker, setMarker] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667})
     const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.009, longitudeDelta: 0.009});
-    const [address,setAddress] = useState({name:"address"})
+    const [address, setAddress] = useState({name:"address"})
 
     const [get_current_info] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
@@ -42,14 +49,16 @@ export const FixToCenter = (props)=>  {
     })
 
     async function setAddresLocation(region) {
-
+        // try {
+        //     console.log(mapView.current.addressForCoordinate)
+        // } catch (error) {
+        //     console.log(mapView.current)
+        //     console.log(error)
+        // }
         setRegion(region)
         await get_current_info()
-        
-    }
+    } 
 
-
-    
     return (
         <View style={styles.masterContainer} accessible={false}>
             <MapView
@@ -57,8 +66,7 @@ export const FixToCenter = (props)=>  {
                 style={styles.mapa}
                 onRegionChangeComplete={(region)=> setAddresLocation(region)}
                 //  onPanDrag={()=> setRegion()}
-                initialRegion={region}>
-                
+                initialRegion={region}>   
             </MapView>
             {/* <TouchableOpacity style={styles.buton} onPress={()=>  setAddresLocation()}>
                   <Text style={styles.text}>{address.name}</Text>
