@@ -10,6 +10,7 @@ import { useAddress } from '../Context/AddressContext'
 import decodePolyline from '../Functions/DecodePolyline'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
+import { TripUpdatedDriver } from '../Listeners/TripUpdated'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -116,6 +117,13 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
       name
       email
       photoUrl
+      brand
+      model
+      plate
+      rating
+      service{
+          name
+      }
     }
     commissionType {
       id
@@ -165,6 +173,8 @@ export const MapasDriver = ({navigation}) => {
     const [route, setRoute] = useState({});
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
+    const [trip, setTrip] = useState({});
+    const [listenerchat, setListenerChat] = useState(false);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -241,6 +251,8 @@ export const MapasDriver = ({navigation}) => {
         fetchPolicy: "no-cache",
         onCompleted:({TripUpdated}) => {
             console.log(TripUpdated)
+            setTrip(TripUpdated)
+            setListenerChat(true)
         },
         onError:(error) => {
           console.log(error);
@@ -297,13 +309,22 @@ export const MapasDriver = ({navigation}) => {
         if(flag){
             console.log('Flag enabled')
             return (
-                <TripCreated userId = {usuario.id} acceptTrip = {accept_trip}/>
+                <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} />
             )   
         } else {
             console.log('Flag not enabled')
             return null
         }
     }
+
+    function EvaluateStartChat() {
+      if(listenerchat){
+          return <TripUpdatedDriver trip={trip} navigation={navigation}/>
+      } else {
+        return null 
+      }
+    }
+
     return(
         <>
         <MapView
@@ -325,6 +346,7 @@ export const MapasDriver = ({navigation}) => {
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
         <EvaluateTripSubscription/>
+        <EvaluateStartChat/>
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>

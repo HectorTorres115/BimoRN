@@ -54,6 +54,7 @@ export const Chat = (props)=> {
     useEffect(() => {
 
         console.log('componente montado')
+        console.log(props.route.params.chatId)
         // lista.current.scrollToEnd()
         handleAndroidBackButton(() => backAction(props.navigation.navigate('Mapas')))
         return ()=> {
@@ -73,11 +74,11 @@ export const Chat = (props)=> {
     useQuery(GET_CHATS_BYID,{
         fetchPolicy: "no-cache",
         variables:{
-            id:4
+            id:props.route.params.chatId
           },
         onCompleted:({GetChatById})=>{
 
-            console.log(GetChatById);
+            // console.log(GetChatById);
             setChat(GetChatById)
             setMessages(GetChatById.messages)
             // lista.current.scrollToEnd()
@@ -90,7 +91,7 @@ export const Chat = (props)=> {
     const [create_message] = useMutation(CREATE_MESSAGE,{
         fetchPolicy: "no-cache",
         variables:{
-            chatid:4,
+            chatid:props.route.params.chatId,
             message:message,
             sender: usuario.name
           },
@@ -135,7 +136,7 @@ export const Chat = (props)=> {
                 key = {(item)=> item.id}
                 keyExtractor = {(item)=> item.id}
                 renderItem = { ({item})=> (evaluateMessage(item))} />
-                <ChatListener messages={messages} setter={setMessages} chatId= {4} lista={lista}/>
+                <ChatListener messages={messages} setter={setMessages} chatId= {props.route.params.chatId} lista={lista}/>
             </View>
             <View style={styles.inputContainer}>
                 <TextInput placeholder={'Message'} placeholderTextColor={'gray'} onChangeText={(message)=>setMessage(message)} value={message} style={styles.inputText}/>

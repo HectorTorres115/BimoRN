@@ -16,6 +16,7 @@ import { set_location } from '../Redux/Redux-actions';
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
 
+
 const QUERY_DRIVERS = gql`
 query{
     GetCities{
@@ -107,6 +108,38 @@ mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $p
     }
   }
 `
+const CREATE_CHAT = gql`
+mutation create_chat($tripId: Int!,$driverId: Int!,$passengerId: Int!){
+  CreateChat(input:{
+    tripId:$tripId
+    driverId:$driverId
+    passengerId:$passengerId
+  }){
+    id
+    createdAt
+    status
+    driverId
+    passengerId
+    driver{
+      id
+      name
+      email
+    }
+    passenger
+    {
+      id
+      name
+      email
+    }
+    messages{
+      id
+      message
+      sender
+    }
+  }
+}
+`
+
 export const Mapas = ({navigation}) => {
     //Config objects
     const initialCameraConfig = {
@@ -145,6 +178,7 @@ export const Mapas = ({navigation}) => {
     const [polyline, setPolyline] = useState([]);
     const [startsuscription, setStartSuscription] = useState(false);
     const [currenttrip, setCurrentTrip] = useState({});
+    const [chat, setChat] = useState(null);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -186,13 +220,26 @@ export const Mapas = ({navigation}) => {
         onCompleted:({CreateTrip})=>{
             // console.log(CreateTrip)
             setCurrentTrip(CreateTrip)
-            
+
             setStartSuscription(true)
 
         },
         onError: (error)=>{
           console.log(error);
         }
+    })
+
+    const [create_chat] = useMutation(CREATE_CHAT, {
+      fetchPolicy: "no-cache",
+      onCompleted:({CreateChat})=>{
+
+          console.log(CreateChat)
+          setChat(CreateChat)
+
+      },
+      onError: (error)=>{
+        console.log(error);
+      }
     })
 
     //Callbacks for components on mapview
@@ -207,6 +254,7 @@ export const Mapas = ({navigation}) => {
     }
 
     async function drawRoute(){
+      
         if(origin == null || destination == null){
             Alert.alert("No se ha asignado localizacion")
         } else{
@@ -269,10 +317,18 @@ export const Mapas = ({navigation}) => {
 
     function EvaluateStartSuscription() {
         if(startsuscription){
-            return <TripUpdated tripId={currenttrip.id}/>
+            return <TripUpdated tripId={currenttrip.id} create_chat={create_chat} setChat={setChat}/>
         } else {
           return null 
         }
+    }
+
+    function EvaluateStartChat() {
+      if(chat !== null){
+          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat",{chatId: chat.id})}/> 
+      }else{
+          return null
+      }
     }
 
     return (
@@ -293,7 +349,9 @@ export const Mapas = ({navigation}) => {
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
         <EvaluateStartSuscription />
+        <EvaluateStartChat />
         {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
+        <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
         <Button title = "Crear Viaje" onPress = {() => createTrip()}/> 
         <View style={styles.fabContainer}>
             <FAB

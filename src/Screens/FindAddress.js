@@ -54,6 +54,14 @@ export function FindAddress(props) {
       setAddresses([])
      
       setSearch(null)
+
+      // if(props.route.params.drawRoute){
+      //   console.log('destination')
+      //   props.route.params.drawRoute()
+      // }      
+      // else{
+      //   console.log(props)
+      // }
      
       props.navigation.goBack();
     }
