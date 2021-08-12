@@ -42,7 +42,6 @@ mutation get_current_info($object: JSON){
     }
   }
 `
-
 const CREATE_TRIP = gql`
 mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $paymentMethod: Int!, $note: String!){
     CreateTrip(input:{
@@ -58,6 +57,8 @@ mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $p
     {
       id
       opt
+      driverId
+      passengerId
       driver{
         id
         name
@@ -177,7 +178,7 @@ export const Mapas = ({navigation}) => {
     const [route, setRoute] = useState({});
     const [polyline, setPolyline] = useState([]);
     const [startsuscription, setStartSuscription] = useState(false);
-    const [currenttrip, setCurrentTrip] = useState({});
+    const [currenttrip, setCurrentTrip] = useState(null);
     const [chat, setChat] = useState(null);
 
     //Server requests
@@ -217,12 +218,9 @@ export const Mapas = ({navigation}) => {
 
     const [create_trip] = useMutation(CREATE_TRIP, {
         fetchPolicy: "no-cache",
-        onCompleted:({CreateTrip})=>{
-            // console.log(CreateTrip)
-            setCurrentTrip(CreateTrip)
-
-            setStartSuscription(true)
-
+        onCompleted:(data)=>{
+          console.log(data)
+          setCurrentTrip(data.CreateTrip)
         },
         onError: (error)=>{
           console.log(error);
@@ -232,10 +230,8 @@ export const Mapas = ({navigation}) => {
     const [create_chat] = useMutation(CREATE_CHAT, {
       fetchPolicy: "no-cache",
       onCompleted:({CreateChat})=>{
-
           console.log(CreateChat)
           setChat(CreateChat)
-
       },
       onError: (error)=>{
         console.log(error);
@@ -316,17 +312,17 @@ export const Mapas = ({navigation}) => {
     }
 
     function EvaluateStartSuscription() {
-        if(startsuscription){
-            return <TripUpdated tripId={currenttrip.id} create_chat={create_chat} setChat={setChat}/>
+        if(currenttrip !== null){
+            return <TripUpdated trip={currenttrip} setTrip = {setCurrentTrip}/>
         } else {
           return null 
         }
     }
 
     function EvaluateStartChat() {
-      if(chat !== null){
-          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat",{chatId: chat.id})}/> 
-      }else{
+      if(currenttrip !== null){
+          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat", { trip: currenttrip })}/> 
+      } else{
           return null
       }
     }
@@ -335,7 +331,7 @@ export const Mapas = ({navigation}) => {
         <>
         <MapView
         ref = {globalMapView}
-        onMapReady = { ()=> getCurrentDirection() }
+        onMapReady = { () => getCurrentDirection() }
         showsUserLocation = {true}
         showsMyLocationButton = {false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
@@ -348,8 +344,10 @@ export const Mapas = ({navigation}) => {
             })}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
+
         <EvaluateStartSuscription />
         <EvaluateStartChat />
+
         {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
         <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
         <Button title = "Crear Viaje" onPress = {() => createTrip()}/> 

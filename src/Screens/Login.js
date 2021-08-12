@@ -20,6 +20,7 @@ mutation login_passenger($email: String!, $password:String!){
     }) {
       id
       email
+      # username
       deviceToken
       genre
       photoUrl
@@ -40,8 +41,8 @@ export const Login=({navigation})=> {
   //  console.log(info.coords);
   }, (error) => console.log(error),
   {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
-  const [email,setEmail] = useState("")
-  const [password,setPassword] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const {setUser} = useUsuario()
   //Server requests
   const [login] = useMutation(LOGIN_PASSENGER,{

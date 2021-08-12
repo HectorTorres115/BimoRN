@@ -62,6 +62,7 @@ const DriverStackScreen = ()=> (
   <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
     <DriverStack.Screen name="Perfil" component={Perfil} />
+    <DriverStack.Screen name="Chat" component={Chat} />
   </DriverStack.Navigator>
 )
 

@@ -10,7 +10,6 @@ import { useAddress } from '../Context/AddressContext'
 import decodePolyline from '../Functions/DecodePolyline'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
-import { TripUpdatedDriver } from '../Listeners/TripUpdated'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -95,13 +94,14 @@ mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
     }
   }
 `
-
 const ACCEPT_TRIP = gql`
 mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
   UpdateTrip(
     input: { id: $id, driverId: $driverId, tripStatusId: $tripStatus }
   ) {
     id
+    driverId
+    passengerId
     tripStatus {
       id
       tripStatus
@@ -173,8 +173,7 @@ export const MapasDriver = ({navigation}) => {
     const [route, setRoute] = useState({});
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
-    const [trip, setTrip] = useState({});
-    const [listenerchat, setListenerChat] = useState(false);
+    const [trip, setTrip] = useState(null);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -251,8 +250,8 @@ export const MapasDriver = ({navigation}) => {
         fetchPolicy: "no-cache",
         onCompleted:({TripUpdated}) => {
             console.log(TripUpdated)
-            setTrip(TripUpdated)
-            setListenerChat(true)
+            // setTrip(TripUpdated)
+            // setListenerChat(true)
         },
         onError:(error) => {
           console.log(error);
@@ -286,7 +285,6 @@ export const MapasDriver = ({navigation}) => {
     async function drawHexagons(){
         get_hexagons({variables:{ lat:address.latitude,lng: address.longitude,res: 7,jumps: 1}});
     }
-
     async function getCurrentDirection() {
         if(address !== null){
             get_current_info({variables:{
@@ -307,21 +305,19 @@ export const MapasDriver = ({navigation}) => {
     //Evaluate methods for custom renders
     function EvaluateTripSubscription() {
         if(flag){
-            console.log('Flag enabled')
             return (
-                <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} />
+                <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
             )   
         } else {
-            console.log('Flag not enabled')
             return null
         }
     }
 
-    function EvaluateStartChat() {
-      if(listenerchat){
-          return <TripUpdatedDriver trip={trip} navigation={navigation}/>
+    function EvaluateChatButton() {
+      if(trip !== null){
+        return <Button title = 'Chat' onPress = {() => navigation.navigate('Chat', {trip: trip})}/> 
       } else {
-        return null 
+        return null
       }
     }
 
@@ -329,7 +325,7 @@ export const MapasDriver = ({navigation}) => {
         <>
         <MapView
         ref = {globalMapView}
-        onMapReady = { ()=> getCurrentDirection() }
+        onMapReady = { () => getCurrentDirection() }
         showsUserLocation = {true}
         showsMyLocationButton = {false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
@@ -345,8 +341,10 @@ export const MapasDriver = ({navigation}) => {
             })}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
+
         <EvaluateTripSubscription/>
-        <EvaluateStartChat/>
+        <EvaluateChatButton/>
+
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>

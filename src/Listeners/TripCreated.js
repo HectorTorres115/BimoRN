@@ -8,54 +8,48 @@ const SUSCRIPTION_TRIP = gql`
 subscription trip_created{
   TripCreated{
     id
-    opt
-    driver{
-      id
-      name
-    }
-    passenger{
-      id
-      name
-    }
-    tripStatus{
+    driverId
+    passengerId
+    tripStatus {
       id
       tripStatus
     }
-    commissionType{
+    passenger {
       id
-      __typename
+      name
+      email
+      photoUrl
     }
-    paymentMethod{
+    driver {
       id
-      __typename
+      name
+      email
+      photoUrl
+      brand
+      model
+      plate
+      rating
+      service{
+          name
+      }
     }
-    promocode{
+    commissionType {
       id
-      __typename
-      discount
+      commissionType
     }
-    commission
-    commissionValue
+    paymentMethod {
+      id
+      paymentMethod
+    }
+    commissionType {
+      id
+      commissionType
+    }
+    opt
     createdAt
     currency
-    originVincity
-    originLocationLat
-    originLocationLng
-    destinationVincity
-    destinationLocationLat
-    destinationLocationLng
     discount
-    distance
-    pickedUpAt
-    droppedOffAt
-    fee
-    feeTaxed
-    feedback
-    note
-    rating
-    rawfee
-    tax
-    tripPolyline
+    originVincity
   }
 }
 `
@@ -76,6 +70,7 @@ export class TripCreated extends Component {
                   tripStatus: 1,
                   driverId: this.props.userId
                 }})
+                this.props.setTrip(data.TripCreated)
               }}/>
           }}
           </Subscription>

@@ -20,6 +20,7 @@ mutation login_driver($email: String!, $password:String!){
     }) {
       id
       email
+      # username
       deviceToken
       genre
       photoUrl
