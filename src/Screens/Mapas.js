@@ -180,6 +180,7 @@ export const Mapas = ({navigation}) => {
     const [startsuscription, setStartSuscription] = useState(false);
     const [currenttrip, setCurrentTrip] = useState(null);
     const [chat, setChat] = useState(null);
+    const [driverState, setDriverState] = useState(null);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -313,7 +314,10 @@ export const Mapas = ({navigation}) => {
 
     function EvaluateStartSuscription() {
         if(currenttrip !== null){
-            return <TripUpdated trip={currenttrip} setTrip = {setCurrentTrip}/>
+            return <TripUpdated 
+            trip={currenttrip} setTrip = {setCurrentTrip}
+            driverState={driverState} setDriverState = {setDriverState}
+            />
         } else {
           return null 
         }
@@ -324,6 +328,21 @@ export const Mapas = ({navigation}) => {
           return <Button title = "Chat" onPress = {() => navigation.navigate("Chat", { trip: currenttrip })}/> 
       } else{
           return null
+      }
+    }
+
+    function EvaluateCityDriver() {
+      if(driverState !== null){
+        console.log(driverState)
+        return (
+          <DriverLocationUpdated 
+          setter={setDriverLocation} 
+          driverId={driverState.id} 
+          driverMarker= {driverMarker} 
+          duration={4000} />
+        )
+      } else {
+        return null
       }
     }
 
@@ -342,6 +361,9 @@ export const Mapas = ({navigation}) => {
             {drivers.map(coord => {
                 return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
+            {/* //Driver marker */}
+            <Marker ref  = {driverMarker} key = {115} coordinate = {driverLocation} icon = {require('../../assets/images/map-taxi3.png')}/>
+            {/* //Trip polyline */}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
 
@@ -372,6 +394,8 @@ export const Mapas = ({navigation}) => {
             style={styles.input}
             onPressIn= {()=> navigation.navigate("FindAddress", {setter:setDestination, setter_search: setSearch, search, drawRoute: drawRoute})} /> 
         </View>  
+
+        <EvaluateCityDriver/>
 
         {/* <DriverLocationUpdated 
         setter={setDriverLocation} 

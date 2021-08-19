@@ -66,34 +66,6 @@ query get_chat_by_tripId($tripId: Int!){
   }
 }
 `
-const GET_CHATS_BYID = gql`
-query get_chat_byid($id: Int!){
-    GetChatById(id:$id){
-      id
-      createdAt
-      status
-      driverId
-      passenger{
-        id
-        name
-        email
-      }
-      driver{
-        id
-        name
-        email
-      }
-      messages{
-        id
-        chatId
-        message
-        sender
-        hour
-      }
-      readed
-    }
-  }
-`
 const CREATE_MESSAGE = gql`
 mutation create_message($chatid: Int!,$message: String!,$sender: String!){
     CreateMessage(input:{

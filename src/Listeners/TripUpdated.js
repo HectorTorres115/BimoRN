@@ -11,6 +11,7 @@ subscription trip_updated($tripId: Int!){
     id
     driverId
     passengerId
+    chatId
     tripStatus {
       id
       tripStatus
@@ -32,6 +33,9 @@ subscription trip_updated($tripId: Int!){
       rating
       service{
           name
+      }
+      city {
+        lat, lng
       }
     }
     commissionType {
@@ -81,6 +85,7 @@ export class TripUpdated extends Component {
               console.log(data.subscriptionData.data)
               // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
+              this.props.setDriverState(data.subscriptionData.data.TripUpdated.driver)
               // this.props.create_chat({variables:{
               //   tripId:data.subscriptionData.data.TripUpdated.id,
               //   driverId:data.subscriptionData.data.TripUpdated.driver.id,

@@ -9,6 +9,7 @@ subscription trip_created{
   TripCreated{
     id
     driverId
+    chatId
     passengerId
     tripStatus {
       id
