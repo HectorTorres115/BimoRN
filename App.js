@@ -56,14 +56,15 @@ const MainStackScreen = ()=> (
     <MainStack.Screen name="FixToCenter" component={FixToCenter} />
     <MainStack.Screen name="Chat" component={Chat} />
     <MainStack.Screen name="Perfil" component={Perfil} />
-    <LoginStack.Screen name="Tracking" component={Tracking} />
+    <MainStack.Screen name="Tracking" component={Tracking} />
   </MainStack.Navigator>
 )
 
 const DriverStackScreen = ()=> (
-  <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
+  <DriverStack.Navigator headerMode='none' initialRouteName={'Tracking'}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
     <DriverStack.Screen name="Perfil" component={Perfil} />
+    <DriverStack.Screen name="Tracking" component={Tracking} />
   </DriverStack.Navigator>
 )
 

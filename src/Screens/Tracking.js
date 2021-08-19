@@ -6,7 +6,7 @@ import { useUsuario } from '../Context/UserContext'
 import { useMutation, useQuery } from 'react-apollo'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import ReduxLocationStore from '../Redux/Redux-location-store';
-
+import { TripCreated } from '../Listeners/TripCreated'
 
 
 const UPDATE_DRIVER_LOCATION = gql`
@@ -33,28 +33,96 @@ mutation update_driver_location($citiId: Int!, $lat: Float!,$lng: Float! ){
    }
 `
 
+const ACCEPT_TRIP = gql`
+mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
+  UpdateTrip(
+    input: { id: $id, driverId: $driverId, tripStatusId: $tripStatus }
+  ) {
+    id
+    tripStatus {
+      id
+      tripStatus
+    }
+    passenger {
+      id
+      name
+      email
+      photoUrl
+    }
+    driver {
+      id
+      name
+      email
+      photoUrl
+      brand
+      model
+      plate
+      rating
+      service{
+          name
+      }
+    }
+    commissionType {
+      id
+      commissionType
+    }
+    paymentMethod {
+      id
+      paymentMethod
+    }
+    commissionType {
+      id
+      commissionType
+    }
+    opt
+    createdAt
+    currency
+    discount
+    originVincity
+  }
+}
+
+`
+
 export const Tracking = (props) => {
 
     useEffect(() => {
-        console.log(ReduxLocationStore.getState())
+        handleAndroidBackButton(() => backAction(setUser))
     }, [])
 
     const globalMapView = useRef(React.Component);
     const driverMaker = useRef(React.Component);
+    const {usuario, setUser} = useUsuario();
     const [coords, setCoords] = useState(ReduxLocationStore.getState());
     const [location, setLocation] = useState([]);
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [polyline,setPolyline] = useState([]);
     const [driverloc,setDriverLoc] = useState(region);
     const [index,setIndex] = useState(0);
+    const [trip, setTrip] = useState({});
+    const [listenerchat, setListenerChat] = useState(false);
+    const [city, setCity] = useState(usuario.city);
 
     const [update_driver_location] = useMutation(UPDATE_DRIVER_LOCATION,{
         fetchPolicy: "no-cache",
         onCompleted:({UpdateCity})=>{
 
-            console.log(UpdateCity)
+            // console.log(UpdateCity)
+            setCity(UpdateCity)
         },
         onError:(error)=>{
+          console.log(error);
+        }
+    })
+
+    const [accept_trip] = useMutation(ACCEPT_TRIP,{
+        fetchPolicy: "no-cache",
+        onCompleted:({UpdateTrip}) => {
+            console.log(UpdateTrip)
+            setTrip(UpdateTrip)
+            setListenerChat(true)
+        },
+        onError:(error) => {
           console.log(error);
         }
     })
@@ -70,11 +138,11 @@ export const Tracking = (props) => {
     }
 
     async function updatePosition(object){
-
+        console.log(object);
         update_driver_location({variables:{
-            id: 48,
-            lat:object.lat,
-            lng:object.lng
+            citiId: 48,
+            lat:object.latitude,
+            lng:object.longitude
           }
         });
     }
@@ -89,6 +157,7 @@ export const Tracking = (props) => {
 
             setIndex(index+1)
             driverMaker.current.animateMarkerToCoordinate(location[index],2000)
+            updatePosition(location[index]);
             
         } else {
             setDriverLoc(location[index])
@@ -110,10 +179,11 @@ export const Tracking = (props) => {
             initialRegion = {region}>
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
             {location.map((location)=>{
-                return <Marker key = {location}  coordinate={location} color="blue"></Marker>
+                return <Marker key = {Math.floor(1000 + Math.random() * 9000)}  coordinate={location} color="blue"></Marker>
             })}
             <Marker ref={driverMaker} key = {driverloc.latitude} coordinate = {{latitude:driverloc.latitude, longitude:driverloc.longitude}} icon={require('../../assets/images/map-taxi3.png')}/>
         </MapView>
+        <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} />
         <Button title = "DrawRoute" onPress = {() => setPolyline(location)}/> 
         <Button title = "Guardar Ubicacion" onPress = {() => guardarUbicacion()}/> 
         <Button title = "Limpiar" onPress = {() => limpiar()}/> 
