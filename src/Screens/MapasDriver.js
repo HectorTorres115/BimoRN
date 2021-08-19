@@ -248,10 +248,10 @@ export const MapasDriver = ({navigation}) => {
 
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
-        onCompleted:({TripUpdated}) => {
-            console.log(TripUpdated)
-            // setTrip(TripUpdated)
-            // setListenerChat(true)
+        onCompleted:({UpdateTrip}) => {
+            console.log(UpdateTrip)
+            setTrip(UpdateTrip)
+            setListenerChat(true)
         },
         onError:(error) => {
           console.log(error);

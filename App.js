@@ -19,6 +19,7 @@ import { FindAddress } from './src/Screens/FindAddress'
 import { FixToCenter } from './src/Screens/FixToCenter'
 import { Chat } from './src/Screens/Chat'
 import { Perfil } from './src/Screens/Perfil'
+import { Tracking } from './src/Screens/Tracking';
 // import SplashScreen from './Screens/SplashScreen';
 //React native paper provider
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
@@ -46,7 +47,7 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Tracking'}>
     <MainStack.Screen name="Mapas" component={Mapas} />
     <MainStack.Screen name="Animation" component={Animation} />
     <MainStack.Screen name="Registro" component={Registro} />
@@ -55,14 +56,16 @@ const MainStackScreen = ()=> (
     <MainStack.Screen name="FixToCenter" component={FixToCenter} />
     <MainStack.Screen name="Chat" component={Chat} />
     <MainStack.Screen name="Perfil" component={Perfil} />
+    <MainStack.Screen name="Tracking" component={Tracking} />
   </MainStack.Navigator>
 )
 
 const DriverStackScreen = ()=> (
-  <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
+  <DriverStack.Navigator headerMode='none' initialRouteName={'Tracking'}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
     <DriverStack.Screen name="Perfil" component={Perfil} />
     <DriverStack.Screen name="Chat" component={Chat} />
+    <DriverStack.Screen name="Tracking" component={Tracking} />
   </DriverStack.Navigator>
 )
 
