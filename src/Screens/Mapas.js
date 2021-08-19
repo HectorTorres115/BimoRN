@@ -219,8 +219,12 @@ export const Mapas = ({navigation}) => {
     const [create_trip] = useMutation(CREATE_TRIP, {
         fetchPolicy: "no-cache",
         onCompleted:(data)=>{
-          console.log(data)
+          console.log(data.CreateTrip.tripPolyline)
           setCurrentTrip(data.CreateTrip)
+          setPolyline(decodePolyline(data.CreateTrip.tripPolyline))
+          animateCameraToPolylineCenter(decodePolyline(data.CreateTrip.tripPolyline))
+
+          
         },
         onError: (error)=>{
           console.log(error);
