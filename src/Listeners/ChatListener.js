@@ -29,7 +29,10 @@ export class ChatListener extends Component {
           {({loading, error}) => {
               // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
               if(loading) return null
-              if(error) return <ActivityIndicator size = 'large' color = 'red'/>
+              if(error) {
+                console.log(error)
+                return <ActivityIndicator size = 'large' color = 'red'/>
+              }
               return null
           }}
           </Subscription>

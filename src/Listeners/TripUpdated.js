@@ -9,6 +9,9 @@ const SUSCRIPTION_TRIP = gql`
 subscription trip_updated($tripId: Int!){
   TripUpdated(id:$tripId){
     id
+    driverId
+    passengerId
+    chatId
     tripStatus {
       id
       tripStatus
@@ -30,6 +33,9 @@ subscription trip_updated($tripId: Int!){
       rating
       service{
           name
+      }
+      city {
+        lat, lng
       }
     }
     commissionType {
@@ -67,44 +73,8 @@ export const TripInfo = ({driver}) =>{
 }
 
 export class TripUpdated extends Component {
-  render() {
-      return (
-          <ApolloProvider client = {subClient}>
-          <Subscription subscription = {SUSCRIPTION_TRIP}
-          variables= {{tripId: this.props.tripId}}
-          onSubscriptionData = {(data) => {
-              console.log(data.subscriptionData.data)
-              // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
-
-              this.props.create_chat({variables:{
-                tripId:data.subscriptionData.data.TripUpdated.id,
-                driverId:data.subscriptionData.data.TripUpdated.driver.id,
-                passengerId:data.subscriptionData.data.TripUpdated.passenger.id
-                }
-              })
-          }}>
-          {({loading, error, data}) => {
-              if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
-              // if(loading) return null
-              if(error) {
-                console.log(error)
-                return <ActivityIndicator size = 'large' color = 'red'/>
-              }
-              if(data){
-                // console.log(data.TripUpdated)
-                return <TripInfo driver = {data.TripUpdated.driver}/> 
-                // return null
-              }
-          }}
-          </Subscription>
-          </ApolloProvider>
-      )
-  }
-}
-
-export class TripUpdatedDriver extends Component {
   componentDidMount(){
-    console.log(this.props)
+    console.log(this.props.trip.id)
   }
   render() {
       return (
@@ -114,8 +84,44 @@ export class TripUpdatedDriver extends Component {
           onSubscriptionData = {(data) => {
               console.log(data.subscriptionData.data)
               // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
+              this.props.setTrip(data.subscriptionData.data.TripUpdated)
+              this.props.setDriverState(data.subscriptionData.data.TripUpdated.driver)
+              // this.props.create_chat({variables:{
+              //   tripId:data.subscriptionData.data.TripUpdated.id,
+              //   driverId:data.subscriptionData.data.TripUpdated.driver.id,
+              //   passengerId:data.subscriptionData.data.TripUpdated.passenger.id
+              //   }
+              // })
+          }}>
+          {({loading, error}) => {
+              // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
+              if(loading) return null
+              if(error) {
+                console.log(error)
+                return <ActivityIndicator size = 'large' color = 'red'/>
+              }
+                // return <TripInfo driver = {data.TripUpdated.driver}/> 
+                return null
+          }}
+          </Subscription>
+          </ApolloProvider>
+      )
+  }
+}
 
-              
+export class TripUpdatedDriver extends Component {
+  componentDidMount(){
+    console.log('Componente montado')
+    console.log(this.props)
+  }
+  render() {
+      return (
+          <ApolloProvider client = {subClient}>
+          <Subscription subscription = {SUSCRIPTION_TRIP}
+          variables= {{tripId: 1}}
+          onSubscriptionData = {(data) => {
+              console.log(data.subscriptionData.data)
+              // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
           }}>
           {({loading, error, data}) => {
               if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
@@ -129,6 +135,7 @@ export class TripUpdatedDriver extends Component {
                 // return <TripInfo driver = {data.TripUpdated.driver}/> 
                 return <Button title = "Chat" onPress = {() => props.navigation.navigate("Chat",{chatId: data.TripUpdated.chatId})}/> 
               }
+              return null
           }}
           </Subscription>
           </ApolloProvider>

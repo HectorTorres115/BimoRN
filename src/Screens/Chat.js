@@ -6,13 +6,45 @@ import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
 import { useUsuario } from '../Context/UserContext'
 import { ChatListener } from '../Listeners/ChatListener'
 
-const GET_CHATS_BYID = gql`
-query get_chat_byid($id: Int!){
-    GetChatById(id:$id){
+const CREATE_CHAT = gql`
+mutation create_chat($tripId: Int!, $driverId: Int!, $passengerId: Int!){
+  CreateChat(input:{
+    tripId:$tripId
+    driverId:$driverId
+    passengerId:$passengerId
+  }){
+    id
+    createdAt
+    status
+    driverId
+    passengerId
+    driver{
       id
+      name
+      email
+    }
+    passenger
+    {
+      id
+      name
+      email
+    }
+    messages{
+      id
+      message
+      sender
+    }
+  }
+}
+`
+const GET_CHAT_BY_TRIPID = gql`
+query get_chat_by_tripId($tripId: Int!){
+  GetChatByTripId(tripId: $tripId){
+    id
       createdAt
       status
       driverId
+      passengerId
       passenger{
         id
         name
@@ -31,8 +63,8 @@ query get_chat_byid($id: Int!){
         hour
       }
       readed
-    }
   }
+}
 `
 const CREATE_MESSAGE = gql`
 mutation create_message($chatid: Int!,$message: String!,$sender: String!){
@@ -49,64 +81,89 @@ mutation create_message($chatid: Int!,$message: String!,$sender: String!){
   }
 `
 
-export const Chat = (props)=> {
+export const Chat = (props) => {
 
     useEffect(() => {
-
-        console.log('componente montado')
-        console.log(props.route.params.chatId)
-        // lista.current.scrollToEnd()
-        handleAndroidBackButton(() => backAction(props.navigation.navigate('Mapas')))
-        return ()=> {
+        console.log(trip.id)
+        handleAndroidBackButton(() => props.navigation.goBack())
+        return () => {
             handleAndroidBackButton(() => backAction(setUser))
         }
-
-    }, [])
+      }, []) 
 
     const lista = useRef(React.Component)
-    const [chat,setChat] = useState({})
-    const [message,setMessage] = useState({})
-    const [messages,setMessages] = useState([])
+    const [trip, setTrip] = useState(props.route.params.trip)
+    const [chat, setChat] = useState({})
+    const [message, setMessage] = useState({})
+    const [messages, setMessages] = useState([])
 
     //Global states
     const {usuario, setUser} = useUsuario();
 
-    useQuery(GET_CHATS_BYID,{
+    useQuery(GET_CHAT_BY_TRIPID,{
         fetchPolicy: "no-cache",
         variables:{
-            id:props.route.params.chatId
-          },
-        onCompleted:({GetChatById})=>{
-
-            // console.log(GetChatById);
-            setChat(GetChatById)
-            setMessages(GetChatById.messages)
-            // lista.current.scrollToEnd()
+            tripId: props.route.params.trip.id
         },
-        onError:(err)=>{
+        onCompleted:async ({GetChatByTripId}) => {
+            if(GetChatByTripId !== null){
+                console.log('Hay chat creado')
+                setChat(GetChatByTripId)
+                setMessages(GetChatByTripId.messages)
+            } else {
+                console.log('No Hay chat creado')
+                await create_chat()
+            }
+        },
+        onError:(err) => {
             console.log(err);
         }
     })
 
+    const [create_chat] = useMutation(CREATE_CHAT, {
+        fetchPolicy: "no-cache",
+        variables: {
+            tripId: props.route.params.trip.id,
+            passengerId: props.route.params.trip.passengerId,
+            driverId: props.route.params.trip.driverId
+        },
+        onCompleted:({CreateChat}) => {
+            setChat(CreateChat)
+            setMessages(CreateChat.messages)
+        },
+        onError: (error)=>{
+          console.log({
+            tripId: props.route.params.trip.id,
+            passengerId: props.route.params.trip.passengerId,
+            driverId: props.route.params.trip.driverId
+          })
+          console.log(error);
+        }
+      })
+
     const [create_message] = useMutation(CREATE_MESSAGE,{
         fetchPolicy: "no-cache",
         variables:{
-            chatid:props.route.params.chatId,
-            message:message,
-            sender: usuario.name
+            chatid: chat.id,
+            message: message,
+            sender: usuario.email
           },
         onCompleted:({CreateMessage})=>{
-
             // console.log(CreateMessage);
             setMessage('')
         },
-        onError:(err)=>{
+        onError: (err) =>{
+            console.log({
+              chatid: chat.id,
+              message: message,
+              sender: usuario.email
+            })
             console.log(err);
         }
     })
 
     function evaluateMessage(item) {
-        if(item.sender !== usuario.name){
+        if(item.sender !== usuario.email){
             return (
                 <View style={styles.test}>
                     <View style={styles.MessagesContainerAlt}>
@@ -127,6 +184,14 @@ export const Chat = (props)=> {
         }
     } 
 
+    function EvaluateChatListener () {
+      if(chat !== {}){
+        return  <ChatListener messages={messages} setter={setMessages} chatId= {chat.id} lista={lista}/>
+      } else {
+        return null
+      }
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.chatContainer}>
@@ -136,7 +201,8 @@ export const Chat = (props)=> {
                 key = {(item)=> item.id}
                 keyExtractor = {(item)=> item.id}
                 renderItem = { ({item})=> (evaluateMessage(item))} />
-                <ChatListener messages={messages} setter={setMessages} chatId= {props.route.params.chatId} lista={lista}/>
+                {/* <ChatListener messages={messages} setter={setMessages} chatId= {chat.id} lista={lista}/> */}
+                <EvaluateChatListener/>
             </View>
             <View style={styles.inputContainer}>
                 <TextInput placeholder={'Message'} placeholderTextColor={'gray'} onChangeText={(message)=>setMessage(message)} value={message} style={styles.inputText}/>
