@@ -47,7 +47,7 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none' initialRouteName={'Tracking'}>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
     <MainStack.Screen name="Mapas" component={Mapas} />
     <MainStack.Screen name="Animation" component={Animation} />
     <MainStack.Screen name="Registro" component={Registro} />
@@ -93,10 +93,14 @@ function App() {
   Geolocation.watchPosition(
     // ({coords}) => {setAddress(coords)},
     ({coords}) => {
+      // console.log(coords)
       ReduxLocationStore.dispatch(set_location(coords))
     },
     (error) => {console.log(error)},
-    {options: geolocationConfig}
+    {enableHighAccuracy: true, 
+      distanceFilter: 0, 
+      useSignificantChanges: false, 
+      maximumAge: 0}
   )
 
   const {setAddress} = useAddress();
