@@ -20,7 +20,7 @@ import { FixToCenter } from './src/Screens/FixToCenter'
 import { Chat } from './src/Screens/Chat'
 import { Perfil } from './src/Screens/Perfil'
 import { Tracking } from './src/Screens/Tracking';
-// import SplashScreen from './Screens/SplashScreen';
+import SplashScreen from './src/Screens/SplashScreen';
 //React native paper provider
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Geolocation from 'react-native-geolocation-service'
@@ -95,6 +95,7 @@ function App() {
     ({coords}) => {
       // console.log(coords)
       ReduxLocationStore.dispatch(set_location(coords))
+      setAddress(coords)
     },
     (error) => {console.log(error)},
     {enableHighAccuracy: true, 
@@ -103,8 +104,7 @@ function App() {
       maximumAge: 0}
   )
 
-  const {setAddress} = useAddress();
-    
+  const {address, setAddress} = useAddress();
   const {usuario} = useUsuario();
   // console.log(usuario);
   if(usuario == null){
@@ -115,8 +115,8 @@ function App() {
         </NavigationContainer>
       </ApolloProvider>
     )
-  } else{
-    if(usuario.__typename=="Passenger"){
+  } else { 
+    if(usuario.__typename=="Passenger" && address !== null){
         return(
           <ApolloProvider client={client} >
             <NavigationContainer>
@@ -124,8 +124,7 @@ function App() {
             </NavigationContainer>
           </ApolloProvider>
         )
-    }else if (usuario.__typename=="Driver"){
-      
+    } else if (usuario.__typename=="Driver" && address !== null){
       return(
         <ApolloProvider client={client} >
           <NavigationContainer>
@@ -133,6 +132,9 @@ function App() {
           </NavigationContainer>
         </ApolloProvider>
       )
+    } else {
+      console.log(address);
+      return <SplashScreen/>
     }
   }
 

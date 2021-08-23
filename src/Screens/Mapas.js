@@ -37,11 +37,9 @@ mutation get_route_info($object: JSON){
   }
 `
 const CURRENT_ADDRESS = gql`
-mutation get_current_info($object: JSON){
-    GetRouteInfo(object: $object) {
-      startAdress
-    }
-  }
+mutation get_address($lat: Float!, $lng: Float!){
+  GetAddress(lat: $lat, lng: $lng)
+}
 `
 const CREATE_TRIP = gql`
 mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $paymentMethod: Int!, $note: String!){
@@ -207,10 +205,10 @@ export const Mapas = ({navigation}) => {
         }
     })
 
-    const [get_current_info] = useMutation(CURRENT_ADDRESS, {
+    const [get_address] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
-        onCompleted:({GetRouteInfo})=>{
-            const shortAddress = GetRouteInfo.startAdress.split(',')
+        onCompleted:({GetAddress})=>{
+            const shortAddress = GetAddress.split(',')
             setOrigin({name: shortAddress[0]})
         },
         onError: (error)=>{
@@ -288,14 +286,8 @@ export const Mapas = ({navigation}) => {
 
     async function getCurrentDirection() {
         if(ReduxLocationStore.getState() !== null){
-            get_current_info({variables:{
-                "object":{  
-                    "start": ReduxLocationStore.getState(), 
-                    "end": region
-                    }
-                }
-            })
-            return ReduxLocationStore.getState()
+          get_address({variables: {lat: ReduxLocationStore.getState().latitude, lng: ReduxLocationStore.getState().longitude}})
+          return ReduxLocationStore.getState()
         } else{
             setOrigin({name:"Ubicacion Actual"})
         }

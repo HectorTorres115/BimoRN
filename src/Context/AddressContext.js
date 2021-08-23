@@ -4,7 +4,7 @@ export const AddressContext = React.createContext();
 
 export const AddressProvider = (props) => {
     //State
-    const [address, setAddress] = useState({});
+    const [address, setAddress] = useState(null);
     //Did mount
     
     const value = useMemo(() => {
