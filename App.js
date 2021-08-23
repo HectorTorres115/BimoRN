@@ -93,10 +93,14 @@ function App() {
   Geolocation.watchPosition(
     // ({coords}) => {setAddress(coords)},
     ({coords}) => {
+      // console.log(coords)
       ReduxLocationStore.dispatch(set_location(coords))
     },
     (error) => {console.log(error)},
-    {options: geolocationConfig}
+    {enableHighAccuracy: true, 
+      distanceFilter: 0, 
+      useSignificantChanges: false, 
+      maximumAge: 0}
   )
 
   const {setAddress} = useAddress();

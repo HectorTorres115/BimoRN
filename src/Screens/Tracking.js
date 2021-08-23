@@ -7,6 +7,7 @@ import { useMutation, useQuery } from 'react-apollo'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import ReduxLocationStore from '../Redux/Redux-location-store';
 import { TripCreated } from '../Listeners/TripCreated'
+import { appMode } from '../Clients/client-config'
 
 
 const UPDATE_DRIVER_LOCATION = gql`
@@ -31,6 +32,45 @@ mutation update_driver_location($citiId: Int!, $lat: Float!,$lng: Float! ){
              indexH3
            }
    }
+`
+
+const GET_HEXAGONS = gql`
+mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
+    GetHexagons(
+      input: {
+        latitude: $lat
+        longitude: $lng
+        resolution: $res
+        jumps: $jumps
+      }
+    ) {
+      index
+      cities {
+        driver {
+          id
+          name
+          isOnline
+          model
+          brand
+          plate
+          rating
+        }
+        lastActive
+        lat
+        lng
+        id
+        service {
+          id
+          commissionTypeId
+          commissionValue
+        }
+      }
+      boundaries {
+        latitude
+        longitude
+      }
+    }
+  }
 `
 
 const ACCEPT_TRIP = gql`
@@ -79,6 +119,13 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
     currency
     discount
     originVincity
+    originLocationLat
+    originLocationLng
+    destinationVincity
+    destinationLocationLat
+    destinationLocationLng
+    originIndex
+    destinationIndex
   }
 }
 
@@ -86,8 +133,38 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
 
 export const Tracking = (props) => {
 
+    function getIndex(){
+
+      if(appMode === 'development'){
+        // get_hexagons({variables:{ lat:city.lat,lng: city.lng,res: 11,jumps: 0}}).then(({data})=>{
+          // ReduxDriverStore.dispatch(set_driver({indexdriver: data.GetHexagons[0].index}))
+          setIndexDriver(city.indexH3)
+        // });
+      } else if(appMode === 'produccion'){
+      
+        update_driver_location({citiId: usuario.city.id,lat:ReduxLocationStore.getState().latitude ,lng:ReduxLocationStore.getState().longitude}).then(({data})=>{
+          setIndexDriver(data.UpdateCity.indexH3)
+        })
+
+      }
+
+    }
+    //Lifecycle methods
     useEffect(() => {
-        handleAndroidBackButton(() => backAction(setUser))
+      handleAndroidBackButton(() => backAction(setUser))
+      
+      
+      // const interval = setInterval(() => {
+      //   console.log(indexdriver)
+      //   console.log(indexpassenger)
+      //     if(indexdriver === indexpassenger){
+      //       console.log('Esperando a pasajero')
+      //     }
+      //     else {
+      //       console.log('Ya voooooy')
+      //     }
+      // }, 4000);
+      // return () => clearInterval(interval);
     }, [])
 
     const globalMapView = useRef(React.Component);
@@ -97,18 +174,33 @@ export const Tracking = (props) => {
     const [location, setLocation] = useState([]);
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [polyline,setPolyline] = useState([]);
-    const [driverloc,setDriverLoc] = useState(region);
+    const [driverloc,setDriverLoc] = useState({longitude: -107.45174869894981, latitude: 24.822962763444405});
     const [index,setIndex] = useState(0);
     const [trip, setTrip] = useState({});
     const [listenerchat, setListenerChat] = useState(false);
     const [city, setCity] = useState(usuario.city);
+    const [indexdriver, setIndexDriver] = useState(null);
+    const [indexdestination, setIndexDestination] = useState(null);
+    const [indexpassenger, setIndexPassenger] = useState(null);
+    const [hexagons,setHexagons] = useState([]);
 
     const [update_driver_location] = useMutation(UPDATE_DRIVER_LOCATION,{
         fetchPolicy: "no-cache",
         onCompleted:({UpdateCity})=>{
 
-            // console.log(UpdateCity)
+            console.log(UpdateCity)
             setCity(UpdateCity)
+            setIndexDriver(UpdateCity.indexH3)
+
+
+            if(UpdateCity.indexH3 === indexpassenger){
+              console.log('Esperando a pasajero')
+              update_trip_status()
+            }
+            else {
+              console.log('Ya voooooy')
+              
+            }
         },
         onError:(error)=>{
           console.log(error);
@@ -121,11 +213,44 @@ export const Tracking = (props) => {
             console.log(UpdateTrip)
             setTrip(UpdateTrip)
             setListenerChat(true)
+
+            console.log(UpdateTrip.index)
+            setIndexPassenger(UpdateTrip.originIndex)
+      
         },
         onError:(error) => {
           console.log(error);
         }
     })
+
+      const [update_trip_status] = useMutation(ACCEPT_TRIP,{
+        fetchPolicy: "no-cache",
+        variables:{
+          id: trip.id,
+          tripStatus: 4,
+          driverId: usuario.id
+        }
+        ,
+        onCompleted:({UpdateTrip}) => {
+            console.log(UpdateTrip)
+      
+        },
+        onError:(error) => {
+          console.log(error);
+        }
+    })
+
+    const [get_hexagons] = useMutation(GET_HEXAGONS,{
+      fetchPolicy: "no-cache",
+      // onCompleted:({GetHexagons})=>{
+
+      //   console.log('Jalo GetHexagons')
+        
+      // },
+      onError:(error)=>{
+        console.log(error);
+      }
+  })
 
     async function drawMarkers(object){
         if(location.length < 1){
@@ -140,7 +265,7 @@ export const Tracking = (props) => {
     async function updatePosition(object){
         console.log(object);
         update_driver_location({variables:{
-            citiId: 48,
+            citiId: usuario.city.id,
             lat:object.latitude,
             lng:object.longitude
           }
@@ -165,6 +290,16 @@ export const Tracking = (props) => {
         }
     }
 
+    async function drawHexagons(){
+      
+      get_hexagons({variables:{ lat:region.latitude,lng: region.longitude,res: 11,jumps: 2}}).then((data)=>{
+
+        console.log(data.data.GetHexagons)
+        setHexagons(data.data.GetHexagons)
+
+      })
+
+    }
 
     return (
         <>
@@ -181,12 +316,20 @@ export const Tracking = (props) => {
             {location.map((location)=>{
                 return <Marker key = {Math.floor(1000 + Math.random() * 9000)}  coordinate={location} color="blue"></Marker>
             })}
+            {hexagons.map(hexagon => {
+                return <Polyline key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
+            })}
             <Marker ref={driverMaker} key = {driverloc.latitude} coordinate = {{latitude:driverloc.latitude, longitude:driverloc.longitude}} icon={require('../../assets/images/map-taxi3.png')}/>
         </MapView>
         <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} />
-        <Button title = "DrawRoute" onPress = {() => setPolyline(location)}/> 
+        <Button title = "DrawHexagon" onPress = {() => drawHexagons()}/> 
         <Button title = "Guardar Ubicacion" onPress = {() => guardarUbicacion()}/> 
         <Button title = "Limpiar" onPress = {() => limpiar()}/> 
+        <Button title = "Imprime" onPress = {() =>{ 
+            console.log(indexdriver)
+            console.log(indexpassenger)
+          }
+        }/> 
         </>
     )
 }

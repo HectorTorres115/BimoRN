@@ -10,6 +10,9 @@ import { useAddress } from '../Context/AddressContext'
 import decodePolyline from '../Functions/DecodePolyline'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
+import ReduxLocationStore from '../Redux/Redux-location-store'
+import ReduxDriverStore from '../Redux/Redux-driver-store'
+import { set_driver } from '../Redux/Redux-actions'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -142,25 +145,51 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
     currency
     discount
     originVincity
+    originLocationLat
+    originLocationLng
+    destinationVincity
+    destinationLocationLat
+    destinationLocationLng
   }
 }
 
 `
 
+
+
 export const MapasDriver = ({navigation}) => {
+
     //Lifecycle methods
     useEffect(() => {
-        handleAndroidBackButton(() => backAction(setUser))
+      handleAndroidBackButton(() => backAction(setUser))
+      
+      
+      const interval = setInterval(() => {
+        // console.log('This will run every 4 seconds!');
+        get_hexagons({variables:{ lat:ReduxLocationStore.getState().latitude,lng: ReduxLocationStore.getState().longitude,res: 11,jumps: 0}}).then(({data})=>{
+
+          // console.log(data.GetHexagons[0].index)
+          // setIndexDriver(data.GetHexagons[0].index)
+          // console.log(indexdriver)
+
+          ReduxDriverStore.dispatch(set_driver({indexdriver: data.GetHexagons[0].index}))
+        });
+      }, 4000);
+      return () => clearInterval(interval);
     }, [])
+
+
     //Referencias
     const globalMarker = useRef(React.Component);
     const globalMapView = useRef(React.Component);
     const driverMarker = useRef(React.Component);
     //Global states from react context
+    const [coords, setCoords] = useState(ReduxLocationStore.getState());
     const {usuario, setUser} = useUsuario();
     const {address, setAddress} = useAddress()
+    
     //State
-    const [coords, setCoords] = useState(null);
+    // const [coords, setCoords] = useState(null);
     const [flag, setFlag] = useState(true);
     const [isonline, setIsOnline] = useState(false);
     const [location, setLocation] = useState([]);
@@ -174,6 +203,9 @@ export const MapasDriver = ({navigation}) => {
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
     const [trip, setTrip] = useState(null);
+    const [indexdriver, setIndexDriver] = useState(null);
+    const [indexdestination, setIndexDestination] = useState(null);
+    const [indexpassenger, setIndexPassenger] = useState(null);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -237,14 +269,16 @@ export const MapasDriver = ({navigation}) => {
 
     const [get_hexagons] = useMutation(GET_HEXAGONS,{
         fetchPolicy: "no-cache",
-        onCompleted:({GetHexagons})=>{
+        // onCompleted:({GetHexagons})=>{
 
-            setHexagons(GetHexagons)
-        },
+        //   console.log('Jalo GetHexagons')
+          
+        // },
         onError:(error)=>{
           console.log(error);
         }
     })
+
 
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
@@ -252,6 +286,12 @@ export const MapasDriver = ({navigation}) => {
             console.log(UpdateTrip)
             setTrip(UpdateTrip)
             setListenerChat(true)
+
+            get_hexagons({variables:{ lat:UpdateTrip.originLocationLat,lng: UpdateTrip.originLocationLng,res: 11,jumps: 0}}).then(({data})=>{
+
+              setIndexPassenger(data.data.GetHexagons[0].index)
+        
+            });
         },
         onError:(error) => {
           console.log(error);
@@ -283,7 +323,14 @@ export const MapasDriver = ({navigation}) => {
         }
     }
     async function drawHexagons(){
-        get_hexagons({variables:{ lat:address.latitude,lng: address.longitude,res: 7,jumps: 1}});
+      
+        get_hexagons({variables:{ lat:ReduxLocationStore.getState().latitude,lng: ReduxLocationStore.getState().longitude,res: 11,jumps: 0}}).then((data)=>{
+
+          console.log(data.data.GetHexagons)
+          setHexagons(data.data.GetHexagons)
+
+        })
+
     }
     async function getCurrentDirection() {
         if(address !== null){
@@ -342,9 +389,11 @@ export const MapasDriver = ({navigation}) => {
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
 
-        <EvaluateTripSubscription/>
+        {/* <EvaluateTripSubscription/> */}
+        <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
         <EvaluateChatButton/>
 
+        <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>
@@ -369,11 +418,11 @@ export const MapasDriver = ({navigation}) => {
                 value={isonline}
             />
         </View> 
-        <DriverLocationUpdated 
+        {/* <DriverLocationUpdated 
         setter={setDriverLocation} 
         driverId={2} 
         driverMarker= {driverMarker} 
-        duration={4000} />
+        duration={4000} /> */}
         </>
     )
 }
