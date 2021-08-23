@@ -15,6 +15,7 @@ import ReduxLocationStore from '../Redux/Redux-location-store';
 import { set_location } from '../Redux/Redux-actions';
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
+import DriverPanel from '../Components/DriverPanel'
 
 
 const QUERY_DRIVERS = gql`

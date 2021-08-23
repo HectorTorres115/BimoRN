@@ -47,7 +47,7 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none' initialRouteName={'Tracking'}>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
     <MainStack.Screen name="Mapas" component={Mapas} />
     <MainStack.Screen name="Animation" component={Animation} />
     <MainStack.Screen name="Registro" component={Registro} />
