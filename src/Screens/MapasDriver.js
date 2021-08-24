@@ -155,6 +155,29 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
 
 `
 
+const UPDATE_DRIVER_LOCATION = gql`
+mutation update_driver_location($citiId: Int!, $lat: Float!,$lng: Float! ){
+    UpdateCity(input:{
+             id:$citiId
+             lat:$lat
+             lng:$lng
+           }){
+             id
+             service{
+               id
+               name
+             }
+             driver{
+               id
+               name 
+             }
+             lastActive
+             lat
+             lng
+             indexH3
+           }
+   }
+`
 
 
 export const MapasDriver = ({navigation}) => {
@@ -165,15 +188,14 @@ export const MapasDriver = ({navigation}) => {
       
       
       const interval = setInterval(() => {
-        // console.log('This will run every 4 seconds!');
-        get_hexagons({variables:{ lat:ReduxLocationStore.getState().latitude,lng: ReduxLocationStore.getState().longitude,res: 11,jumps: 0}}).then(({data})=>{
+        // console.log('actualizadno ubicacion')
+        // console.log(usuario.city)
+        // console.log(ReduxLocationStore.getState().latitude)
+        // console.log(ReduxLocationStore.getState().longitude)
+        update_driver_location({variables:{citiId: usuario.city.id,lat:ReduxLocationStore.getState().latitude ,lng:ReduxLocationStore.getState().longitude}}).then(({data})=>{
+          // setIndexDriver(data.UpdateCity.indexH3)
+        })
 
-          // console.log(data.GetHexagons[0].index)
-          // setIndexDriver(data.GetHexagons[0].index)
-          // console.log(indexdriver)
-
-          ReduxDriverStore.dispatch(set_driver({indexdriver: data.GetHexagons[0].index}))
-        });
       }, 4000);
       return () => clearInterval(interval);
     }, [])
@@ -206,6 +228,7 @@ export const MapasDriver = ({navigation}) => {
     const [indexdriver, setIndexDriver] = useState(null);
     const [indexdestination, setIndexDestination] = useState(null);
     const [indexpassenger, setIndexPassenger] = useState(null);
+    const [city, setCity] = useState(usuario.city);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -277,6 +300,20 @@ export const MapasDriver = ({navigation}) => {
         onError:(error)=>{
           console.log(error);
         }
+    })
+
+    const [update_driver_location] = useMutation(UPDATE_DRIVER_LOCATION,{
+      fetchPolicy: "no-cache",
+      onCompleted:({UpdateCity})=>{
+
+          console.log(UpdateCity)
+          setCity(UpdateCity)
+          setIndexDriver(UpdateCity.indexH3)
+
+      },
+      onError:(error)=>{
+        console.log(error);
+      }
     })
 
 
