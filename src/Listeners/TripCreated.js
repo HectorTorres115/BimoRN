@@ -51,6 +51,7 @@ subscription trip_created{
     currency
     discount
     originVincity
+    driverPolyline
   }
 }
 `
@@ -63,7 +64,8 @@ export class TripCreated extends Component {
               console.log(data.subscriptionData.data.TripCreated)
           }}>
           {({loading, error, data}) => {
-              if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
+              // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
+              if(loading) return null
               if(error) return <ActivityIndicator size = 'large' color = 'red'/>
               return <Button title = 'Accept trip' onPress = {async () => {
                 await this.props.acceptTrip({variables: {

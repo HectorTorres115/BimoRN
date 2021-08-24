@@ -13,10 +13,11 @@ import { requestPermission } from '../Functions/MapsPermissions'
 import Geolocation from 'react-native-geolocation-service'
 
 const LOGIN_PASSENGER = gql`
-mutation login_passenger($email: String!, $password:String!){
+mutation login_passenger($email: String!, $password:String!,$deviceToken: String!){
     LoginPassenger(input: {
       email: $email,
-      password: $password
+      password: $password,
+      deviceToken:$deviceToken
     }) {
       id
       email
@@ -50,7 +51,6 @@ export const Login=({navigation})=> {
       onCompleted:({LoginPassenger})=>{
         console.log(LoginPassenger);
         setUser(LoginPassenger)
-        SetUser(LoginPassenger)
       },
       onError:(error)=>{
         console.log(error);
@@ -74,7 +74,7 @@ export const Login=({navigation})=> {
         <TouchableOpacity>
           <Text style={styles.forgot}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
-      <Pressable  style={styles.boton} onPress={()=> login({variables:{email,password}})} >
+      <Pressable  style={styles.boton} onPress={async ()=> login({variables:{email,password,deviceToken:await GetDeviceToken()}})} >
         <Text style={styles.texto}>Iniciar Sesión</Text>
       </Pressable>
       <TouchableOpacity>
