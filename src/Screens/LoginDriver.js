@@ -13,10 +13,11 @@ import { requestPermission } from '../Functions/MapsPermissions'
 import Geolocation from 'react-native-geolocation-service'
 
 const LOGIN_DRIVER = gql`
-mutation login_driver($email: String!, $password:String!){
+mutation login_driver($email: String!, $password:String!, $deviceToken: String!){
     LoginDriver(input: {
       email: $email,
       password: $password
+      deviceToken: $deviceToken
     }) {
       id
       email
@@ -86,7 +87,7 @@ export const LoginDriver=()=> {
         <TouchableOpacity>
           <Text style={styles.forgot}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
-      <Pressable  style={styles.boton} onPress={()=> login_driver({variables:{email,password}})} >
+      <Pressable  style={styles.boton} onPress={async()=> login_driver({variables:{email,password, deviceToken: await GetDeviceToken()}})} >
         <Text style={styles.texto}>Iniciar Sesión</Text>
       </Pressable>
       <TouchableOpacity>

@@ -83,6 +83,9 @@ export default ()=> (
 
 function App() {
 
+  const {address, setAddress} = useAddress();
+  const {usuario} = useUsuario();
+
   const geolocationConfig = {
     enableHighAccuracy: true, 
     distanceFilter: 0, 
@@ -104,8 +107,6 @@ function App() {
       maximumAge: 0}
   )
 
-  const {address, setAddress} = useAddress();
-  const {usuario} = useUsuario();
   // console.log(usuario);
   if(usuario == null){
     return (

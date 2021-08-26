@@ -55,6 +55,7 @@ subscription trip_updated($tripId: Int!){
     currency
     discount
     originVincity
+    driverPolyline
   }
 }
 `
@@ -85,13 +86,8 @@ export class TripUpdated extends Component {
               console.log(data.subscriptionData.data)
               // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
+              // this.props.setDriverPolyline(data.subscriptionData.data.TripUpdated.driverPolyline)
               this.props.setDriverState(data.subscriptionData.data.TripUpdated.driver)
-              // this.props.create_chat({variables:{
-              //   tripId:data.subscriptionData.data.TripUpdated.id,
-              //   driverId:data.subscriptionData.data.TripUpdated.driver.id,
-              //   passengerId:data.subscriptionData.data.TripUpdated.passenger.id
-              //   }
-              // })
           }}>
           {({loading, error}) => {
               // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>

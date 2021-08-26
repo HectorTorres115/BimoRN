@@ -176,6 +176,7 @@ export const Mapas = ({navigation}) => {
     const [drivers, setDrivers] = useState([]);
     const [route, setRoute] = useState({});
     const [polyline, setPolyline] = useState([]);
+    const [driverPolyline, setDriverPolyline] = useState([]);
     const [startsuscription, setStartSuscription] = useState(false);
     const [currenttrip, setCurrentTrip] = useState(null);
     const [chat, setChat] = useState(null);
@@ -312,6 +313,7 @@ export const Mapas = ({navigation}) => {
     function EvaluateStartSuscription() {
         if(currenttrip !== null){
             return <TripUpdated 
+            // setDriverPolyline ={setDriverPolyline}
             trip={currenttrip} setTrip = {setCurrentTrip}
             driverState={driverState} setDriverState = {setDriverState}
             />
@@ -362,6 +364,7 @@ export const Mapas = ({navigation}) => {
             <Marker ref  = {driverMarker} key = {115} coordinate = {driverLocation} icon = {require('../../assets/images/map-taxi3.png')}/>
             {/* //Trip polyline */}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
+            <Polyline coordinates={driverPolyline} strokeWidth={6} strokeColor ={"#000000"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
 
         <EvaluateStartSuscription />
