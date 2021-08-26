@@ -281,7 +281,8 @@ export const Tracking = (props) => {
         if(index < location.length){
 
             setIndex(index+1)
-            driverMaker.current.animateMarkerToCoordinate(location[index],2000)
+            console.log(location[index])
+            driverMaker.current.animateMarkerToCoordinate(location[index],2000)        
             updatePosition(location[index]);
             
         } else {
@@ -321,7 +322,7 @@ export const Tracking = (props) => {
             })}
             <Marker ref={driverMaker} key = {driverloc.latitude} coordinate = {{latitude:driverloc.latitude, longitude:driverloc.longitude}} icon={require('../../assets/images/map-taxi3.png')}/>
         </MapView>
-        <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} />
+        <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
         <Button title = "DrawHexagon" onPress = {() => drawHexagons()}/> 
         <Button title = "Guardar Ubicacion" onPress = {() => guardarUbicacion()}/> 
         <Button title = "Limpiar" onPress = {() => limpiar()}/> 

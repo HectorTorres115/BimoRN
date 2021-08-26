@@ -17,7 +17,7 @@ import { set_driver } from '../Redux/Redux-actions'
 const QUERY_DRIVERS = gql`
 query{
     GetCities{
-      lat, lng, indexH3, driver{name, email}
+      id,lat, lng, indexH3, driver{name, email}
     }
   }
 `
@@ -188,18 +188,12 @@ export const MapasDriver = ({navigation}) => {
       
       
       const interval = setInterval(() => {
-        // console.log('actualizadno ubicacion')
-        // console.log(usuario.city)
-        // console.log(ReduxLocationStore.getState().latitude)
-        // console.log(ReduxLocationStore.getState().longitude)
-        update_driver_location({variables:{citiId: usuario.city.id,lat:ReduxLocationStore.getState().latitude ,lng:ReduxLocationStore.getState().longitude}}).then(({data})=>{
-          // setIndexDriver(data.UpdateCity.indexH3)
-        })
+
+        updatePosition()
 
       }, 4000);
       return () => clearInterval(interval);
     }, [])
-
 
     //Referencias
     const globalMarker = useRef(React.Component);
@@ -220,7 +214,7 @@ export const MapasDriver = ({navigation}) => {
     const [destination, setDestination] = useState({});
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [drivers, setDrivers] = useState([]);
-    const [driverLocation, setDriverLocation] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667});
+    const [driverLocation, setDriverLocation] = useState(ReduxLocationStore.getState());
     const [route, setRoute] = useState({});
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
@@ -233,11 +227,14 @@ export const MapasDriver = ({navigation}) => {
     //Server requests
     useQuery(QUERY_DRIVERS, {
         partialRefetch: true,
-        pollInterval: 4000,
+        // pollInterval: 4000,
         fetchPolicy:'no-cache',
         onCompleted:({GetCities}) => {
             console.log('Polled');
-            setDrivers(GetCities)
+            let arrayDrivers = GetCities.filter(city=> city.id !== usuario.city.id)
+            console.log(usuario.city.id);
+            console.log(arrayDrivers);
+            setDrivers(arrayDrivers)
           },
           onError:(error) => {
             console.log(error);
@@ -306,9 +303,10 @@ export const MapasDriver = ({navigation}) => {
       fetchPolicy: "no-cache",
       onCompleted:({UpdateCity})=>{
 
-          console.log(UpdateCity)
-          setCity(UpdateCity)
+          // console.log(UpdateCity)
+          // setCity(UpdateCity)
           setIndexDriver(UpdateCity.indexH3)
+          // driverMarker.current.animateMarkerToCoordinate({color: "#00FF00", latitude: 24.821387698025184, longitude: -107.45261002331972},2000)
 
       },
       onError:(error)=>{
@@ -320,7 +318,7 @@ export const MapasDriver = ({navigation}) => {
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
         onCompleted:({UpdateTrip}) => {
-            console.log(UpdateTrip)
+            // console.log(UpdateTrip)
             setTrip(UpdateTrip)
             setListenerChat(true)
 
@@ -363,7 +361,7 @@ export const MapasDriver = ({navigation}) => {
       
         get_hexagons({variables:{ lat:ReduxLocationStore.getState().latitude,lng: ReduxLocationStore.getState().longitude,res: 11,jumps: 0}}).then((data)=>{
 
-          console.log(data.data.GetHexagons)
+          // console.log(data.data.GetHexagons)
           setHexagons(data.data.GetHexagons)
 
         })
@@ -405,6 +403,19 @@ export const MapasDriver = ({navigation}) => {
       }
     }
 
+    async function updatePosition(){
+
+      // console.log(ReduxLocationStore.getState())
+
+      update_driver_location({variables:{
+          citiId: usuario.city.id,
+          lat:ReduxLocationStore.getState().latitude,
+          lng:ReduxLocationStore.getState().longitude
+        }
+      });
+  }
+
+
     return(
         <>
         <MapView
@@ -414,15 +425,19 @@ export const MapasDriver = ({navigation}) => {
         showsMyLocationButton = {false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
         initialRegion = {region}>
-            {location.map(coord => {
+            {/* {location.map(coord => {
                 return <Marker key = {coord.lat} ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
-            })} 
+            })}  */}
             {drivers.map(coord => {
                 return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
             {hexagons.map(hexagon => {
                 return <Polyline key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
             })}
+            <Marker key = {Math.floor(1000 + Math.random() * 9000)} 
+            ref={driverMarker} 
+            coordinate = {driverLocation} 
+            icon={require('../../assets/images/map-taxi3.png')}/>
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
 
@@ -432,6 +447,7 @@ export const MapasDriver = ({navigation}) => {
 
         <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
+        {/* <Button title = "Animar" onPress = {() => driverMarker.current.animateMarkerToCoordinate({color: "#00FF00", latitude: 24.821387698025184, longitude: -107.45261002331972},2000)}/>  */}
         <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
         <View style={styles.fabContainer}>
             <FAB
@@ -455,11 +471,11 @@ export const MapasDriver = ({navigation}) => {
                 value={isonline}
             />
         </View> 
-        {/* <DriverLocationUpdated 
+        <DriverLocationUpdated 
         setter={setDriverLocation} 
-        driverId={2} 
+        driverId={usuario.id} 
         driverMarker= {driverMarker} 
-        duration={4000} /> */}
+        duration={1000} />
         </>
     )
 }

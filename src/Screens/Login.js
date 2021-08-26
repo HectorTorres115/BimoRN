@@ -51,7 +51,6 @@ export const Login=({navigation})=> {
       onCompleted:({LoginPassenger})=>{
         console.log(LoginPassenger);
         setUser(LoginPassenger)
-        SetUser(LoginPassenger)
       },
       onError:(error)=>{
         console.log(error);
@@ -75,7 +74,11 @@ export const Login=({navigation})=> {
         <TouchableOpacity>
           <Text style={styles.forgot}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
+<<<<<<< HEAD
       <Pressable  style={styles.boton} onPress={async ()=> login({variables:{email,password, deviceToken: await GetDeviceToken()}})} >
+=======
+      <Pressable  style={styles.boton} onPress={async ()=> login({variables:{email,password,deviceToken:await GetDeviceToken()}})} >
+>>>>>>> 7bbef89f2078f9e0d485dc4681dd1c7193e0fe42
         <Text style={styles.texto}>Iniciar Sesión</Text>
       </Pressable>
       <TouchableOpacity>
