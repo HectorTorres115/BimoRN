@@ -32,7 +32,7 @@ export class DriverLocationUpdated extends Component {
           }}>
           {({loading, error}) => {
               // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
-              if(loading) return <ActivityIndicator size = 'large' color = 'green'/>
+              if(loading) return null
               if(error) return <ActivityIndicator size = 'large' color = 'red'/>
               return null
           }}

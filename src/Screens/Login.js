@@ -51,6 +51,7 @@ export const Login=({navigation})=> {
       onCompleted:({LoginPassenger})=>{
         console.log(LoginPassenger);
         setUser(LoginPassenger)
+        SetUser(LoginPassenger)
       },
       onError:(error)=>{
         console.log(error);

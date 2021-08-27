@@ -150,6 +150,8 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
     destinationVincity
     destinationLocationLat
     destinationLocationLng
+    tripPolyline
+    driverPolyline
   }
 }
 
@@ -318,10 +320,14 @@ export const MapasDriver = ({navigation}) => {
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
         onCompleted:({UpdateTrip}) => {
-            // console.log(UpdateTrip)
+            console.log(UpdateTrip)
+            console.log(decodePolyline(UpdateTrip.tripPolyline))
             setTrip(UpdateTrip)
-            setListenerChat(true)
-
+            // setListenerChat(true)
+            setPolyline(decodePolyline(UpdateTrip.tripPolyline))
+            // setPolyline(decodePolyline(GetRouteInfo.polyline))
+            animateCameraToPolylineCenter(decodePolyline(UpdateTrip.tripPolyline))
+              
             get_hexagons({variables:{ lat:UpdateTrip.originLocationLat,lng: UpdateTrip.originLocationLng,res: 11,jumps: 0}}).then(({data})=>{
 
               setIndexPassenger(data.data.GetHexagons[0].index)
@@ -343,19 +349,35 @@ export const MapasDriver = ({navigation}) => {
         }
     }
 
-    async function drawRoute(){
-        if(origin == null || destination == null){
-            Alert.alert("No se ha asignado localizacion")
-        } else{
-            get_route_info({variables:{
-                "object":{  
-                  "start": coords, 
-                  "end": destination.placeId
-                }
-              }
+    async function animateCameraToPolylineCenter(polyline){
+      const polylineCenterCoords = polyline[parseInt(polyline.length / 2)];
+      
+      globalMapView.current.animateCamera({
+          center: {
+          latitude: polylineCenterCoords.latitude,
+          longitude: polylineCenterCoords.longitude
+          },
+          pitch: 1,
+          heading: 0,
+          zoom: 13,
+          altitude: 0
+      }, {duration: 1000}) 
+    }
 
-            });
-        }
+    async function drawRoute(){
+        // if(origin == null || destination == null){
+        //     Alert.alert("No se ha asignado localizacion")
+        // } else{
+        //     get_route_info({variables:{
+        //         "object":{  
+        //           "start": coords, 
+        //           "end": destination.placeId
+        //         }
+        //       }
+
+        //     });
+        // }
+        console.log(polyline)
     }
     async function drawHexagons(){
       
@@ -367,6 +389,7 @@ export const MapasDriver = ({navigation}) => {
         })
 
     }
+    
     async function getCurrentDirection() {
         if(address !== null){
             get_current_info({variables:{
