@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import {ActivityIndicator, Button} from 'react-native'
 import {subClient} from '../Clients/sub-client'
 import {ApolloProvider, Subscription} from 'react-apollo'
+import { CardTripInfo } from '../Components/CardTripInfo'
 
 const SUSCRIPTION_TRIP = gql`
 subscription trip_created{
@@ -51,7 +52,9 @@ subscription trip_created{
     currency
     discount
     originVincity
+    destinationVincity
     driverPolyline
+    distance
   }
 }
 `
@@ -67,14 +70,12 @@ export class TripCreated extends Component {
               // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
               if(loading) return null
               if(error) return <ActivityIndicator size = 'large' color = 'red'/>
-              return <Button title = 'Accept trip' onPress = {async () => {
-                await this.props.acceptTrip({variables: {
-                  id: data.TripCreated.id,
-                  tripStatus: 1,
-                  driverId: this.props.userId
-                }})
-                this.props.setTrip(data.TripCreated)
-              }}/>
+              return (
+                  <CardTripInfo 
+                  trip = {data.TripCreated} 
+                  accept_trip = {this.props.acceptTrip} 
+                  userId = {this.props.userId}/>
+              )
           }}
           </Subscription>
           </ApolloProvider>

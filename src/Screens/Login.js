@@ -38,10 +38,12 @@ export const Login=({navigation})=> {
       console.log('permisos aceptados')
     }).catch(()=>console.log('permisos denegados'))
   },[])
+
   Geolocation.watchPosition((info) => {
   //  console.log(info.coords);
   }, (error) => console.log(error),
   {enableHighAccuracy: true, distanceFilter: 0, useSignificantChanges: false, maximumAge: 0})
+  
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const {setUser} = useUsuario()
@@ -74,11 +76,7 @@ export const Login=({navigation})=> {
         <TouchableOpacity>
           <Text style={styles.forgot}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
-<<<<<<< HEAD
       <Pressable  style={styles.boton} onPress={async ()=> login({variables:{email,password, deviceToken: await GetDeviceToken()}})} >
-=======
-      <Pressable  style={styles.boton} onPress={async ()=> login({variables:{email,password,deviceToken:await GetDeviceToken()}})} >
->>>>>>> 7bbef89f2078f9e0d485dc4681dd1c7193e0fe42
         <Text style={styles.texto}>Iniciar Sesión</Text>
       </Pressable>
       <TouchableOpacity>

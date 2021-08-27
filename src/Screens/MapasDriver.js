@@ -184,13 +184,16 @@ export const MapasDriver = ({navigation}) => {
 
     //Lifecycle methods
     useEffect(() => {
+      console.log('Component did mount');
       handleAndroidBackButton(() => backAction(setUser))
-      
-      
       const interval = setInterval(() => {
-
-        updatePosition()
-
+        // animateDriverMarker() 
+        update_driver_location({variables:{
+          citiId: usuario.city.id,
+          lat: ReduxLocationStore.getState().latitude,
+          lng: ReduxLocationStore.getState().longitude
+        }
+       })
       }, 4000);
       return () => clearInterval(interval);
     }, [])
@@ -266,9 +269,7 @@ export const MapasDriver = ({navigation}) => {
     const [get_current_info] = useMutation(CURRENT_ADDRESS,{
         fetchPolicy: "no-cache",
         onCompleted:({GetRouteInfo})=>{
-
             const shortAddress = GetRouteInfo.startAdress.split(',')
-
             setOrigin({name: shortAddress[0]})
         },
         onError:(error)=>{
@@ -279,7 +280,7 @@ export const MapasDriver = ({navigation}) => {
     const [update_driver_status] = useMutation(UPDATE_STATUS,{
         fetchPolicy: "no-cache",
         onCompleted:({UpdateDriver})=>{
-            console.log(UpdateDriver)
+            // console.log(UpdateDriver)
             setIsOnline(UpdateDriver.isOnline)
         },
         onError:(error)=>{
@@ -302,12 +303,11 @@ export const MapasDriver = ({navigation}) => {
     const [update_driver_location] = useMutation(UPDATE_DRIVER_LOCATION,{
       fetchPolicy: "no-cache",
       onCompleted:({UpdateCity})=>{
-
           // console.log(UpdateCity)
-          // setCity(UpdateCity)
+          setCity(UpdateCity)
           setIndexDriver(UpdateCity.indexH3)
+          setDriverLocation(ReduxLocationStore.getState())
           // driverMarker.current.animateMarkerToCoordinate({color: "#00FF00", latitude: 24.821387698025184, longitude: -107.45261002331972},2000)
-
       },
       onError:(error)=>{
         console.log(error);
@@ -404,17 +404,13 @@ export const MapasDriver = ({navigation}) => {
     }
 
     async function updatePosition(){
-
-      // console.log(ReduxLocationStore.getState())
-
       update_driver_location({variables:{
           citiId: usuario.city.id,
-          lat:ReduxLocationStore.getState().latitude,
-          lng:ReduxLocationStore.getState().longitude
+          lat: ReduxLocationStore.getState().latitude,
+          lng: ReduxLocationStore.getState().longitude
         }
       });
   }
-
 
     return(
         <>
@@ -425,9 +421,9 @@ export const MapasDriver = ({navigation}) => {
         showsMyLocationButton = {false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
         initialRegion = {region}>
-            {/* {location.map(coord => {
+            {location.map(coord => {
                 return <Marker key = {coord.lat} ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
-            })}  */}
+            })} 
             {drivers.map(coord => {
                 return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
@@ -442,13 +438,14 @@ export const MapasDriver = ({navigation}) => {
         </MapView>
 
         {/* <EvaluateTripSubscription/> */}
-        <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
+        
         <EvaluateChatButton/>
 
-        <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
-        <Button title = "DrawRoute" onPress = {() => drawRoute()}/> 
+        {/* <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
+        <Button title = "DrawRoute" onPress = {() => drawRoute()}/>  */}
         {/* <Button title = "Animar" onPress = {() => driverMarker.current.animateMarkerToCoordinate({color: "#00FF00", latitude: 24.821387698025184, longitude: -107.45261002331972},2000)}/>  */}
-        <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/> 
+        {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
+
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
@@ -456,6 +453,11 @@ export const MapasDriver = ({navigation}) => {
             onPress={() => navigation.openDrawer()}
             />
         </View>    
+
+        <View style = {styles.cardContainer}>
+          <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
+        </View>
+
         <View style={styles.switchContainer}>
             <Text style={styles.text}>En linea</Text>
             <Switch
@@ -471,11 +473,6 @@ export const MapasDriver = ({navigation}) => {
                 value={isonline}
             />
         </View> 
-        <DriverLocationUpdated 
-        setter={setDriverLocation} 
-        driverId={usuario.id} 
-        driverMarker= {driverMarker} 
-        duration={1000} />
         </>
     )
 }
@@ -495,6 +492,15 @@ const styles = StyleSheet.create({
         position: "absolute",
         height: "10%",
         width: "20%"
+    },
+    cardContainer: {
+      flex: 1,
+      marginTop: 450,
+      justifyContent: "flex-end",
+      alignItems: "flex-end",
+      position: "absolute",
+      height: "33%",
+      width: "98%"
     },
     switchContainer:{
         flex: 1,
