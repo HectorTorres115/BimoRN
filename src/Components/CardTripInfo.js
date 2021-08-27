@@ -8,7 +8,7 @@ export const CardTripInfo = (props) => {
         const shortAddressOri = props.trip.originVincity.split(',')
         const shortAddressDes = props.trip.destinationVincity.split(',')
         setOrigin(shortAddressOri[0])
-        setDestination(shortAddressDes[0])
+        setDestination(shortAddressDes[1])
     }, [])
 
     const [origin, setOrigin] = useState('');
