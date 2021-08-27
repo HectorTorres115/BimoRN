@@ -335,7 +335,7 @@ export const Mapas = ({navigation}) => {
 
     function EvaluateCityDriver() {
       if(driverState !== null){
-        console.log(driverState)
+        // console.log(driverState)
         return (
           <DriverLocationUpdated 
           setter={setDriverLocation} 

@@ -226,7 +226,7 @@ export const MapasDriver = ({navigation}) => {
     const [trip, setTrip] = useState(null);
     const [indexdriver, setIndexDriver] = useState(null);
     const [indexdestination, setIndexDestination] = useState(null);
-    const [indexpassenger, setIndexPassenger] = useState(null);
+    const [indexorigin, setIndexOrigin] = useState(null);
     const [city, setCity] = useState(usuario.city);
 
     //Server requests
@@ -309,6 +309,12 @@ export const MapasDriver = ({navigation}) => {
           setCity(UpdateCity)
           setIndexDriver(UpdateCity.indexH3)
           setDriverLocation(ReduxLocationStore.getState())
+          if(indexdriver === indexorigin){
+                  console.log('Esperando a pasajero')
+          }
+          else {
+                  console.log('Ya voooooy')
+          }
           // driverMarker.current.animateMarkerToCoordinate({color: "#00FF00", latitude: 24.821387698025184, longitude: -107.45261002331972},2000)
       },
       onError:(error)=>{
@@ -320,8 +326,8 @@ export const MapasDriver = ({navigation}) => {
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
         onCompleted:({UpdateTrip}) => {
-            console.log(UpdateTrip)
-            console.log(decodePolyline(UpdateTrip.tripPolyline))
+            // console.log(UpdateTrip)
+            // console.log(decodePolyline(UpdateTrip.tripPolyline))
             setTrip(UpdateTrip)
             // setListenerChat(true)
             setPolyline(decodePolyline(UpdateTrip.tripPolyline))
@@ -329,10 +335,13 @@ export const MapasDriver = ({navigation}) => {
             animateCameraToPolylineCenter(decodePolyline(UpdateTrip.tripPolyline))
               
             get_hexagons({variables:{ lat:UpdateTrip.originLocationLat,lng: UpdateTrip.originLocationLng,res: 11,jumps: 0}}).then(({data})=>{
-
-              setIndexPassenger(data.data.GetHexagons[0].index)
+              
+              setIndexOrigin(data.GetHexagons[0].index)
+              setHexagons(data.GetHexagons)
         
-            });
+            }).catch(error=>  console.log(error))
+
+        
         },
         onError:(error) => {
           console.log(error);
