@@ -223,7 +223,7 @@ export const MapasDriver = ({navigation}) => {
     const [route, setRoute] = useState({});
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
-    const [trip, setTrip] = useState(null);
+    const [trip, setTrip] = useState({});
     const [indexdriver, setIndexDriver] = useState(null);
     const [indexdestination, setIndexDestination] = useState(null);
     const [indexorigin, setIndexOrigin] = useState(null);
@@ -290,6 +290,23 @@ export const MapasDriver = ({navigation}) => {
         }
     })
 
+    const [update_trip_status] = useMutation(ACCEPT_TRIP,{
+      fetchPolicy: "no-cache",
+      variables:{
+        id: trip.id,
+        tripStatus: 4,
+        driverId: usuario.id
+      }
+      ,
+      onCompleted:({UpdateTrip}) => {
+          console.log(UpdateTrip)
+    
+      },
+      onError:(error) => {
+        console.log(error);
+      }
+  })
+
     const [get_hexagons] = useMutation(GET_HEXAGONS,{
         fetchPolicy: "no-cache",
         // onCompleted:({GetHexagons})=>{
@@ -311,6 +328,7 @@ export const MapasDriver = ({navigation}) => {
           setDriverLocation(ReduxLocationStore.getState())
           if(indexdriver === indexorigin){
                   console.log('Esperando a pasajero')
+                  update_trip_status()
           }
           else {
                   console.log('Ya voooooy')
@@ -471,7 +489,7 @@ export const MapasDriver = ({navigation}) => {
 
         {/* <EvaluateTripSubscription/> */}
         
-        <EvaluateChatButton/>
+        {/* <EvaluateChatButton/> */}
 
         {/* <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
         <Button title = "DrawRoute" onPress = {() => drawRoute()}/>  */}
