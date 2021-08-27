@@ -93,6 +93,9 @@ function App() {
     maximumAge: 0
   }
 
+  const {address, setAddress} = useAddress();
+  const {usuario} = useUsuario();
+
   Geolocation.watchPosition(
     // ({coords}) => {setAddress(coords)},
     ({coords}) => {
@@ -107,6 +110,10 @@ function App() {
       maximumAge: 0}
   )
 
+<<<<<<< HEAD
+=======
+  
+>>>>>>> b9936d124abc08ca2bd24197d55beb8406705eee
   // console.log(usuario);
   if(usuario == null){
     return (

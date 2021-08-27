@@ -209,6 +209,8 @@ export const Mapas = ({navigation}) => {
     const [get_address] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
         onCompleted:({GetAddress})=>{
+          console.log(GetAddress)
+          console.log(ReduxLocationStore.getState())
             const shortAddress = GetAddress.split(',')
             setOrigin({name: shortAddress[0]})
         },
@@ -220,6 +222,7 @@ export const Mapas = ({navigation}) => {
     const [create_trip] = useMutation(CREATE_TRIP, {
         fetchPolicy: "no-cache",
         onCompleted:(data)=>{
+
           console.log(data.CreateTrip.tripPolyline)
           setCurrentTrip(data.CreateTrip)
           setPolyline(decodePolyline(data.CreateTrip.tripPolyline))
