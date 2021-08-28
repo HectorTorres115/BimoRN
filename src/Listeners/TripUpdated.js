@@ -83,7 +83,7 @@ export class TripUpdated extends Component {
           <Subscription subscription = {SUSCRIPTION_TRIP}
           variables= {{tripId: this.props.trip.id}}
           onSubscriptionData = {(data) => {
-              console.log(data.subscriptionData.data)
+              // console.log(data.subscriptionData.data)
               if(data.subscriptionData.data.TripUpdated.tripStatus.id === 4){
                 Alert.alert("El conductor ha llegado")
               } else {

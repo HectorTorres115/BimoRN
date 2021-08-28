@@ -1,41 +1,19 @@
 import React, {useState, useRef, useEffect } from 'react'
-import { Button, StyleSheet, View, Alert, Switch, Text } from 'react-native'
+import { Button, StyleSheet, View, Switch, Text } from 'react-native'
 import gql from 'graphql-tag'
-import MapView, {Marker, Polyline} from 'react-native-maps'
-import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
+import MapView, {Marker, Polygon, Polyline} from 'react-native-maps'
 import { useUsuario } from '../Context/UserContext'
 import { useMutation, useQuery } from 'react-apollo'
 import { FAB } from 'react-native-paper';
-import { useAddress } from '../Context/AddressContext'
 import decodePolyline from '../Functions/DecodePolyline'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
-import ReduxDriverStore from '../Redux/Redux-driver-store'
-import { set_driver } from '../Redux/Redux-actions'
 
 const QUERY_DRIVERS = gql`
 query{
     GetCities{
       id,lat, lng, indexH3, driver{name, email}
-    }
-  }
-`
-const DRAW_ROUTE = gql`
-mutation get_route_info($object: JSON){
-    GetRouteInfo(object: $object) {
-      startAdress
-      endAdress
-      polyline
-      distance
-      time
-    }
-  }
-`
-const CURRENT_ADDRESS = gql`
-mutation get_current_info($object: JSON){
-    GetRouteInfo(object: $object) {
-      startAdress
     }
   }
 `
@@ -105,6 +83,7 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
     id
     driverId
     passengerId
+    tripStatusId
     tripStatus {
       id
       tripStatus
@@ -156,7 +135,6 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
 }
 
 `
-
 const UPDATE_DRIVER_LOCATION = gql`
 mutation update_driver_location($citiId: Int!, $lat: Float!,$lng: Float! ){
     UpdateCity(input:{
@@ -181,12 +159,9 @@ mutation update_driver_location($citiId: Int!, $lat: Float!,$lng: Float! ){
    }
 `
 
-
 export const MapasDriver = ({navigation}) => {
-
     //Lifecycle methods
     useEffect(() => {
-      console.log('Component did mount');
       handleAndroidBackButton(() => backAction(setUser))
       const interval = setInterval(() => {
         // animateDriverMarker() 
@@ -201,82 +176,34 @@ export const MapasDriver = ({navigation}) => {
     }, [])
 
     //Referencias
-    const globalMarker = useRef(React.Component);
     const globalMapView = useRef(React.Component);
     const driverMarker = useRef(React.Component);
     //Global states from react context
-    const [coords, setCoords] = useState(ReduxLocationStore.getState());
     const {usuario, setUser} = useUsuario();
-    const {address, setAddress} = useAddress()
-    
     //State
-    // const [coords, setCoords] = useState(null);
-    const [flag, setFlag] = useState(true);
-    const [isonline, setIsOnline] = useState(false);
-    const [location, setLocation] = useState([]);
-    const [search, setSearch] = useState({});
-    const [origin, setOrigin] = useState({});
-    const [destination, setDestination] = useState({});
+    const [isonline, setIsOnline] = useState(usuario.isOnline);
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [drivers, setDrivers] = useState([]);
     const [driverLocation, setDriverLocation] = useState(ReduxLocationStore.getState());
-    const [route, setRoute] = useState({});
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
     const [trip, setTrip] = useState({});
     const [indexdriver, setIndexDriver] = useState(null);
-    const [indexdestination, setIndexDestination] = useState(null);
     const [indexorigin, setIndexOrigin] = useState(null);
     const [city, setCity] = useState(usuario.city);
-
-    //Server requests
+    //Marcadores
+    const [originCoordinates, setOriginCoordinates] = useState(null);
+    const [destinantionCoordinates, setDestinationCoordinates] = useState(null);
+     //Server requests
     useQuery(QUERY_DRIVERS, {
-        partialRefetch: true,
-        // pollInterval: 4000,
         fetchPolicy:'no-cache',
         onCompleted:({GetCities}) => {
-            console.log('Polled');
             let arrayDrivers = GetCities.filter(city=> city.id !== usuario.city.id)
-            console.log(usuario.city.id);
-            console.log(arrayDrivers);
             setDrivers(arrayDrivers)
           },
           onError:(error) => {
             console.log(error);
           }
-    })
-
-    const [get_route_info] = useMutation(DRAW_ROUTE,{
-        fetchPolicy: "no-cache",
-        onCompleted:({GetRouteInfo})=>{
-        //console.log(globalMapView);
-        setRoute(GetRouteInfo)
-        setPolyline(decodePolyline(GetRouteInfo.polyline))
-        globalMapView.current.animateCamera({
-            center:{coords},
-            zoom:18,
-            pitch: 20,
-            heading: coords.heading
-        },
-        {
-            duration:1000
-        })
-
-        },
-        onError:(error)=>{
-          console.log(error);
-        }
-    })
-
-    const [get_current_info] = useMutation(CURRENT_ADDRESS,{
-        fetchPolicy: "no-cache",
-        onCompleted:({GetRouteInfo})=>{
-            const shortAddress = GetRouteInfo.startAdress.split(',')
-            setOrigin({name: shortAddress[0]})
-        },
-        onError:(error)=>{
-          console.log(error);
-        }
     })
 
     const [update_driver_status] = useMutation(UPDATE_STATUS,{
@@ -290,30 +217,11 @@ export const MapasDriver = ({navigation}) => {
         }
     })
 
-    const [update_trip_status] = useMutation(ACCEPT_TRIP,{
-      fetchPolicy: "no-cache",
-      variables:{
-        id: trip.id,
-        tripStatus: 4,
-        driverId: usuario.id
-      }
-      ,
-      onCompleted:({UpdateTrip}) => {
-          console.log(UpdateTrip)
-    
-      },
-      onError:(error) => {
-        console.log(error);
-      }
-  })
-
     const [get_hexagons] = useMutation(GET_HEXAGONS,{
         fetchPolicy: "no-cache",
-        // onCompleted:({GetHexagons})=>{
-
-        //   console.log('Jalo GetHexagons')
-          
-        // },
+        onCompleted:({GetHexagons})=>{
+          console.log('GetHexagons is working')
+        },
         onError:(error)=>{
           console.log(error);
         }
@@ -322,18 +230,17 @@ export const MapasDriver = ({navigation}) => {
     const [update_driver_location] = useMutation(UPDATE_DRIVER_LOCATION,{
       fetchPolicy: "no-cache",
       onCompleted:({UpdateCity})=>{
-          // console.log(UpdateCity)
           setCity(UpdateCity)
           setIndexDriver(UpdateCity.indexH3)
           setDriverLocation(ReduxLocationStore.getState())
-          if(indexdriver === indexorigin){
-                  console.log('Esperando a pasajero')
-                  update_trip_status()
+          if(indexdriver == indexorigin && trip.tripStatusId !== 4){
+            // console.log('Esperando a pasajero (this gonna be printed just once)')
+            update_trip()
+          } else if (indexdriver == indexorigin && trip.tripStatusId == 4) {
+            console.log('Llegue')
+          } else {
+            console.log('Ya voooy')
           }
-          else {
-                  console.log('Ya voooooy')
-          }
-          // driverMarker.current.animateMarkerToCoordinate({color: "#00FF00", latitude: 24.821387698025184, longitude: -107.45261002331972},2000)
       },
       onError:(error)=>{
         console.log(error);
@@ -344,37 +251,43 @@ export const MapasDriver = ({navigation}) => {
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
         onCompleted:({UpdateTrip}) => {
-            // console.log(UpdateTrip)
-            // console.log(decodePolyline(UpdateTrip.tripPolyline))
             setTrip(UpdateTrip)
-            // setListenerChat(true)
+
             setPolyline(decodePolyline(UpdateTrip.tripPolyline))
-            // setPolyline(decodePolyline(GetRouteInfo.polyline))
+
+            setOriginCoordinates({latitude: UpdateTrip.originLocationLat, longitude: UpdateTrip.originLocationLng})
+            setDestinationCoordinates({latitude: UpdateTrip.destinationLocationLat, longitude: UpdateTrip.destinationLocationLng})
+
             animateCameraToPolylineCenter(decodePolyline(UpdateTrip.tripPolyline))
-              
+
             get_hexagons({variables:{ lat:UpdateTrip.originLocationLat,lng: UpdateTrip.originLocationLng,res: 11,jumps: 0}}).then(({data})=>{
-              
               setIndexOrigin(data.GetHexagons[0].index)
               setHexagons(data.GetHexagons)
-        
-            }).catch(error=>  console.log(error))
+            })
 
-        
+            // console.log(UpdateTrip.tripStatusId)
         },
         onError:(error) => {
           console.log(error);
         }
     })
-    //Functions for components callbacks
-    async function drawMarkers(object){
-        if(location.length < 1){
-            setLocation([...location, {color: "#00FF00", ...object}])
-        } else if (location.length == 1) {
-            setLocation([...location, {color: "#0000FF", ...object}])
-        } else {
-            setLocation([]);
-        }
-    }
+
+    const [update_trip] = useMutation(ACCEPT_TRIP,{
+      fetchPolicy: "no-cache",
+      variables: {
+        id: trip.id,
+        driverId: usuario.id,
+        tripStatus: 4,
+
+      },
+      onCompleted:({UpdateTrip}) => {
+        setTrip(UpdateTrip)
+        console.log('TripStatus changed (this gotta be printed just once)');
+      },
+      onError:(error) => {
+        console.log(error);
+      }
+  })
 
     async function animateCameraToPolylineCenter(polyline){
       const polylineCenterCoords = polyline[parseInt(polyline.length / 2)];
@@ -391,60 +304,6 @@ export const MapasDriver = ({navigation}) => {
       }, {duration: 1000}) 
     }
 
-    async function drawRoute(){
-        // if(origin == null || destination == null){
-        //     Alert.alert("No se ha asignado localizacion")
-        // } else{
-        //     get_route_info({variables:{
-        //         "object":{  
-        //           "start": coords, 
-        //           "end": destination.placeId
-        //         }
-        //       }
-
-        //     });
-        // }
-        console.log(polyline)
-    }
-    async function drawHexagons(){
-      
-        get_hexagons({variables:{ lat:ReduxLocationStore.getState().latitude,lng: ReduxLocationStore.getState().longitude,res: 11,jumps: 0}}).then((data)=>{
-
-          // console.log(data.data.GetHexagons)
-          setHexagons(data.data.GetHexagons)
-
-        })
-
-    }
-    
-    async function getCurrentDirection() {
-        if(address !== null){
-            get_current_info({variables:{
-                "object":{  
-                    "start": address, 
-                    "end": region
-                    }
-                }
-            })
-            // const address = await globalMapView.current.addressForCoordinate(coords.latitude,coords.longitude)
-            // console.log(coords)
-            return address
-        } else {
-            setOrigin({name:"Ubicacion Actual"})
-        }
-
-    }
-    //Evaluate methods for custom renders
-    function EvaluateTripSubscription() {
-        if(flag){
-            return (
-                <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
-            )   
-        } else {
-            return null
-        }
-    }
-
     function EvaluateChatButton() {
       if(trip !== null){
         return <Button title = 'Chat' onPress = {() => navigation.navigate('Chat', {trip: trip})}/> 
@@ -453,48 +312,51 @@ export const MapasDriver = ({navigation}) => {
       }
     }
 
-    async function updatePosition(){
-      update_driver_location({variables:{
-          citiId: usuario.city.id,
-          lat: ReduxLocationStore.getState().latitude,
-          lng: ReduxLocationStore.getState().longitude
-        }
-      });
-  }
+    function EvaluateMarkers() {
+      if(originCoordinates !== null && destinantionCoordinates !== null){
+        return (
+          <>
+          <Marker 
+          color = 'blue'
+          key = {Math.floor(1000 + Math.random() * 9000)} 
+          coordinate = {originCoordinates} />
+          <Marker 
+          color = 'blue'
+          key = {Math.floor(1000 + Math.random() * 9000)} 
+          coordinate = {destinantionCoordinates} />
+          </>
+        )
+      } else {return null}
+    }
 
     return(
         <>
         <MapView
         ref = {globalMapView}
-        onMapReady = { () => getCurrentDirection() }
         showsUserLocation = {true}
         showsMyLocationButton = {false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
         initialRegion = {region}>
-            {location.map(coord => {
-                return <Marker key = {coord.lat} ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
-            })} 
+
             {drivers.map(coord => {
                 return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
+
             {hexagons.map(hexagon => {
-                return <Polyline key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
+                return <Polygon fillColor = {'rgba(22, 161, 220, 0.5)'} key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} />
             })}
+            {/* Marcador del driver */}
             <Marker key = {Math.floor(1000 + Math.random() * 9000)} 
             ref={driverMarker} 
-            coordinate = {driverLocation} 
+            coordinate = {driverLocation}    
             icon={require('../../assets/images/map-taxi3.png')}/>
+
+            <EvaluateMarkers/>
+
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
 
-        {/* <EvaluateTripSubscription/> */}
-        
         {/* <EvaluateChatButton/> */}
-
-        {/* <Button title = "Draw Hexagons" onPress = {() => drawHexagons()}/> 
-        <Button title = "DrawRoute" onPress = {() => drawRoute()}/>  */}
-        {/* <Button title = "Animar" onPress = {() => driverMarker.current.animateMarkerToCoordinate({color: "#00FF00", latitude: 24.821387698025184, longitude: -107.45261002331972},2000)}/>  */}
-        {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
 
         <View style={styles.fabContainer}>
             <FAB
@@ -511,15 +373,14 @@ export const MapasDriver = ({navigation}) => {
         <View style={styles.switchContainer}>
             <Text style={styles.text}>En linea</Text>
             <Switch
-                trackColor={{ false: "#767577", true: "#81b0ff" }}
-                thumbColor={isonline ? "#f5dd4b" : "#f4f3f4"}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={(status) => {
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={isonline ? "#f5dd4b" : "#f4f3f4"}
+            ios_backgroundColor="#3e3e3e"
+              onValueChange={(status) => {
                     setIsOnline(status)
                     update_driver_status({variables:{id:usuario.id,status}})
-                    // console.log(status)
                     }
-                }
+              }
                 value={isonline}
             />
         </View> 

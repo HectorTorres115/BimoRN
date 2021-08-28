@@ -64,7 +64,7 @@ export class TripCreated extends Component {
           <ApolloProvider client = {subClient}>
           <Subscription subscription = {SUSCRIPTION_TRIP}
           onSubscriptionData = {(data) => {
-              console.log(data.subscriptionData.data.TripCreated)
+              // console.log(data.subscriptionData.data.TripCreated)
           }}>
           {({loading, error, data}) => {
               // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>

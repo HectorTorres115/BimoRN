@@ -22,6 +22,7 @@ mutation login_driver($email: String!, $password:String!, $deviceToken: String!)
     }) {
       id
       email
+      isOnline
       # username
       deviceToken
       genre
