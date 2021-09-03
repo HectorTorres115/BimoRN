@@ -186,11 +186,11 @@ export const MapasDriver = ({navigation}) => {
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [drivers, setDrivers] = useState([]);
     const [driverLocation, setDriverLocation] = useState(ReduxLocationStore.getState());
-    const [polyline,setPolyline] = useState([]);
-    const [hexagons,setHexagons] = useState([]);
-    const [hexagonsdestination,setHexagonsDestination] = useState([]);
+    const [polyline, setPolyline] = useState([]);
+    const [hexagons, setHexagons] = useState([]);
+    const [hexagonsdestination, setHexagonsDestination] = useState([]);
     const [trip, setTrip] = useState({});
-    const [indexdriver, setIndexDriver] = useState(null);
+    const [indexdriver, setIndexDriver] = useState(usuario.city.indexH3);
     const [indexorigin, setIndexOrigin] = useState(null);
     const [indexdestination, setIndexDestination] = useState(null);
     const [city, setCity] = useState(usuario.city);
