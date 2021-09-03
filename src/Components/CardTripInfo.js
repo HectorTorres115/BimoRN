@@ -2,6 +2,7 @@ import React , {useEffect, useState} from 'react'
 import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
 import { Card, Title, Paragraph } from 'react-native-paper'
 import MotionSlider from 'react-native-motion-slider';
+import AsyncStorage from '@react-native-community/async-storage'
 
 export const CardTripInfo = (props) => {
     useEffect(() => {
@@ -10,6 +11,13 @@ export const CardTripInfo = (props) => {
         const shortAddressDes = props.trip.destinationVincity.split(',')
         setOrigin(shortAddressOri[0])
         setDestination(shortAddressDes[1])
+
+        AsyncStorage.getItem('@trip_key').then((data)=>{
+            const json = JSON.parse(data)
+
+            setTrip(json.trip)
+    
+          }).catch((error)=>{console.log(error)})
     }, [])
 
     // useEffect(() => {
@@ -20,6 +28,7 @@ export const CardTripInfo = (props) => {
     const [destination, setDestination] = useState('');
     const [tripAccepted, setTripAccepted] = useState(false);
     const [statusid, setStatusId] = useState(props.trip.tripStatusId);
+    const [trip, setTrip] = useState(null);
 
     async function aceptarViaje() {
         setTripAccepted(true)
@@ -30,8 +39,20 @@ export const CardTripInfo = (props) => {
         }})  
     }
 
+    async function deleteStorage(){
+        try {
+          await AsyncStorage.removeItem('@trip_key')
+          setTrip(null)
+            props.setsetter({trip:null})
+        } catch (error) {
+
+          console.log(error)        
+        }
+        
+      }
+      
     function EvaluateTrip() {
-        if(tripAccepted){
+        if(trip !== null && trip.tripStatusId !== 5){
             return null
         } else {
             return (
@@ -75,6 +96,7 @@ export const CardTripInfo = (props) => {
             <Text style = {styles.text}>Distancia: {props.trip.distance}</Text>
             <Text style = {styles.text}>Precio: {props.trip.distance * 10}</Text> */}
             <EvaluateTrip/>
+            <Button style = {styles.button} title = 'Cancelar Viaje' color = 'red' onPress = {() => deleteStorage()}/>
             {props.children}
         </View>
     )

@@ -10,6 +10,7 @@ import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
 import MotionSlider from 'react-native-motion-slider';
+import AsyncStorage from '@react-native-community/async-storage'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -173,6 +174,14 @@ export const MapasDriver = ({navigation}) => {
         }
        })
       }, 4000);
+
+      AsyncStorage.getItem('@trip_key').then((data)=>{
+        const json = JSON.parse(data)
+        console.log(json.polylineTrip)
+        // setPolyline(json.polylineTrip)
+
+      }).catch((error)=>{console.log(error)})
+        
       return () => clearInterval(interval);
     }, [])
 
@@ -266,7 +275,7 @@ export const MapasDriver = ({navigation}) => {
 
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
-        onCompleted:({UpdateTrip}) => {
+        onCompleted:async ({UpdateTrip}) => {
             setTrip(UpdateTrip)
 
             setPolyline(decodePolyline(UpdateTrip.tripPolyline))
@@ -276,17 +285,31 @@ export const MapasDriver = ({navigation}) => {
 
             animateCameraToPolylineCenter(decodePolyline(UpdateTrip.tripPolyline))
 
-            get_hexagons({variables:{ lat:UpdateTrip.originLocationLat,lng: UpdateTrip.originLocationLng,res: 11,jumps: 0}}).then(({data})=>{
+            get_hexagons({variables:{ lat:UpdateTrip.originLocationLat,lng: UpdateTrip.originLocationLng,res: 10,jumps: 0}}).then(({data})=>{
               setIndexOrigin(data.GetHexagons[0].index)
               setHexagons(data.GetHexagons)
             })
 
-            get_hexagons({variables:{ lat:UpdateTrip.destinationLocationLat,lng: UpdateTrip.destinationLocationLng,res: 11,jumps: 0}}).then(({data})=>{
+            get_hexagons({variables:{ lat:UpdateTrip.destinationLocationLat,lng: UpdateTrip.destinationLocationLng,res: 10,jumps: 0}}).then(({data})=>{
 
               setIndexDestination(data.GetHexagons[0].index)
               setHexagonsDestination(data.GetHexagons)
             })
 
+            AsyncStorage.setItem('@trip_key', JSON.stringify({
+                trip:UpdateTrip,
+                indexdriver: indexdriver,
+                indexorigin: indexorigin,
+                indexdestination: indexdestination,
+                polylineTrip:decodePolyline(UpdateTrip.tripPolyline)
+              })).then(()=>{
+
+                  console.log('guardo estados en storage')
+
+              }).catch((error)=>{
+                console.log(error)
+              })
+    
             // console.log(UpdateTrip.tripStatusId)
         },
         onError:(error) => {
@@ -383,6 +406,28 @@ export const MapasDriver = ({navigation}) => {
           return( <Text style = {styles.textTrip}>Aun no puedes terminar el viaje</Text>)
         }
       }
+
+      async function saveOnDevice(){
+        try {
+          // await AsyncStorage.setItem('@trip_key', JSON.stringify({
+          //   trip:trip,
+          //   indexdriver: indexdriver,
+          //   indexorigin: indexorigin,
+          //   indexdestination: indexdestination
+          // }))
+          console.log(trip)
+          console.log(indexdriver)
+          console.log(indexorigin)
+          console.log(indexdestination)
+          console.log('trip setter')
+        } catch (error) {
+          
+            console.log(error)
+        }
+      }
+
+      
+      
 
     return(
         <>
