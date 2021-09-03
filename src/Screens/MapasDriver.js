@@ -351,7 +351,7 @@ export const MapasDriver = ({navigation}) => {
             coordinate = {driverLocation}    
             icon={require('../../assets/images/map-taxi3.png')}/>
 
-            <EvaluateMarkers/>
+            {/* <EvaluateMarkers/> */}
 
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>

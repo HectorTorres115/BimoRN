@@ -74,9 +74,6 @@ export const TripInfo = ({driver}) =>{
 }
 
 export class TripUpdated extends Component {
-  componentDidMount(){
-    console.log(this.props.trip.id)
-  }
   render() {
       return (
           <ApolloProvider client = {subClient}>

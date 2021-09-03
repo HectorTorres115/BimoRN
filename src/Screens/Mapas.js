@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect, useLayoutEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, Text } from 'react-native'
+import { Button, StyleSheet, View, TextInput, Alert, ScrollView } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
 import MapView, {Marker, Polyline} from 'react-native-maps'
@@ -15,7 +15,8 @@ import ReduxLocationStore from '../Redux/Redux-location-store';
 import { set_location } from '../Redux/Redux-actions';
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
-import DriverPanel from '../Components/DriverPanel'
+// import DriverPanel from '../Components/DriverPanel'
+import { CardPassenger } from '../Components/CardPassenger'
 
 
 const QUERY_DRIVERS = gql`
@@ -196,7 +197,7 @@ export const Mapas = ({navigation}) => {
     const [get_route_info] = useMutation(DRAW_ROUTE,{
         fetchPolicy: "no-cache",
         onCompleted:({GetRouteInfo})=>{
-        console.log(GetRouteInfo)
+        // console.log(GetRouteInfo)
         setRoute(GetRouteInfo)
         setPolyline(decodePolyline(GetRouteInfo.polyline))
         animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
@@ -374,8 +375,30 @@ export const Mapas = ({navigation}) => {
         <EvaluateStartChat />
 
         {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
-        <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
-        <Button title = "Crear Viaje" onPress = {() => createTrip()}/> 
+        {/* <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
+        <Button title = "Crear Viaje" onPress = {() => createTrip()}/>  */}
+        
+        <View style = {styles.cardContainer}>
+          <CardPassenger>
+            {/* <View style={styles.inputsContainer}> */}
+              <TextInput 
+              placeholder="Origen" 
+              placeholderTextColor="gray" 
+              value= {origin.name}
+              style={styles.input} 
+              onPressIn= {()=> {navigation.navigate("FindAddress", {setter:setOrigin, setter_search: setSearch, search, drawRoute: drawRoute})}}/>
+              <TextInput 
+              placeholder="Destino" 
+              placeholderTextColor="gray" 
+              value= {destination.name}
+              style={styles.input}
+              onPressIn= {()=> navigation.navigate("FindAddress", {setter:setDestination, setter_search: setSearch, search, drawRoute: drawRoute})} /> 
+              <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
+              <Button title = "Crear Viaje" onPress = {() => createTrip()}/> 
+            {/* </View>   */}
+          </CardPassenger>
+        </View>
+
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
@@ -383,7 +406,8 @@ export const Mapas = ({navigation}) => {
             onPress={() => navigation.navigate('MapCamera')}
             />
         </View>    
-        <View style={styles.inputsContainer}>
+
+        {/* <View style={styles.inputsContainer}>
             <TextInput 
             placeholder="Origen" 
             placeholderTextColor="gray" 
@@ -396,7 +420,7 @@ export const Mapas = ({navigation}) => {
             value= {destination.name}
             style={styles.input}
             onPressIn= {()=> navigation.navigate("FindAddress", {setter:setDestination, setter_search: setSearch, search, drawRoute: drawRoute})} /> 
-        </View>  
+        </View>   */}
 
         <EvaluateCityDriver/>
 
@@ -441,13 +465,21 @@ const styles = StyleSheet.create({
         borderRadius:5,
         borderWidth:2,
         borderColor:"gray",
-        fontSize:20,
+        fontSize: 15,
         color: "black",
-        width: '90%',
-        borderRadius:25,
+        width: '95%',
+        // borderRadius:25,
         margin: 5,
-        height: "50%",
+        height: "30%",
         paddingLeft: 10
-      }
+      },
+      cardContainer: {
+        marginBottom: 10,
+        alignSelf: 'center',
+        alignContent: 'center',
+        position: "relative",
+        height: "25%",
+        width: "98%"
+      },
   })
   
