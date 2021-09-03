@@ -11,12 +11,13 @@ import { Notification } from './src/Functions/ShowNotification'
 messaging().setBackgroundMessageHandler(async payload=>{
     console.log('aplicacion cerrada')
     console.log(payload)
+    Notification(payload.data.title,payload.data.body)
 })
 
 messaging().onMessage(async payload=>{
     console.log('aplicacion abierta')
     console.log(payload)
-    Notification(payload.notification.title,payload.notification.body)
+    Notification(payload.data.title,payload.data.body)
 })
 
 AppRegistry.registerComponent(appName, () => App);

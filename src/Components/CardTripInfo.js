@@ -1,6 +1,7 @@
 import React , {useEffect, useState} from 'react'
-import { StyleSheet, Text, View, Button } from 'react-native'
+import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
 import { Card, Title, Paragraph } from 'react-native-paper'
+import MotionSlider from 'react-native-motion-slider';
 
 export const CardTripInfo = (props) => {
     useEffect(() => {
@@ -11,9 +12,14 @@ export const CardTripInfo = (props) => {
         setDestination(shortAddressDes[1])
     }, [])
 
+    // useEffect(() => {
+    //      console.log(props.trip.tripStatusId)
+    // })
+
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
     const [tripAccepted, setTripAccepted] = useState(false);
+    const [statusid, setStatusId] = useState(props.trip.tripStatusId);
 
     async function aceptarViaje() {
         setTripAccepted(true)
@@ -26,7 +32,7 @@ export const CardTripInfo = (props) => {
 
     function EvaluateTrip() {
         if(tripAccepted){
-            return <Text style = {styles.textTrip}>Viaje aceptado.</Text>
+            return null
         } else {
             return (
             <View style = {styles.buttonContainer}>
@@ -37,14 +43,39 @@ export const CardTripInfo = (props) => {
         }
     }
 
+    // function EvaluateSlider() {
+    //     console.log('card')
+    //     console.log(props.trip.tripStatusId)
+    //     if(props.trip.tripStatusId == 2){
+    //         return <MotionSlider
+    //         title={'Choose the desired temperature'} 
+    //         min={0} 
+    //         max={40}
+    //         value={0} 
+    //         decimalPlaces={10}
+    //         units={'º'}
+    //         backgroundColor={['rgb(3, 169, 244)', 'rgb(255, 152, 0)', 'rgb(255, 87, 34)']}
+    //         onValueChanged={(value) => console.log(value)}
+    //         onPressIn={() => console.log('Pressed in')}
+    //         onPressOut={() => console.log('Pressed out')}
+    //         onDrag={() => console.log('Dragging')}
+    //     />
+    //     } else {
+    //         return (
+    //             <Text style = {styles.textTrip}>Aun no puedes terminar el viaje</Text>
+    //         )
+    //     }
+    // }
+
     return (
         <View style = {styles.card}>
             <Text style = {styles.text}>Pasajero: {props.trip.passenger.name}</Text>
             <Text style = {styles.text}>Origen: {origin}</Text>
-            <Text style = {styles.text}>Destino: {destination}</Text>
+            {/* <Text style = {styles.text}>Destino: {destination}</Text>
             <Text style = {styles.text}>Distancia: {props.trip.distance}</Text>
-            <Text style = {styles.text}>Precio: {props.trip.distance * 10}</Text>
+            <Text style = {styles.text}>Precio: {props.trip.distance * 10}</Text> */}
             <EvaluateTrip/>
+            {props.children}
         </View>
     )
 }

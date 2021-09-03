@@ -12,6 +12,7 @@ subscription trip_created{
     driverId
     chatId
     passengerId
+    tripStatusId
     tripStatus {
       id
       tripStatus
@@ -74,7 +75,9 @@ export class TripCreated extends Component {
                   <CardTripInfo 
                   trip = {data.TripCreated} 
                   accept_trip = {this.props.acceptTrip} 
-                  userId = {this.props.userId}/>
+                  userId = {this.props.userId}>
+                    {this.props.children}
+                  </CardTripInfo>
               )
           }}
           </Subscription>

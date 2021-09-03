@@ -23,9 +23,9 @@ export const Notification = (title, message) => {
         }
     });
 
-    PushNotification.localNotification({
-        channelId: "bimo-id",
-        title,
-        message
-    })
+    // PushNotification.localNotification({
+    //     channelId: "bimo-id",
+    //     title,
+    //     message
+    // })
 }

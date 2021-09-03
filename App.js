@@ -70,15 +70,15 @@ const DriverStackScreen = ()=> (
 )
 
 export default ()=> (
-  <StripeProvider publishableKey={stripeUrl}>
   <PaperProvider>
+  <StripeProvider publishableKey={stripeUrl}>
   <UsuarioProvider>
   <AddressProvider>
     <App></App>
   </AddressProvider>
   </UsuarioProvider>
-  </PaperProvider>
   </StripeProvider>
+  </PaperProvider>
 )
 
 function App() {

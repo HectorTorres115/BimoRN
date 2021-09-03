@@ -9,6 +9,7 @@ import decodePolyline from '../Functions/DecodePolyline'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
+import MotionSlider from 'react-native-motion-slider';
 
 const QUERY_DRIVERS = gql`
 query{
@@ -187,13 +188,16 @@ export const MapasDriver = ({navigation}) => {
     const [driverLocation, setDriverLocation] = useState(ReduxLocationStore.getState());
     const [polyline,setPolyline] = useState([]);
     const [hexagons,setHexagons] = useState([]);
+    const [hexagonsdestination,setHexagonsDestination] = useState([]);
     const [trip, setTrip] = useState({});
     const [indexdriver, setIndexDriver] = useState(null);
     const [indexorigin, setIndexOrigin] = useState(null);
+    const [indexdestination, setIndexDestination] = useState(null);
     const [city, setCity] = useState(usuario.city);
     //Marcadores
     const [originCoordinates, setOriginCoordinates] = useState(null);
     const [destinantionCoordinates, setDestinationCoordinates] = useState(null);
+    const [slidervalue, setSliderValue] = useState(0);
      //Server requests
     useQuery(QUERY_DRIVERS, {
         fetchPolicy:'no-cache',
@@ -233,13 +237,25 @@ export const MapasDriver = ({navigation}) => {
           setCity(UpdateCity)
           setIndexDriver(UpdateCity.indexH3)
           setDriverLocation(ReduxLocationStore.getState())
-          if(indexdriver == indexorigin && trip.tripStatusId !== 4){
-            // console.log('Esperando a pasajero (this gonna be printed just once)')
-            update_trip()
-          } else if (indexdriver == indexorigin && trip.tripStatusId == 4) {
-            console.log('Llegue')
-          } else {
-            console.log('Ya voooy')
+          // console.log(indexdriver)
+          // console.log(indexorigin)
+          // console.log(indexdestination)
+          // console.log(trip.tripStatusId)
+          if(indexdriver == indexorigin && trip.tripStatusId !== 4 && trip.tripStatusId !== 6 && trip.tripStatusId !==2){
+             console.log('Esperando a pasajero')
+            update_trip({variables:{id: trip.id,
+              driverId: usuario.id,
+              tripStatus: 4}})
+          } else if (indexdriver == indexorigin && trip.tripStatusId !== 6) {
+            console.log('iniciado')
+            update_trip({variables:{id: trip.id,
+              driverId: usuario.id,
+              tripStatus: 6}})
+          } else if (indexdriver == indexdestination && trip.tripStatusId !== 2){
+            console.log('llego a destino')
+            // update_trip({variables:{id: trip.id,
+            //   driverId: usuario.id,
+            //   tripStatus: 2}})
           }
       },
       onError:(error)=>{
@@ -265,6 +281,12 @@ export const MapasDriver = ({navigation}) => {
               setHexagons(data.GetHexagons)
             })
 
+            get_hexagons({variables:{ lat:UpdateTrip.destinationLocationLat,lng: UpdateTrip.destinationLocationLng,res: 11,jumps: 0}}).then(({data})=>{
+
+              setIndexDestination(data.GetHexagons[0].index)
+              setHexagonsDestination(data.GetHexagons)
+            })
+
             // console.log(UpdateTrip.tripStatusId)
         },
         onError:(error) => {
@@ -274,15 +296,10 @@ export const MapasDriver = ({navigation}) => {
 
     const [update_trip] = useMutation(ACCEPT_TRIP,{
       fetchPolicy: "no-cache",
-      variables: {
-        id: trip.id,
-        driverId: usuario.id,
-        tripStatus: 4,
 
-      },
       onCompleted:({UpdateTrip}) => {
         setTrip(UpdateTrip)
-        console.log('TripStatus changed (this gotta be printed just once)');
+        // console.log('TripStatus changed (this gotta be printed just once)');
       },
       onError:(error) => {
         console.log(error);
@@ -329,6 +346,44 @@ export const MapasDriver = ({navigation}) => {
       } else {return null}
     }
 
+    // function handleSlider(value){
+    //   setSliderValue(value)
+    //   if(value == 40){
+
+    //     console.log('viaje terminado!')
+    //   }
+    // }
+
+    function EvaluateSlider() {
+      // console.log('card')
+      // console.log(trip.tripStatusId)
+      if(indexdriver == indexdestination && trip.tripStatusId == 6){
+          return (<MotionSlider
+          // title={'Choose'} 
+            min={0} 
+            max={40}
+            value={0} 
+            decimalPlaces={10}
+            units={'º'}
+            backgroundColor={['#16A0DB']}
+            onValueChanged={(value) => {
+              if(value == 40){
+        
+                update_trip({variables:{id: trip.id,
+                  driverId: usuario.id,
+                  tripStatus: 2}})
+            }}}
+            // onDrag={() => console.log('Dragging')}
+      />)
+      } else if(trip.tripStatusId == 2){
+          return (
+              <Text style = {styles.textTrip}>Viaje terminado</Text>
+          )
+        } else {
+          return( <Text style = {styles.textTrip}>Aun no puedes terminar el viaje</Text>)
+        }
+      }
+
     return(
         <>
         <MapView
@@ -345,13 +400,16 @@ export const MapasDriver = ({navigation}) => {
             {hexagons.map(hexagon => {
                 return <Polygon fillColor = {'rgba(22, 161, 220, 0.5)'} key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} />
             })}
+            {hexagonsdestination.map(hexagon => {
+                return <Polygon fillColor = {'rgba(22, 161, 220, 0.5)'} key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} />
+            })}
             {/* Marcador del driver */}
             <Marker key = {Math.floor(1000 + Math.random() * 9000)} 
             ref={driverMarker} 
             coordinate = {driverLocation}    
-            icon={require('../../assets/images/map-taxi3.png')}/>
+            icon={require('../../assets/images/map-taxi.png')}/>
 
-            <EvaluateMarkers/>
+            {/* <EvaluateMarkers/> */}
 
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
@@ -361,13 +419,15 @@ export const MapasDriver = ({navigation}) => {
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
-            icon="menu"
+            icon="camera"
             onPress={() => navigation.openDrawer()}
             />
         </View>    
 
         <View style = {styles.cardContainer}>
-          <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
+          <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}>
+              <EvaluateSlider/>
+            </TripCreated>
         </View>
 
         <View style={styles.switchContainer}>
@@ -406,7 +466,7 @@ const styles = StyleSheet.create({
     },
     cardContainer: {
       flex: 1,
-      marginTop: 450,
+      marginTop: 200,
       justifyContent: "flex-end",
       alignItems: "flex-end",
       position: "absolute",
@@ -447,6 +507,11 @@ const styles = StyleSheet.create({
       },
       text:{
           margin: 5
-      }
+      },
+      textTrip: {
+        fontSize: 20,
+        color: 'green'
+    }
+
   })
   

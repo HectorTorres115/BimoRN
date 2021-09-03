@@ -196,7 +196,7 @@ export const Mapas = ({navigation}) => {
     const [get_route_info] = useMutation(DRAW_ROUTE,{
         fetchPolicy: "no-cache",
         onCompleted:({GetRouteInfo})=>{
-        console.log(GetRouteInfo)
+        console.log(GetRouteInfo.placeId)
         setRoute(GetRouteInfo)
         setPolyline(decodePolyline(GetRouteInfo.polyline))
         animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
@@ -223,7 +223,8 @@ export const Mapas = ({navigation}) => {
         fetchPolicy: "no-cache",
         onCompleted:(data)=>{
 
-          console.log(data.CreateTrip.tripPolyline)
+          console.log(data.CreateTrip.destinationLocationLat)
+          console.log(data.CreateTrip.destinationLocationLng)
           setCurrentTrip(data.CreateTrip)
           setPolyline(decodePolyline(data.CreateTrip.tripPolyline))
           animateCameraToPolylineCenter(decodePolyline(data.CreateTrip.tripPolyline))
@@ -364,7 +365,7 @@ export const Mapas = ({navigation}) => {
                 return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
             })}
             {/* //Driver marker */}
-            <Marker ref  = {driverMarker} key = {115} coordinate = {driverLocation} icon = {require('../../assets/images/map-taxi3.png')}/>
+            <Marker ref  = {driverMarker} key = {115} coordinate = {driverLocation} icon = {require('../../assets/images/map-taxi.png')}/>
             {/* //Trip polyline */}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
             <Polyline coordinates={driverPolyline} strokeWidth={6} strokeColor ={"#000000"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
