@@ -11,6 +11,8 @@ import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
 import MotionSlider from 'react-native-motion-slider';
 import AsyncStorage from '@react-native-community/async-storage'
+import { useTrip } from '../Context/TripContext'
+// import { TripCreatedHooks } from '../Listeners/TripCreatedHooks'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -177,7 +179,7 @@ export const MapasDriver = ({navigation}) => {
 
       AsyncStorage.getItem('@trip_key').then((data)=>{
         const json = JSON.parse(data)
-        console.log(json.polylineTrip)
+        // console.log(json.polylineTrip)
         // setPolyline(json.polylineTrip)
 
       }).catch((error)=>{console.log(error)})
@@ -190,6 +192,7 @@ export const MapasDriver = ({navigation}) => {
     const driverMarker = useRef(React.Component);
     //Global states from react context
     const {usuario, setUser} = useUsuario();
+    const {trip, setTrip} = useTrip();
     //State
     const [isonline, setIsOnline] = useState(usuario.isOnline);
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
@@ -198,7 +201,7 @@ export const MapasDriver = ({navigation}) => {
     const [polyline, setPolyline] = useState([]);
     const [hexagons, setHexagons] = useState([]);
     const [hexagonsdestination, setHexagonsDestination] = useState([]);
-    const [trip, setTrip] = useState({});
+    // const [trip, setTrip] = useState({});
     const [indexdriver, setIndexDriver] = useState(usuario.city.indexH3);
     const [indexorigin, setIndexOrigin] = useState(null);
     const [indexdestination, setIndexDestination] = useState(null);
@@ -207,6 +210,7 @@ export const MapasDriver = ({navigation}) => {
     const [originCoordinates, setOriginCoordinates] = useState(null);
     const [destinantionCoordinates, setDestinationCoordinates] = useState(null);
     const [slidervalue, setSliderValue] = useState(0);
+
      //Server requests
     useQuery(QUERY_DRIVERS, {
         fetchPolicy:'no-cache',
@@ -382,13 +386,15 @@ export const MapasDriver = ({navigation}) => {
       // console.log(trip.tripStatusId)
       if(indexdriver == indexdestination && trip.tripStatusId == 6){
           return (<MotionSlider
-          // title={'Choose'} 
             min={0} 
             max={40}
             value={0} 
             decimalPlaces={10}
             units={'º'}
-            backgroundColor={['#16A0DB']}
+            backgroundColor={['#16A0DB', '#e3d912', '#32a852']}
+            firstMessage = {'Teminar Viaje'}
+            secondMessage = {'Terminando Viaje'}
+            finalMessage = {'Viaje Terminado'}
             onValueChanged={(value) => {
               if(value == 40){
         
@@ -473,6 +479,7 @@ export const MapasDriver = ({navigation}) => {
           <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}>
               <EvaluateSlider/>
             </TripCreated>
+            {/* <TripCreatedHooks/> */}
         </View>
 
         <View style={styles.switchContainer}>

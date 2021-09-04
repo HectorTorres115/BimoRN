@@ -6,6 +6,7 @@ import { ApolloProvider } from 'react-apollo'
 import { client } from './src/Clients/client'
 import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
 import { AddressProvider , useAddress } from './src/Context/AddressContext'
+import { TripProvider } from './src/Context/TripContext'
 
 //pantallas
 import { Login } from './src/Screens/Login'
@@ -72,11 +73,13 @@ const DriverStackScreen = ()=> (
 export default ()=> (
   <PaperProvider>
   <StripeProvider publishableKey={stripeUrl}>
+  <TripProvider>
   <UsuarioProvider>
   <AddressProvider>
     <App></App>
   </AddressProvider>
   </UsuarioProvider>
+  </TripProvider>
   </StripeProvider>
   </PaperProvider>
 )
