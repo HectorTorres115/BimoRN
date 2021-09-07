@@ -1,34 +1,21 @@
 import React , {useEffect, useState} from 'react'
 import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
-import { Card, Title, Paragraph } from 'react-native-paper'
-import MotionSlider from 'react-native-motion-slider';
-import AsyncStorage from '@react-native-community/async-storage'
+import {useTrip} from '../Context/TripContext'
+import {DeleteTrip} from '../Functions/TripStorage'
 
-export const CardTripInfo = (props) => {
+export const CardTripInfo = () => {
+    const {trip, setTrip} = useTrip();
+
     useEffect(() => {
-        // console.log(props.trip)
-        const shortAddressOri = props.trip.originVincity.split(',')
-        const shortAddressDes = props.trip.destinationVincity.split(',')
+        console.log(trip.tripStatus.tripStatus);
+        const shortAddressOri = trip.originVincity.split(',')
+        const shortAddressDes = trip.destinationVincity.split(',')
         setOrigin(shortAddressOri[0])
         setDestination(shortAddressDes[1])
-
-        AsyncStorage.getItem('@trip_key').then((data)=>{
-            const json = JSON.parse(data)
-
-            setTrip(json.trip)
-    
-          }).catch((error)=>{console.log(error)})
     }, [])
-
-    // useEffect(() => {
-    //      console.log(props.trip.tripStatusId)
-    // })
 
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
-    const [tripAccepted, setTripAccepted] = useState(false);
-    const [statusid, setStatusId] = useState(props.trip.tripStatusId);
-    const [trip, setTrip] = useState(null);
 
     async function aceptarViaje() {
         setTripAccepted(true)
@@ -37,31 +24,6 @@ export const CardTripInfo = (props) => {
             tripStatus: 1,
             driverId: props.userId
         }})  
-    }
-
-    async function deleteStorage(){
-        try {
-          await AsyncStorage.removeItem('@trip_key')
-          setTrip(null)
-            props.setsetter({trip:null})
-        } catch (error) {
-
-          console.log(error)        
-        }
-        
-      }
-      
-    function EvaluateTrip() {
-        if(trip !== null && trip.tripStatusId !== 5){
-            return null
-        } else {
-            return (
-            <View style = {styles.buttonContainer}>
-                <Button style = {styles.button} title = 'Aceptar' color = 'blue' onPress = {() => aceptarViaje()}/>
-                <Button style = {styles.button} title = 'Rechazar' color = 'red'/>
-            </View>
-            )
-        }
     }
 
     // function EvaluateSlider() {
@@ -88,16 +50,23 @@ export const CardTripInfo = (props) => {
     //     }
     // }
 
+    async function deleteFromStorage() {
+        setTrip(null)
+        await DeleteTrip()
+    }
+
     return (
         <View style = {styles.card}>
-            <Text style = {styles.text}>Pasajero: {props.trip.passenger.name}</Text>
+            <Text style = {styles.text}>Pasajero: {trip.passenger.name}</Text>
             <Text style = {styles.text}>Origen: {origin}</Text>
-            {/* <Text style = {styles.text}>Destino: {destination}</Text>
-            <Text style = {styles.text}>Distancia: {props.trip.distance}</Text>
-            <Text style = {styles.text}>Precio: {props.trip.distance * 10}</Text> */}
-            <EvaluateTrip/>
-            <Button style = {styles.button} title = 'Cancelar Viaje' color = 'red' onPress = {() => deleteStorage()}/>
-            {props.children}
+            <Text style = {styles.text}>Destino: {destination}</Text>
+            <View style = {styles.buttonContainer}>
+                <Button 
+                style = {styles.button}
+                title = 'Delete from storage' 
+                color = 'red' 
+                onPress = {() => deleteFromStorage()}/>
+            </View>
         </View>
     )
 }
@@ -111,7 +80,7 @@ const styles = StyleSheet.create({
         borderColor: 'gray',
         borderRadius: 10,
         // height: "33%",
-        width: "98%"
+        width: "98%",
     },
     text: {
         fontSize: 20,

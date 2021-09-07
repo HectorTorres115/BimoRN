@@ -12,6 +12,7 @@ import ReduxLocationStore from '../Redux/Redux-location-store'
 import MotionSlider from 'react-native-motion-slider';
 import AsyncStorage from '@react-native-community/async-storage'
 import { useTrip } from '../Context/TripContext'
+import { CardTripInfo } from '../Components/CardTripInfo'
 // import { TripCreatedHooks } from '../Listeners/TripCreatedHooks'
 
 const QUERY_DRIVERS = gql`
@@ -411,29 +412,15 @@ export const MapasDriver = ({navigation}) => {
         } else {
           return( <Text style = {styles.textTrip}>Aun no puedes terminar el viaje</Text>)
         }
-      }
+    }
 
-      async function saveOnDevice(){
-        try {
-          // await AsyncStorage.setItem('@trip_key', JSON.stringify({
-          //   trip:trip,
-          //   indexdriver: indexdriver,
-          //   indexorigin: indexorigin,
-          //   indexdestination: indexdestination
-          // }))
-          console.log(trip)
-          console.log(indexdriver)
-          console.log(indexorigin)
-          console.log(indexdestination)
-          console.log('trip setter')
-        } catch (error) {
-          
-            console.log(error)
-        }
+    function EvalText() {
+      if(trip !== null){
+        return <Text style = {styles.textTrip}>Trip has state</Text>
+      } else {
+        return <Text style = {styles.textTrip}>Trip has shit</Text>
       }
-
-      
-      
+    }
 
     return(
         <>
@@ -465,7 +452,10 @@ export const MapasDriver = ({navigation}) => {
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
 
-        {/* <EvaluateChatButton/> */}
+        <View style = {styles.cardContainer}>
+          {trip !== null ? <CardTripInfo/>: null}
+            {/* <CardTripInfo/> */}
+        </View>
 
         <View style={styles.fabContainer}>
             <FAB
@@ -475,12 +465,7 @@ export const MapasDriver = ({navigation}) => {
             />
         </View>    
 
-        <View style = {styles.cardContainer}>
-          <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}>
-              <EvaluateSlider/>
-            </TripCreated>
-            {/* <TripCreatedHooks/> */}
-        </View>
+        <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip} />
 
         <View style={styles.switchContainer}>
             <Text style={styles.text}>En linea</Text>
@@ -517,13 +502,11 @@ const styles = StyleSheet.create({
         width: "20%"
     },
     cardContainer: {
-      flex: 1,
-      marginTop: 200,
-      justifyContent: "flex-end",
-      alignItems: "flex-end",
+      alignContent: 'center',
+      alignSelf: 'flex-end',
       position: "absolute",
       height: "33%",
-      width: "98%"
+      width: "100%"
     },
     switchContainer:{
         flex: 1,

@@ -13,6 +13,7 @@ export const TripProvider = (props) => {
             setTrip(data)
         })
         .catch((err) => console.log(err))
+        
     }, [])
     
     const value = useMemo(() => {

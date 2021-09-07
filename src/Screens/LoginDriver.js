@@ -27,7 +27,7 @@ mutation login_driver($email: String!, $password:String!, $deviceToken: String!)
       deviceToken
       genre
       photoUrl
-      city{
+      city {
           id
           indexH3
           lat
