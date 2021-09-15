@@ -1,34 +1,31 @@
 import React, {useState, useEffect, useRef} from 'react'
-import { StyleSheet, View, Image,Alert} from 'react-native'
-import MapView from 'react-native-maps' 
+import { StyleSheet, View, Image, Alert} from 'react-native'
+import MapView, {Marker} from 'react-native-maps' 
 import gql from 'graphql-tag'
 import { useMutation } from 'react-apollo'
 import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
 import { useUsuario } from '../Context/UserContext'
+import Icon from 'react-native-vector-icons/FontAwesome5';
+const myIcon1 = <Icon name="comments" size={30} color="#900" />; // Defaults to regular
+//Backhandler
 
 const CURRENT_ADDRESS = gql`
-mutation get_current_info($object: JSON){
-    GetRouteInfo(object: $object) {
-      startAdress
-    }
-  }
+mutation get_address($lat: Float!, $lng: Float!){
+  GetAddress(lat: $lat, lng: $lng)
+}
 `
 
-export const FixToCenter = (props)=>  {
+export const FixToCenter = (props) => {
 
     useEffect(() => {
         handleAndroidBackButton(() => props.navigation.goBack())
-        return () => {
-            handleAndroidBackButton(() => backAction(setUser))
-        }
       }, []) 
-
+      
     const mapView = useRef(React.Component)
     const {setUser} = useUsuario()
     const [marker, setMarker] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667})
     const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.009, longitudeDelta: 0.009});
     const [address, setAddress] = useState({name:"address"})
-
     const [get_current_info] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
         variables:{
@@ -47,14 +44,9 @@ export const FixToCenter = (props)=>  {
           console.log(error);
         }
     })
+    const [debugMarkers, setDebugMarkers] = useState([]);
 
     async function setAddresLocation(region) {
-        // try {
-        //     console.log(mapView.current.addressForCoordinate)
-        // } catch (error) {
-        //     console.log(mapView.current)
-        //     console.log(error)
-        // }
         setRegion(region)
         await get_current_info()
     } 
@@ -64,14 +56,21 @@ export const FixToCenter = (props)=>  {
             <MapView
                 ref={mapView}
                 style={styles.mapa}
-                onRegionChangeComplete={(region)=> setAddresLocation(region)}
-                //  onPanDrag={()=> setRegion()}
+                onRegionChangeComplete={(region) => {
+                    console.log(region);
+                    setDebugMarkers([...debugMarkers, region])
+                }}
                 initialRegion={region}>   
+                {debugMarkers.map(coord => {
+                return <Marker 
+                key = {coord.lat} 
+                coordinate = {coord} />
+                })} 
             </MapView>
-            {/* <TouchableOpacity style={styles.buton} onPress={()=>  setAddresLocation()}>
-                  <Text style={styles.text}>{address.name}</Text>
-            </TouchableOpacity>    */}
-            <Image source={require('../../assets/images/pin1.jpeg')} style={styles.icon}></Image>
+            <View style = {{position: 'absolute', marginBottom: 200}}>
+                <Icon name="map-marker" size={20} color = "#000000"/>
+            </View>
+            {/* <Image source={require('../../assets/images/pin1.jpeg')} style={styles.icon}></Image> */}
         </View>
     )
 }
@@ -125,6 +124,6 @@ const styles = StyleSheet.create({
     centerIcon:{
         height: 40,
         width: 40,
-        marginBottom:100
+        // marginBottom:100
     }
 })

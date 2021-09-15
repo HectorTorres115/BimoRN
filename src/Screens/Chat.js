@@ -2,7 +2,7 @@ import React, {useState,useEffect,useRef} from 'react'
 import { StyleSheet, Text, View, TextInput,Button, FlatList } from 'react-native'
 import gql from 'graphql-tag'
 import { useMutation, useQuery } from 'react-apollo'
-import { backAction,handleAndroidBackButton } from '../Functions/BackHandler'
+import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { useUsuario } from '../Context/UserContext'
 import { ChatListener } from '../Listeners/ChatListener'
 

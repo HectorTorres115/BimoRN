@@ -13,6 +13,7 @@ import MotionSlider from 'react-native-motion-slider';
 import AsyncStorage from '@react-native-community/async-storage'
 import { useTrip } from '../Context/TripContext'
 import { CardTripInfo } from '../Components/CardTripInfo'
+import darkStyle from '../Styles/darkStyle'
 // import { TripCreatedHooks } from '../Listeners/TripCreatedHooks'
 
 const QUERY_DRIVERS = gql`
@@ -425,6 +426,7 @@ export const MapasDriver = ({navigation}) => {
     return(
         <>
         <MapView
+        // customMapStyle = {darkStyle}
         ref = {globalMapView}
         showsUserLocation = {true}
         showsMyLocationButton = {false}

@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect, useLayoutEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, Text } from 'react-native'
+import { Button, StyleSheet, View, TextInput, Alert, ScrollView, Text } from 'react-native'
 import gql from 'graphql-tag'
 //Maps
 import MapView, {Marker, Polyline} from 'react-native-maps'
@@ -15,7 +15,9 @@ import ReduxLocationStore from '../Redux/Redux-location-store';
 import { set_location } from '../Redux/Redux-actions';
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
-import DriverPanel from '../Components/DriverPanel'
+// import DriverPanel from '../Components/DriverPanel'
+import { CardPassenger } from '../Components/CardPassenger'
+import darkStyle from '../Styles/darkStyle'
 
 
 const QUERY_DRIVERS = gql`
@@ -196,7 +198,7 @@ export const Mapas = ({navigation}) => {
     const [get_route_info] = useMutation(DRAW_ROUTE,{
         fetchPolicy: "no-cache",
         onCompleted:({GetRouteInfo})=>{
-        console.log(GetRouteInfo.placeId)
+        // console.log(GetRouteInfo)
         setRoute(GetRouteInfo)
         setPolyline(decodePolyline(GetRouteInfo.polyline))
         animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
@@ -352,6 +354,7 @@ export const Mapas = ({navigation}) => {
     return (
         <>
         <MapView
+        // customMapStyle = {darkStyle}
         ref = {globalMapView}
         onMapReady = { () => getCurrentDirection() }
         showsUserLocation = {true}
@@ -375,8 +378,19 @@ export const Mapas = ({navigation}) => {
         <EvaluateStartChat />
 
         {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
-        <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
-        <Button title = "Crear Viaje" onPress = {() => createTrip()}/> 
+        {/* <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
+        <Button title = "Crear Viaje" onPress = {() => createTrip()}/>  */}
+        
+        <View style = {styles.cardContainer}>
+          <CardPassenger>
+            <ScrollView contentContainerStyle = {styles.scroll}>
+              <Button title = 'Draw route'></Button>
+              <Button title = 'Profile'></Button>
+              <Button title = 'Idk'></Button>
+            </ScrollView>
+          </CardPassenger>
+        </View>
+
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
@@ -384,6 +398,7 @@ export const Mapas = ({navigation}) => {
             onPress={() => navigation.navigate('MapCamera')}
             />
         </View>    
+
         <View style={styles.inputsContainer}>
             <TextInput 
             placeholder="Origen" 
@@ -442,13 +457,28 @@ const styles = StyleSheet.create({
         borderRadius:5,
         borderWidth:2,
         borderColor:"gray",
-        fontSize:20,
+        fontSize: 20,
         color: "black",
-        width: '90%',
-        borderRadius:25,
+        width: '95%',
+        // borderRadius:25,
         margin: 5,
         height: "50%",
         paddingLeft: 10
+      },
+      cardContainer: {
+        marginBottom: 10,
+        alignSelf: 'center',
+        alignContent: 'center',
+        position: "relative",
+        height: "25%",
+        width: "98%"
+      },
+      scroll: {
+        // flex: 1,
+        // flexDirection: 'row',
+        width: '100%',
+        borderWidth: 2,
+        borderColor: 'blue'
       }
   })
   
