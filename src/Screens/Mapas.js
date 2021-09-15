@@ -53,7 +53,8 @@ mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $p
       origin: $origin
       destination: $destination
       paymentMethodId:$paymentMethod
-      note:$note
+      note:$note,
+      serviceId:1
     })
     {
       id

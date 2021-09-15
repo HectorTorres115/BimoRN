@@ -40,7 +40,7 @@ export function FindAddress(props) {
     const [getAround_places] = useMutation(GET_AROUND_PLACES,{
         fetchPolicy: "no-cache",
         onCompleted:({GetAroundPlaces})=>{
-          
+          console.log(place)
           const places = GetAroundPlaces.filter((place)=> place !== null)
           setAddresses(places)
         },

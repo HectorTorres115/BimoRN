@@ -6,7 +6,7 @@ import { ApolloProvider } from 'react-apollo'
 import { client } from './src/Clients/client'
 import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
 import { AddressProvider , useAddress } from './src/Context/AddressContext'
-import { TripProvider } from './src/Context/TripContext'
+import { TripProvider } from './src/Context/TripContext';
 
 //pantallas
 import { Login } from './src/Screens/Login'
@@ -22,6 +22,8 @@ import { Chat } from './src/Screens/Chat'
 import { Perfil } from './src/Screens/Perfil'
 import { Tracking } from './src/Screens/Tracking';
 import SplashScreen from './src/Screens/SplashScreen';
+import { ResumenViaje } from './src/Screens/ResumenViaje';
+import { Viajes } from './src/Screens/Viajes';
 //React native paper provider
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Geolocation from 'react-native-geolocation-service'
@@ -62,11 +64,13 @@ const MainStackScreen = ()=> (
 )
 
 const DriverStackScreen = ()=> (
-  <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
+  <DriverStack.Navigator headerMode='none' initialRouteName={'Viajes'}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
     <DriverStack.Screen name="Perfil" component={Perfil} />
     <DriverStack.Screen name="Chat" component={Chat} />
     <DriverStack.Screen name="Tracking" component={Tracking} />
+    <DriverStack.Screen name="ResumenViaje" component={ResumenViaje} />
+    <DriverStack.Screen name="Viajes" component={Viajes} />
   </DriverStack.Navigator>
 )
 
