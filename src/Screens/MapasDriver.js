@@ -10,6 +10,7 @@ import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
 import MotionSlider from 'react-native-motion-slider';
+import { useTrip } from '../Context/TripContext'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -181,6 +182,7 @@ export const MapasDriver = ({navigation}) => {
     const driverMarker = useRef(React.Component);
     //Global states from react context
     const {usuario, setUser} = useUsuario();
+    // const {trip, setTrip} = useTrip();
     //State
     const [isonline, setIsOnline] = useState(usuario.isOnline);
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
@@ -356,7 +358,7 @@ export const MapasDriver = ({navigation}) => {
 
     function EvaluateSlider() {
       // console.log('card')
-      // console.log(trip.tripStatusId)
+       console.log(trip)
       if(indexdriver == indexdestination && trip.tripStatusId == 6){
           return (<MotionSlider
           // title={'Choose'} 

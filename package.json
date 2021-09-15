@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.11.0",
+    "@react-native-community/datetimepicker": "^3.5.2",
     "@react-native-community/hooks": "^2.5.1",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-firebase/app": "^12.1.0",
@@ -32,7 +33,7 @@
     "react-native-gesture-handler": "^1.6.1",
     "react-native-image-picker": "^3.2.1",
     "react-native-maps": "0.28.0",
-    "react-native-motion-slider": "^1.0.3",
+    "react-native-motion-slider": "https://github.com/HectorTorres115/react-native-motion-slider",
     "react-native-paper": "^4.2.0",
     "react-native-push-notification": "7.3.1",
     "react-native-reanimated": "^1.8.0",
