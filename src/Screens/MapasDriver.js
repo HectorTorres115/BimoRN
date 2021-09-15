@@ -134,6 +134,10 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
     destinationLocationLng
     tripPolyline
     driverPolyline
+    fee
+    feeTaxed
+    rawfee
+    distance
   }
 }
 
@@ -253,22 +257,22 @@ export const MapasDriver = ({navigation}) => {
           // console.log(indexorigin)
           // console.log(indexdestination)
           // console.log(trip.tripStatusId)
-          if(indexdriver == indexorigin && trip.tripStatusId !== 4 && trip.tripStatusId !== 6 && trip.tripStatusId !==2){
-             console.log('Esperando a pasajero')
-            update_trip({variables:{id: trip.id,
-              driverId: usuario.id,
-              tripStatus: 4}})
-          } else if (indexdriver == indexorigin && trip.tripStatusId !== 6) {
-            console.log('iniciado')
-            update_trip({variables:{id: trip.id,
-              driverId: usuario.id,
-              tripStatus: 6}})
-          } else if (indexdriver == indexdestination && trip.tripStatusId !== 2){
-            console.log('llego a destino')
-            // update_trip({variables:{id: trip.id,
-            //   driverId: usuario.id,
-            //   tripStatus: 2}})
-          }
+          // if(indexdriver == indexorigin && trip.tripStatusId !== 4 && trip.tripStatusId !== 6 && trip.tripStatusId !==2){
+          //    console.log('Esperando a pasajero')
+          //   update_trip({variables:{id: trip.id,
+          //     driverId: usuario.id,
+          //     tripStatus: 4}})
+          // } else if (indexdriver == indexorigin && trip.tripStatusId !== 6 && trip.tripStatusId !== 4) {
+          //   console.log('iniciado')
+          //   update_trip({variables:{id: trip.id,
+          //     driverId: usuario.id,
+          //     tripStatus: 6}})
+          // } else if (indexdriver == indexdestination && trip.tripStatusId !== 2){
+          //   console.log('llego a destino')
+          //   update_trip({variables:{id: trip.id,
+          //     driverId: usuario.id,
+          //     tripStatus: 2}})
+          // }
       },
       onError:(error)=>{
         console.log(error);
@@ -418,7 +422,7 @@ export const MapasDriver = ({navigation}) => {
       if(trip !== null){
         return (
           <View style = {styles.cardContainer}>
-          <CardTripInfo acceptTrip = {accept_trip}>
+          <CardTripInfo acceptTrip = {accept_trip} navigation={navigation}>
             <Text style = {styles.text}>{trip.passenger.name}</Text>
           </CardTripInfo>
         </View>

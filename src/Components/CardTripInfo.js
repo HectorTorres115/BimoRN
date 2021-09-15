@@ -79,7 +79,10 @@ export const CardTripInfo = (props) => {
         } else if (trip.tripStatus.tripStatus == 'Iniciado') {
             return (
                 <>
-                <Button title = 'Terminar Viaje' color = 'red' onPress = {() => actualizarViaje(2)}/>
+                <Button title = 'Terminar Viaje' color = 'red' onPress = {() => {
+                    actualizarViaje(2)
+                    props.navigation.navigate('ResumenViaje')    
+                }}/>
                 <Button title = 'Cancelar Viaje' color = 'red' onPress = {() => console.log(3)}/>
                 <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/>
                 </>
