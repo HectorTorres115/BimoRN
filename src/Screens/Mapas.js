@@ -17,7 +17,7 @@ import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
 // import DriverPanel from '../Components/DriverPanel'
 import { CardPassenger } from '../Components/CardPassenger'
-import darkStyle from '../Styles/darkStyle'
+// import darkStyle from '../Styles/darkStyle'
 
 
 const QUERY_DRIVERS = gql`

@@ -10,7 +10,7 @@ export const TripProvider = (props) => {
     useEffect(() => {
         GetTrip()
         .then((data) => {
-            // console.log(data)
+            console.log(data)
             setTrip(data)
         })
         .catch((err) => console.log(err))
