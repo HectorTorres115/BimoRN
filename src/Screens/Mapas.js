@@ -416,12 +416,6 @@ export const Mapas = ({navigation}) => {
         </View>  
 
         <EvaluateCityDriver/>
-
-        {/* <DriverLocationUpdated 
-        setter={setDriverLocation} 
-        driverId={2} 
-        driverMarker= {driverMarker} 
-        duration={4000} /> */}
         </>
     )
 }

@@ -19,11 +19,10 @@ export const CardTripInfo = (props) => {
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
 
-    async function aceptarViaje() {
-        // setTripAccepted(true)
+    async function actualizarViaje(tripStatus) {
         await props.acceptTrip({variables: {
             id: trip.id,
-            tripStatus: 1,
+            tripStatus,
             driverId: usuario.id
         }})  
     }
@@ -52,18 +51,76 @@ export const CardTripInfo = (props) => {
     //     }
     // }
 
+    function EvaluateTripStatus() {
+        if(trip.tripStatus.tripStatus == 'deal'){
+            return (
+                <>
+                <Button title = 'Aceptar Viaje' color = 'blue' onPress = {() => actualizarViaje(1)}/>
+                <Button title = 'Rechazar Viaje' color = 'red' onPress = {() => console.log(3)}/>
+                <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/>
+                </>
+            )
+        } else if (trip.tripStatus.tripStatus == 'En Camino') {
+            return (
+                <>
+                <Button title = 'Esperar al pasajero' color = 'blue' onPress = {() => actualizarViaje(4)}/> 
+                <Button title = 'Cancelar Viaje' color = 'red' onPress = {() => console.log(3)}/>
+                <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/>
+                </>
+            )
+        } else if (trip.tripStatus.tripStatus == 'Esperando') {
+            return (
+                <>
+                <Button title = 'Empezar Viaje' color = 'blue' onPress = {() => actualizarViaje(6)}/> 
+                <Button title = 'Cancelar Viaje' color = 'red' onPress = {() => console.log(3)}/>
+                <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/>
+                </>
+            )
+        } else if (trip.tripStatus.tripStatus == 'Iniciado') {
+            return (
+                <>
+                <Button title = 'Terminar Viaje' color = 'red' onPress = {() => actualizarViaje(2)}/>
+                <Button title = 'Cancelar Viaje' color = 'red' onPress = {() => console.log(3)}/>
+                <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/>
+                </>
+            )
+        } 
+    }
+
     async function deleteFromStorage() {
         setTrip(null)
         await DeleteTrip()
     }
 
+    // return (
+    //     <View style = {styles.card}>
+    //         <Text style = {styles.text}>Pasajero: {trip.passenger.name}</Text> 
+    //         <Text style = {styles.text}>Origen: {origin}</Text>
+    //         <Text style = {styles.text}>Destino: {destination}</Text>
+    //         <View style = {styles.buttonContainer}>
+    //             <Button 
+    //             style = {styles.button}
+    //             title = 'Aceptar Viaje' 
+    //             color = 'green' 
+    //             onPress = {() => aceptarViaje()}/>
+    //             <Button 
+    //             style = {styles.button}
+    //             title = 'Delete from storage' 
+    //             color = 'red' 
+    //             onPress = {() => deleteFromStorage()}/>
+    //         </View>
+    //     </View>
+    // )
+
     return (
         <View style = {styles.card}>
+            {/* {props.children} */}
             <Text style = {styles.text}>Pasajero: {trip.passenger.name}</Text> 
-            <Text style = {styles.text}>Origen: {origin}</Text>
-            <Text style = {styles.text}>Destino: {destination}</Text>
-            <View style = {styles.buttonContainer}>
-                <Button 
+             <Text style = {styles.text}>Origen: {trip.originVincity.split(',')[0]}</Text>
+             <Text style = {styles.text}>Destino: {trip.destinationVincity.split(',')[1]}</Text>
+
+             <View style = {styles.buttonContainer}>
+                {/* <Button 
                 style = {styles.button}
                 title = 'Aceptar Viaje' 
                 color = 'green' 
@@ -72,8 +129,10 @@ export const CardTripInfo = (props) => {
                 style = {styles.button}
                 title = 'Delete from storage' 
                 color = 'red' 
-                onPress = {() => deleteFromStorage()}/>
+                onPress = {() => deleteFromStorage()}/> */}
+                <EvaluateTripStatus/>
             </View>
+
         </View>
     )
 }
@@ -86,8 +145,8 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'gray',
         borderRadius: 10,
-        // height: "33%",
-        width: "98%",
+        height: "100%",
+        width: "100%",
     },
     text: {
         fontSize: 20,

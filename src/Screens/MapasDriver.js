@@ -11,10 +11,8 @@ import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
 import MotionSlider from 'react-native-motion-slider';
 import { useTrip } from '../Context/TripContext'
-// import AsyncStorage from '@react-native-community/async-storage'
 import {CardTripInfo} from '../Components/CardTripInfo'
 import { SetTrip as SetTripStorage } from '../Functions/TripStorage'
-import { GetTrip as GetTripStorage } from '../Functions/TripStorage'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -280,7 +278,7 @@ export const MapasDriver = ({navigation}) => {
 
     const [accept_trip] = useMutation(ACCEPT_TRIP,{
         fetchPolicy: "no-cache",
-        onCompleted:async ({UpdateTrip}) => {
+        onCompleted: async ({UpdateTrip}) => {
             setTrip(UpdateTrip)
 
             setPolyline(decodePolyline(UpdateTrip.tripPolyline))
@@ -416,11 +414,17 @@ export const MapasDriver = ({navigation}) => {
         }
     }
 
-    function EvalText() {
+    function EvaluateCard() {
       if(trip !== null){
-        return <Text style = {styles.textTrip}>Trip has state</Text>
+        return (
+          <View style = {styles.cardContainer}>
+          <CardTripInfo acceptTrip = {accept_trip}>
+            <Text style = {styles.text}>{trip.passenger.name}</Text>
+          </CardTripInfo>
+        </View>
+        )
       } else {
-        return <Text style = {styles.textTrip}>Trip has shit</Text>
+        return null
       }
     }
 
@@ -456,9 +460,7 @@ export const MapasDriver = ({navigation}) => {
             {/* {trip !== null ? <Polyline coordinates={decodePolyline(trip.tripPolyline)} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />: null} */}
         </MapView>
 
-        <View style = {styles.cardContainer}>
-          {trip !== null ? <CardTripInfo acceptTrip = {accept_trip}/>: null}
-        </View>
+        <EvaluateCard/>
 
         <View style={styles.fabContainer}>
             <FAB
@@ -505,11 +507,12 @@ const styles = StyleSheet.create({
         width: "20%"
     },
     cardContainer: {
-      alignContent: 'center',
-      alignSelf: 'flex-end',
-      position: "absolute",
-      height: "33%",
-      width: "100%"
+        marginBottom: 10,
+        alignSelf: 'center',
+        alignContent: 'center',
+        position: "relative",
+        height: "25%",
+        width: "98%"
     },
     switchContainer:{
         flex: 1,

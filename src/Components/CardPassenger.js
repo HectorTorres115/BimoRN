@@ -3,24 +3,10 @@ import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
 
 export const CardPassenger = (props) => {
     useEffect(() => {
-        // console.log(props.trip)
         console.log('Component did mount');
-        // const shortAddressOri = props.trip.originVincity.split(',')
-        // const shortAddressDes = props.trip.destinationVincity.split(',')
-        // setOrigin(shortAddressOri[0])
-        // setDestination(shortAddressDes[1])
     }, [])
 
     const [tripAccepted, setTripAccepted] = useState(false);
-
-    async function crearViaje() {
-        // setTripAccepted(true)
-        // await props.accept_trip({variables: {
-        //     id: props.trip.id,
-        //     tripStatus: 1,
-        //     driverId: props.userId
-        // }})  
-    }
 
     function EvaluateTrip() {
         if(tripAccepted){
@@ -37,20 +23,13 @@ export const CardPassenger = (props) => {
 
     return (
         <View style = {styles.card}>
-            {/* <Text style = {styles.text}>Passenger Card</Text> */}
-            {/* <EvaluateTrip/> */}
-            <ScrollView>
-
-            </ScrollView>
             {props.children}
+            {/* {EvaluateTrip()} */}
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    serviceSelector: {
-        
-    },
     card: {
         justifyContent: 'center',
         alignItems: 'center',
