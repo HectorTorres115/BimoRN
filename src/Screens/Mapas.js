@@ -387,7 +387,7 @@ export const Mapas = ({navigation}) => {
             <ScrollView contentContainerStyle = {styles.scroll}>
               <Button title = 'Draw route'></Button>
               <Button title = 'Profile'></Button>
-              <Button title = 'Idk'></Button>
+              <Button title = 'Create Trip' onPress = {() => createTrip()}></Button>
             </ScrollView>
           </CardPassenger>
         </View>
