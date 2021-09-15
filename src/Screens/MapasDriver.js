@@ -11,7 +11,10 @@ import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
 import MotionSlider from 'react-native-motion-slider';
 import { useTrip } from '../Context/TripContext'
-import AsyncStorage from '@react-native-community/async-storage'
+// import AsyncStorage from '@react-native-community/async-storage'
+import {CardTripInfo} from '../Components/CardTripInfo'
+import { SetTrip as SetTripStorage } from '../Functions/TripStorage'
+import { GetTrip as GetTripStorage } from '../Functions/TripStorage'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -68,7 +71,6 @@ mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
         service {
           id
           commissionTypeId
-          commissionValue
         }
       }
       boundaries {
@@ -166,6 +168,11 @@ export const MapasDriver = ({navigation}) => {
     //Lifecycle methods
     useEffect(() => {
       handleAndroidBackButton(() => backAction(setUser))
+      if(trip !== null){
+        setPolyline(decodePolyline(trip.tripPolyline))
+        animateCameraToPolylineCenter(decodePolyline(trip.tripPolyline))
+      }
+
       const interval = setInterval(() => {
         // animateDriverMarker() 
         update_driver_location({variables:{
@@ -176,12 +183,7 @@ export const MapasDriver = ({navigation}) => {
        })
       }, 4000);
 
-      AsyncStorage.getItem('@trip_key').then((data)=>{
-        const json = JSON.parse(data)
-        // console.log(json.polylineTrip)
-        // setPolyline(json.polylineTrip)
 
-      }).catch((error)=>{console.log(error)})
         
       return () => clearInterval(interval);
     }, [])
@@ -299,19 +301,21 @@ export const MapasDriver = ({navigation}) => {
               setHexagonsDestination(data.GetHexagons)
             })
 
-            AsyncStorage.setItem('@trip_key', JSON.stringify({
-                trip:UpdateTrip,
-                indexdriver: indexdriver,
-                indexorigin: indexorigin,
-                indexdestination: indexdestination,
-                polylineTrip:decodePolyline(UpdateTrip.tripPolyline)
-              })).then(()=>{
+            // AsyncStorage.setItem('@trip_key', JSON.stringify({
+            //     trip:UpdateTrip,
+            //     indexdriver: indexdriver,
+            //     indexorigin: indexorigin,
+            //     indexdestination: indexdestination,
+            //     polylineTrip:decodePolyline(UpdateTrip.tripPolyline)
+            //   })).then(()=>{
 
-                  console.log('guardo estados en storage')
+            //       console.log('guardo estados en storage')
 
-              }).catch((error)=>{
-                console.log(error)
-              })
+            //   }).catch((error)=>{
+            //     console.log(error)
+            //   })
+
+              SetTripStorage(UpdateTrip)
     
             // console.log(UpdateTrip.tripStatusId)
         },
@@ -449,10 +453,11 @@ export const MapasDriver = ({navigation}) => {
             {/* <EvaluateMarkers/> */}
 
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
+            {/* {trip !== null ? <Polyline coordinates={decodePolyline(trip.tripPolyline)} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />: null} */}
         </MapView>
 
         <View style = {styles.cardContainer}>
-          {trip !== null ? <CardTripInfo/>: null}
+          {trip !== null ? <CardTripInfo acceptTrip = {accept_trip}/>: null}
         </View>
 
         <View style={styles.fabContainer}>

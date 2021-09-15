@@ -2,12 +2,14 @@ import React , {useEffect, useState} from 'react'
 import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
 import {useTrip} from '../Context/TripContext'
 import {DeleteTrip} from '../Functions/TripStorage'
+import { useUsuario } from '../Context/UserContext'
 
-export const CardTripInfo = () => {
+export const CardTripInfo = (props) => {
     const {trip, setTrip} = useTrip();
+    const {usuario, setUsuario} = useUsuario();
 
     useEffect(() => {
-        console.log(trip.tripStatus.tripStatus);
+        //  console.log(trip.trip.passenger.name);
         const shortAddressOri = trip.originVincity.split(',')
         const shortAddressDes = trip.destinationVincity.split(',')
         setOrigin(shortAddressOri[0])
@@ -18,11 +20,11 @@ export const CardTripInfo = () => {
     const [destination, setDestination] = useState('');
 
     async function aceptarViaje() {
-        setTripAccepted(true)
-        await props.accept_trip({variables: {
-            id: props.trip.id,
+        // setTripAccepted(true)
+        await props.acceptTrip({variables: {
+            id: trip.id,
             tripStatus: 1,
-            driverId: props.userId
+            driverId: usuario.id
         }})  
     }
 
@@ -57,10 +59,15 @@ export const CardTripInfo = () => {
 
     return (
         <View style = {styles.card}>
-            <Text style = {styles.text}>Pasajero: {trip.passenger.name}</Text>
+            <Text style = {styles.text}>Pasajero: {trip.passenger.name}</Text> 
             <Text style = {styles.text}>Origen: {origin}</Text>
             <Text style = {styles.text}>Destino: {destination}</Text>
             <View style = {styles.buttonContainer}>
+                <Button 
+                style = {styles.button}
+                title = 'Aceptar Viaje' 
+                color = 'green' 
+                onPress = {() => aceptarViaje()}/>
                 <Button 
                 style = {styles.button}
                 title = 'Delete from storage' 
