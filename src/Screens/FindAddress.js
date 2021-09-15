@@ -8,7 +8,7 @@ import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { useUsuario } from '../Context/UserContext';
 
 const GET_AROUND_PLACES = gql`
-mutation getAround_places($place: String!,$lat: Float!, $lng: Float!){
+mutation getAround_places($place: String!, $lat: Float!, $lng: Float!){
     GetAroundPlaces(
       input: {
       radius: 60000,
@@ -40,7 +40,6 @@ export function FindAddress(props) {
     const [getAround_places] = useMutation(GET_AROUND_PLACES,{
         fetchPolicy: "no-cache",
         onCompleted:({GetAroundPlaces})=>{
-          console.log(place)
           const places = GetAroundPlaces.filter((place)=> place !== null)
           setAddresses(places)
         },
@@ -75,12 +74,18 @@ export function FindAddress(props) {
                 placeholder="Search" 
                 placeholderTextColor="gray" 
                 style={styles.input}
-                onChangeText= {(texto)=> getAround_places({
-                  variables:{
-                    place: texto,lat:ReduxLocationStore.getState().latitude,
-                    lng: ReduxLocationStore.getState().longitude
-                  }
-                })}
+                // onChangeText= {(texto) => {
+                //   console.log(ReduxLocationStore.getState())
+                // }}
+                onChangeText= {async (texto) => {
+                  getAround_places({
+                    variables: {
+                      place: texto,
+                      lat: ReduxLocationStore.getState().latitude,
+                      lng: ReduxLocationStore.getState().longitude
+                    }
+                  })
+                }}
                 value= {search}
                 /> 
             </View>
