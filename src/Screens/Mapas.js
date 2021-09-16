@@ -1,5 +1,6 @@
 import React, {useState, useRef, useEffect, useLayoutEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, ScrollView, Text } from 'react-native'
+import { Button, StyleSheet, View, TextInput, Alert, ScrollView, Text, FlatList, Pressable } from 'react-native'
+import { Avatar, BottomNavigation  } from 'react-native-paper'
 import gql from 'graphql-tag'
 //Maps
 import MapView, {Marker, Polyline} from 'react-native-maps'
@@ -27,6 +28,29 @@ query{
     }
   }
 `
+
+const QUERY_SERVICES = gql`
+query{
+  GetServices{
+    id
+    name
+    icon
+    mapIcon
+    seats
+    commissionType{
+      id
+      commissionType
+    }
+    tarifaBase
+    cuotaDeSolicitudPorKm
+    tarifaMinima
+    costoPorKm
+    costoPorTiempo
+    tarifaDeCancelacion
+  }
+}
+`
+
 const DRAW_ROUTE = gql`
 mutation get_route_info($object: JSON){
     GetRouteInfo(object: $object) {
@@ -184,6 +208,7 @@ export const Mapas = ({navigation}) => {
     const [currenttrip, setCurrentTrip] = useState(null);
     const [chat, setChat] = useState(null);
     const [driverState, setDriverState] = useState(null);
+    const [services, setServices] = useState([]);
 
     //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -194,6 +219,16 @@ export const Mapas = ({navigation}) => {
           onError:(error)=>{
             console.log(error);
           }
+    })
+
+    useQuery(QUERY_SERVICES, {
+      fetchPolicy:'no-cache',
+      onCompleted:({GetServices})=>{
+          setServices(GetServices)
+        },
+        onError:(error)=>{
+          console.log(error);
+        }
     })
 
     const [get_route_info] = useMutation(DRAW_ROUTE,{
@@ -352,6 +387,10 @@ export const Mapas = ({navigation}) => {
       }
     }
 
+    const elegirServicio = (item)=>{
+      console.log(item)
+    }
+
     return (
         <>
         <MapView
@@ -384,7 +423,26 @@ export const Mapas = ({navigation}) => {
         
         <View style = {styles.cardContainer}>
           <CardPassenger>
+            <FlatList 
+              data={services} 
+              key = {(item)=> item.id}
+              keyExtractor = {(item)=> item.id}
+              horizontal= {true}
+              renderItem = { ({item}) => (
+                <View style = {styles.serviceContainer}>
+                  <View >
+                    <Pressable onPress={ ()=> elegirServicio(item)}> 
+                      <Avatar.Image size={40} source={require('../../assets/images/avatar.jpg')} style= {styles.avatar}/>  
+                      <Text style={styles.texto}>Tarifa</Text>
+                      <Text style={styles.texto}>{item.name}</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ) }
+              >
+            </FlatList>
             <ScrollView contentContainerStyle = {styles.scroll}>
+            
               <Button title = 'Draw route'></Button>
               <Button title = 'Profile'></Button>
               <Button title = 'Create Trip' onPress = {() => createTrip()}></Button>
@@ -462,10 +520,12 @@ const styles = StyleSheet.create({
       },
       cardContainer: {
         marginBottom: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
         alignContent: 'center',
         position: "relative",
-        height: "25%",
+        height: "30%",
         width: "98%"
       },
       scroll: {
@@ -474,6 +534,25 @@ const styles = StyleSheet.create({
         width: '100%',
         borderWidth: 2,
         borderColor: 'blue'
+      },
+      serviceContainer: {
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth:2,
+        borderColor:"gray",
+        margin:10
+      },
+      avatar:{
+        marginTop:10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 5,
+      },
+      texto:{
+        fontSize: 15,
+        color: 'black'
       }
   })
   
