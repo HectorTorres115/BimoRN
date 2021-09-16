@@ -4,6 +4,7 @@ import {ActivityIndicator , Alert, View, Text, Button} from 'react-native'
 import {subClient} from '../Clients/sub-client'
 import {ApolloProvider, Subscription} from 'react-apollo'
 import { Avatar, Card, IconButton} from 'react-native-paper'
+import {SetTrip as SetTripStorage} from '../Functions/TripStorage'
 
 const SUSCRIPTION_TRIP = gql`
 subscription trip_updated($tripId: Int!){
@@ -83,6 +84,14 @@ export class TripUpdated extends Component {
               // console.log(data.subscriptionData.data)
               if(data.subscriptionData.data.TripUpdated.tripStatus.id === 4){
                 Alert.alert("El conductor ha llegado")
+              } else {
+                console.log(data.subscriptionData.data.TripUpdated.tripStatus)
+              }
+
+              if(data.subscriptionData.data.TripUpdated.tripStatus.id === 2){
+                Alert.alert("El viaje ha terminado")
+                SetTripStorage(null)
+                this.props.setTrip(null)
               } else {
                 console.log(data.subscriptionData.data.TripUpdated.tripStatus)
               }

@@ -18,6 +18,7 @@ import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
 // import DriverPanel from '../Components/DriverPanel'
 import { CardPassenger } from '../Components/CardPassenger'
+import { useTrip } from '../Context/TripContext'
 // import darkStyle from '../Styles/darkStyle'
 
 
@@ -184,6 +185,7 @@ export const Mapas = ({navigation}) => {
     //Lifecycle methods
     useEffect(() => {
         handleAndroidBackButton(() => backAction(setUser))
+        console.log(trip);
     }, [])
     //Referencias
     const globalMarker = useRef(React.Component);
@@ -192,6 +194,7 @@ export const Mapas = ({navigation}) => {
     //Global states
     const {usuario, setUser} = useUsuario();
     const {address, setAddress} = useAddress();
+    const {trip, setTrip} = useTrip();
     //State
     const [coords, setCoords] = useState(ReduxLocationStore.getState());
     const [location, setLocation] = useState([]);
@@ -205,7 +208,7 @@ export const Mapas = ({navigation}) => {
     const [polyline, setPolyline] = useState([]);
     const [driverPolyline, setDriverPolyline] = useState([]);
     const [startsuscription, setStartSuscription] = useState(false);
-    const [currenttrip, setCurrentTrip] = useState(null);
+    // const [trip, setTrip] = useState(null);
     const [chat, setChat] = useState(null);
     const [driverState, setDriverState] = useState(null);
     const [services, setServices] = useState([]);
@@ -263,7 +266,7 @@ export const Mapas = ({navigation}) => {
 
           console.log(data.CreateTrip.destinationLocationLat)
           console.log(data.CreateTrip.destinationLocationLng)
-          setCurrentTrip(data.CreateTrip)
+          setTrip(data.CreateTrip)
           setPolyline(decodePolyline(data.CreateTrip.tripPolyline))
           animateCameraToPolylineCenter(decodePolyline(data.CreateTrip.tripPolyline))
 
@@ -353,10 +356,10 @@ export const Mapas = ({navigation}) => {
     }
 
     function EvaluateStartSuscription() {
-        if(currenttrip !== null){
+        if(trip !== null){
             return <TripUpdated 
             // setDriverPolyline ={setDriverPolyline}
-            trip={currenttrip} setTrip = {setCurrentTrip}
+            trip={trip} setTrip = {setTrip}
             driverState={driverState} setDriverState = {setDriverState}
             />
         } else {
@@ -365,8 +368,8 @@ export const Mapas = ({navigation}) => {
     }
 
     function EvaluateStartChat() {
-      if(currenttrip !== null){
-          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat", { trip: currenttrip })}/> 
+      if(trip !== null){
+          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat", { trip: trip })}/> 
       } else{
           return null
       }
