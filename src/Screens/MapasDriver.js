@@ -174,7 +174,6 @@ export const MapasDriver = ({navigation}) => {
         setPolyline(decodePolyline(trip.tripPolyline))
         animateCameraToPolylineCenter(decodePolyline(trip.tripPolyline))
       }
-
       const interval = setInterval(() => {
         // animateDriverMarker() 
         update_driver_location({variables:{
@@ -183,10 +182,7 @@ export const MapasDriver = ({navigation}) => {
           lng: ReduxLocationStore.getState().longitude
         }
        })
-      }, 4000);
-
-
-        
+      }, 4000);  
       return () => clearInterval(interval);
     }, [])
 
@@ -273,8 +269,24 @@ export const MapasDriver = ({navigation}) => {
           //     driverId: usuario.id,
           //     tripStatus: 2}})
           // }
-      },
-      onError:(error)=>{
+          if(indexdriver !== indexorigin){
+            if(trip.tripStatus.tripStatus == 'deal'){
+              update_trip({variables: {tripStatusId: 1}}) //En camino
+            }
+          }
+          if(indexdriver == indexorigin){
+            if(trip.tripStatus.tripStatus == 'En Camino'){ //Esperando
+              update_trip({variables: {tripStatusId: 4}})
+            }
+            if(trip.tripStatus.tripStatus == 'Esperando'){ //Iniciado
+              update_trip({variables: {tripStatusId: 6}})
+            }
+          }
+          if(indexdriver == indexdestination){
+            if(trip.tripStatus.tripStatus == 'Iniciado'){
+              update_trip({variables: {tripStatusId: 2}})
+            }
+          }
         console.log(error);
       }
     })
@@ -297,29 +309,11 @@ export const MapasDriver = ({navigation}) => {
               setHexagons(data.GetHexagons)
             })
 
-            get_hexagons({variables:{ lat:UpdateTrip.destinationLocationLat,lng: UpdateTrip.destinationLocationLng,res: 10,jumps: 0}}).then(({data})=>{
-
+            get_hexagons({variables:{ lat: UpdateTrip.destinationLocationLat,lng: UpdateTrip.destinationLocationLng,res: 10,jumps: 0}}).then(({data})=>{
               setIndexDestination(data.GetHexagons[0].index)
               setHexagonsDestination(data.GetHexagons)
             })
-
-            // AsyncStorage.setItem('@trip_key', JSON.stringify({
-            //     trip:UpdateTrip,
-            //     indexdriver: indexdriver,
-            //     indexorigin: indexorigin,
-            //     indexdestination: indexdestination,
-            //     polylineTrip:decodePolyline(UpdateTrip.tripPolyline)
-            //   })).then(()=>{
-
-            //       console.log('guardo estados en storage')
-
-            //   }).catch((error)=>{
-            //     console.log(error)
-            //   })
-
               SetTripStorage(UpdateTrip)
-    
-            // console.log(UpdateTrip.tripStatusId)
         },
         onError:(error) => {
           console.log(error);
@@ -328,7 +322,10 @@ export const MapasDriver = ({navigation}) => {
 
     const [update_trip] = useMutation(ACCEPT_TRIP,{
       fetchPolicy: "no-cache",
-
+      variables: {
+        tripId: trip.id,
+        driverId: usuario.id
+      },
       onCompleted:({UpdateTrip}) => {
         setTrip(UpdateTrip)
         // console.log('TripStatus changed (this gotta be printed just once)');
