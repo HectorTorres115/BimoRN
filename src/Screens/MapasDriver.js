@@ -477,7 +477,7 @@ export const MapasDriver = ({navigation}) => {
         <View style={styles.fabContainer}>
             <FAB
             style={styles.fab}
-            icon="camera"
+            icon="menu"
             onPress={() => navigation.openDrawer()}
             />
         </View>    
