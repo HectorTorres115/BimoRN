@@ -1,15 +1,11 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import React, {useState, useRef, useEffect }  from 'react'
-import { StyleSheet, Text, View , Button } from 'react-native'
-import { DataTable , TextInput  } from 'react-native-paper'
+import { DateFetcher } from '../Components/DateFetcher'
 
-
-
-export const Viajes = ({props}) => {
+export const Viajes = (props) => {
     return (
         <View>
-            <Text></Text>
+            <DateFetcher/>
         </View>
     )
 }
