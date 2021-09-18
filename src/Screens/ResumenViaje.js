@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Button, StyleSheet, Text, View} from 'react-native'
 import { DataTable } from 'react-native-paper'
 import { useTrip } from '../Context/TripContext'
 import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
@@ -23,7 +23,8 @@ export const ResumenViaje = ({navigation}) => {
     // const [distance, setDistance] = useState('10.5km');
 
     return (
-        <View style = {styles.container}>
+
+        trip !== null ? <View style = {styles.container}>
             <Text style = {styles.text}>De: {trip.originVincity}</Text>
             <Text style = {styles.text}>Hasta: {trip.destinationVincity}</Text>
             <DataTable style = {styles.tablecontainer}> 
@@ -44,8 +45,12 @@ export const ResumenViaje = ({navigation}) => {
                     <DataTable.Cell style = {styles.text2}>{trip.feeTaxed}</DataTable.Cell>
                 </DataTable.Row>
             </DataTable>            
-        </View>
-        
+            <Button title = 'Cerrar' color = 'red' onPress = {() => {
+                navigation.navigate('MapasDriver') 
+                setTrip(null)
+                }}/> 
+        </View> 
+        : null
     )
 }
 
