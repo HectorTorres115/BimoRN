@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
-import { StyleSheet, View, Image, Alert} from 'react-native'
+import { StyleSheet, View, Image, Alert, TextInput} from 'react-native'
 import MapView, {Marker} from 'react-native-maps' 
 import gql from 'graphql-tag'
 import { useMutation } from 'react-apollo'
@@ -25,40 +25,32 @@ export const FixToCenter = (props) => {
     const {setUser} = useUsuario()
     const [marker, setMarker] = useState(ReduxLocationStore.getState())
     const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.009, longitudeDelta: 0.009});
-    const [address, setAddress] = useState({name:"address"})
+    const [address, setAddress] = useState("Dirección")
+
     const [get_current_info] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
         variables:{
-            "object":{  
-              "start": region, 
-              "end": marker
-            }
-          },
-        onCompleted:({GetRouteInfo})=>{
-            const shortAddress = GetRouteInfo.startAdress.split(',')
-            setAddress({name: shortAddress[0]})
-            console.log(address)
-            Alert.alert(shortAddress[0])
+            lat: marker.latitude,
+            lng: marker.longitude
+        },
+        onCompleted:({GetAddress})=>{
+            const shortAddress = GetAddress.split(',')[0]
+            setAddress(shortAddress)
         },
         onError: (error)=>{
           console.log(error);
         }
     })
-    const [debugMarkers, setDebugMarkers] = useState([]);
-
-    async function setAddresLocation(region) {
-        setRegion(region)
-        await get_current_info()
-    } 
 
     return (
+        <>
         <View style={styles.masterContainer} accessible={false}>
             <MapView
                 ref={mapView}
                 style={styles.mapa}
                 onRegionChangeComplete={(region) => {
-                    console.log(region);
                     setMarker(region)
+                    get_current_info()
                 }}
                 initialRegion={region}>   
                 <Marker coordinate = {marker} />
@@ -66,8 +58,20 @@ export const FixToCenter = (props) => {
             <View style = {{position: 'absolute', marginBottom: 200}}>
                 <Icon name="map-marker" size={40} color = "#000000"/>
             </View>
-            {/* <Image source={require('../../assets/images/pin1.jpeg')} style={styles.icon}></Image> */}
         </View>
+
+        <View style={styles.inputsContainer}>
+            <TextInput 
+            placeholder="Direccion" 
+            placeholderTextColor="gray" 
+            value= {address}
+            style={styles.input} 
+            editable={false}
+            // onPressIn= {()=> {navigation.navigate("FindAddress", {setter:setOrigin, setter_search: setSearch, search, drawRoute: drawRoute})}}
+            />
+        </View>  
+
+        </>
     )
 }
 
@@ -121,5 +125,29 @@ const styles = StyleSheet.create({
         height: 40,
         width: 40,
         // marginBottom:100
-    }
+    },
+    inputsContainer:{
+        height: 120,
+        position: "absolute",
+        // backgroundColor: "black",
+        justifyContent: "center",
+        alignItems: "center",
+        // borderWidth:2,
+        // borderColor: "red",
+        width:"100%",
+        marginTop:30
+    },
+    input:{
+        backgroundColor:"rgba(255,255,255,1)",
+        borderRadius:5,
+        borderWidth:2,
+        borderColor:"gray",
+        fontSize: 20,
+        color: "black",
+        width: '95%',
+        // borderRadius:25,
+        margin: 5,
+        height: "50%",
+        paddingLeft: 10
+      }
 })
