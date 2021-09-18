@@ -3,6 +3,7 @@ import { Button, StyleSheet, View, Switch, Text } from 'react-native'
 import gql from 'graphql-tag'
 import MapView, {Marker, Polygon, Polyline} from 'react-native-maps'
 import { useUsuario } from '../Context/UserContext'
+import { useAddress } from '../Context/AddressContext'
 import { useMutation, useQuery } from 'react-apollo'
 import { FAB } from 'react-native-paper';
 import decodePolyline from '../Functions/DecodePolyline'
@@ -181,7 +182,7 @@ export const MapasDriver = ({navigation}) => {
           lat: ReduxLocationStore.getState().latitude,
           lng: ReduxLocationStore.getState().longitude
         }
-       })
+      })
       }, 4000);  
       return () => clearInterval(interval);
     }, [])
@@ -192,6 +193,7 @@ export const MapasDriver = ({navigation}) => {
     //Global states from react context
     const {usuario, setUser} = useUsuario();
     const {trip, setTrip} = useTrip();
+    const {address, setAddress} = useAddress();
     //State
     const [isonline, setIsOnline] = useState(usuario.isOnline);
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
@@ -270,24 +272,33 @@ export const MapasDriver = ({navigation}) => {
           //     tripStatus: 2}})
           // }
           if(indexdriver !== indexorigin){
-            if(trip.tripStatus.tripStatus == 'deal'){
-              update_trip({variables: {tripStatusId: 1}}) //En camino
+            console.log('indices son diferentes')
+            console.log(indexdriver)
+            console.log(indexorigin)
+            console.log(trip)
+            if(trip.tripStatus.tripStatus == 'deal'){//En camino
+              // update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 1}})
             }
-          }
-          if(indexdriver == indexorigin){
+          }else if(indexdriver == indexorigin){
+            console.log('indices son iguales')
+            console.log(indexdriver)
+            console.log(indexorigin)
             if(trip.tripStatus.tripStatus == 'En Camino'){ //Esperando
-              update_trip({variables: {tripStatusId: 4}})
+              update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 4}})
             }
             if(trip.tripStatus.tripStatus == 'Esperando'){ //Iniciado
-              update_trip({variables: {tripStatusId: 6}})
+              update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 6}})
             }
           }
           if(indexdriver == indexdestination){
+            console.log('llego al destino')
+            console.log(indexdriver)
+            console.log(indexdestination)
             if(trip.tripStatus.tripStatus == 'Iniciado'){
-              update_trip({variables: {tripStatusId: 2}})
+              update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 2}})
             }
           }
-        console.log(error);
+      // }console.log(error);
       }
     })
 
@@ -322,10 +333,10 @@ export const MapasDriver = ({navigation}) => {
 
     const [update_trip] = useMutation(ACCEPT_TRIP,{
       fetchPolicy: "no-cache",
-      variables: {
-        tripId: trip.id,
-        driverId: usuario.id
-      },
+      // variables: {
+      //   // tripId: trip.id,
+      //   driverId: usuario.id
+      // },
       onCompleted:({UpdateTrip}) => {
         setTrip(UpdateTrip)
         // console.log('TripStatus changed (this gotta be printed just once)');

@@ -8,7 +8,7 @@ export const ResumenViaje = ({navigation}) => {
 
     useEffect(() => {
         handleAndroidBackButton(() => navigation.goBack())
-        console.log(trip)
+        // return () => setTrip(null);
       }, []) 
 
     const {trip, setTrip} = useTrip();

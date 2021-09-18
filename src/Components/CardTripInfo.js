@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
 import {useTrip} from '../Context/TripContext'
 import {DeleteTrip} from '../Functions/TripStorage'
 import { useUsuario } from '../Context/UserContext'
+import MotionSlider from 'react-native-motion-slider';
 
 export const CardTripInfo = (props) => {
     const {trip, setTrip} = useTrip();
@@ -79,19 +80,68 @@ export const CardTripInfo = (props) => {
         } else if (trip.tripStatus.tripStatus == 'Iniciado') {
             return (
                 <>
-                <Button title = 'Terminar Viaje' color = 'red' onPress = {() => {
+                {/* <Button title = 'Terminar Viaje' color = 'red' onPress = {() => {
                     actualizarViaje(2)
                     props.navigation.navigate('ResumenViaje')    
-                }}/>
+                }}/> */}
+                <MotionSlider
+                        min={0} 
+                        max={40}
+                        value={0} 
+                        decimalPlaces={10}
+                        units={'º'}
+                        backgroundColor={['#16A0DB', '#e3d912', '#32a852']}
+                        firstMessage = {'Teminar Viaje'}
+                        secondMessage = {'Terminando Viaje'}
+                        finalMessage = {'Viaje Terminado'}
+                        onValueChanged={(value) => {
+                        if(value == 40){
+                            actualizarViaje(2)
+                            deleteFromStorage()
+                            props.navigation.navigate('ResumenViaje')  
+                        }}}
+                        // onDrag={() => console.log('Dragging')}
+                />
                 <Button title = 'Cancelar Viaje' color = 'red' onPress = {() => console.log(3)}/>
                 <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/>
                 </>
             )
-        } 
+        } else if (trip.tripStatus.tripStatus == 'Terminado') {
+            return (
+                <>
+                <MotionSlider
+                        min={0} 
+                        max={40}
+                        value={0} 
+                        decimalPlaces={10}
+                        units={'º'}
+                        backgroundColor={['#16A0DB', '#e3d912', '#32a852']}
+                        firstMessage = {'Teminar Viaje'}
+                        secondMessage = {'Terminando Viaje'}
+                        finalMessage = {'Viaje Terminado'}
+                        onValueChanged={(value) => {
+                        if(value == 40){
+                            deleteFromStorage()
+                            props.navigation.navigate('ResumenViaje')  
+                        }}}
+                        // onDrag={() => console.log('Dragging')}
+                />
+                {/* <Button title = 'Terminar Viaje' color = 'red' onPress = {() => {
+                    // actualizarViaje(2)
+                    props.navigation.navigate('ResumenViaje')    
+                }}/> */}
+                {/* <Button title = 'Cancelar Viaje' color = 'red' onPress = {() => console.log(3)}/> */}
+                {/* <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/> */}
+                </>
+            )
+        } else
+        {
+            return null
+        }
     }
 
     async function deleteFromStorage() {
-        setTrip(null)
+        // setTrip(null)
         await DeleteTrip()
     }
 
