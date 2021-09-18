@@ -21,7 +21,7 @@ import { CardPassenger } from '../Components/CardPassenger'
 import { useTrip } from '../Context/TripContext'
 import {DeleteTrip} from '../Functions/TripStorage'
 // import darkStyle from '../Styles/darkStyle'
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { Button as ButtonPaper } from 'react-native-paper';
 
 const QUERY_DRIVERS = gql`
@@ -475,9 +475,9 @@ export const Mapas = ({navigation}) => {
           </View>
           <Text style = {styles.textCard}>Viaje</Text>
           <View style ={{flex: 1/2, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
-            <ButtonPaper style = {{backgroundColor: '#16A0DB'}} icon="plus" mode="contained" onPress={() => createTrip()}>viaje</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#4d4545'}} icon="highway" mode="contained" onPress={() => drawRoute()}>ruta</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>eliminar</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#16A0DB'}} icon="plus" mode="contained" onPress={() => createTrip()}>Viaje</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#4d4545'}} icon="highway" mode="contained" onPress={() => drawRoute()}>Ruta</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>Eliminar</ButtonPaper>
           </View>
           </CardPassenger>
         </View>

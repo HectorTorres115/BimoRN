@@ -5,8 +5,8 @@ import gql from 'graphql-tag'
 import { useMutation } from 'react-apollo'
 import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
 import { useUsuario } from '../Context/UserContext'
-import Icon from 'react-native-vector-icons/FontAwesome5';
-const myIcon1 = <Icon name="comments" size={30} color="#900" />; // Defaults to regular
+import Icon from 'react-native-vector-icons/FontAwesome';
+import ReduxLocationStore from '../Redux/Redux-location-store'
 //Backhandler
 
 const CURRENT_ADDRESS = gql`
@@ -23,7 +23,7 @@ export const FixToCenter = (props) => {
       
     const mapView = useRef(React.Component)
     const {setUser} = useUsuario()
-    const [marker, setMarker] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667})
+    const [marker, setMarker] = useState(ReduxLocationStore.getState())
     const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.009, longitudeDelta: 0.009});
     const [address, setAddress] = useState({name:"address"})
     const [get_current_info] = useMutation(CURRENT_ADDRESS, {
@@ -58,17 +58,13 @@ export const FixToCenter = (props) => {
                 style={styles.mapa}
                 onRegionChangeComplete={(region) => {
                     console.log(region);
-                    setDebugMarkers([...debugMarkers, region])
+                    setMarker(region)
                 }}
                 initialRegion={region}>   
-                {debugMarkers.map(coord => {
-                return <Marker 
-                key = {coord.lat} 
-                coordinate = {coord} />
-                })} 
+                <Marker coordinate = {marker} />
             </MapView>
             <View style = {{position: 'absolute', marginBottom: 200}}>
-                <Icon name="map-marker" size={20} color = "#000000"/>
+                <Icon name="map-marker" size={40} color = "#000000"/>
             </View>
             {/* <Image source={require('../../assets/images/pin1.jpeg')} style={styles.icon}></Image> */}
         </View>
