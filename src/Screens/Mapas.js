@@ -19,8 +19,10 @@ import { TripUpdated } from '../Listeners/TripUpdated'
 // import DriverPanel from '../Components/DriverPanel'
 import { CardPassenger } from '../Components/CardPassenger'
 import { useTrip } from '../Context/TripContext'
+import {DeleteTrip} from '../Functions/TripStorage'
 // import darkStyle from '../Styles/darkStyle'
-
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { Button as ButtonPaper } from 'react-native-paper';
 
 const QUERY_DRIVERS = gql`
 query{
@@ -29,7 +31,6 @@ query{
     }
   }
 `
-
 const QUERY_SERVICES = gql`
 query{
   GetServices{
@@ -51,7 +52,6 @@ query{
   }
 }
 `
-
 const DRAW_ROUTE = gql`
 mutation get_route_info($object: JSON){
     GetRouteInfo(object: $object) {
@@ -323,7 +323,7 @@ export const Mapas = ({navigation}) => {
               passengerId: usuario.id,
               "origin": ReduxLocationStore.getState(),
               "destination":  destination.placeId,
-              paymentMethod:1,
+              paymentMethod: 1,
               note:""
             }
           });
@@ -394,6 +394,12 @@ export const Mapas = ({navigation}) => {
       console.log(item)
     }
 
+    function deleteStorage() {
+      setTrip(null);
+      setPolyline([])
+      DeleteTrip()
+    }
+
     return (
         <>
         <MapView
@@ -418,13 +424,13 @@ export const Mapas = ({navigation}) => {
         </MapView>
 
         <EvaluateStartSuscription />
-        <EvaluateStartChat />
+        {/* <EvaluateStartChat /> */}
 
         {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
         {/* <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
         <Button title = "Crear Viaje" onPress = {() => createTrip()}/>  */}
         
-        <View style = {styles.cardContainer}>
+        {/* <View style = {styles.cardContainer}>
           <CardPassenger>
             <FlatList 
               data={services} 
@@ -444,12 +450,35 @@ export const Mapas = ({navigation}) => {
               ) }
               >
             </FlatList>
-            <ScrollView contentContainerStyle = {styles.scroll}>
-            
+            <ScrollView contentContainerStyle = {styles.scroll} horizontal = {true}>
               <Button title = 'Draw route'></Button>
-              <Button title = 'Profile'></Button>
               <Button title = 'Create Trip' onPress = {() => createTrip()}></Button>
+              <Button title = 'Delete Trip' onPress = {() => {
+                setTrip(null)
+                DeleteTrip()
+              }}></Button>
             </ScrollView>
+          </CardPassenger>
+        </View> */}
+
+        <View style = {styles.cardContainer}>
+          <CardPassenger>
+          <Text style = {styles.textCard}>Metodos de pago</Text>
+          <View style ={{flex: 1/2, justifyContent: 'space-between', alignItems: 'space-between', flexDirection: 'row'}}>
+            <ButtonPaper icon="credit-card" mode="contained" onPress={() => console.log('Pressed')}>card</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#329239'}} icon="cash" mode="contained" onPress={() => console.log('Pressed')}>cash</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#f7931a'}} icon="bitcoin" mode="contained" onPress={() => console.log('Pressed')}>bitcoin</ButtonPaper>
+          </View>
+          <Text style = {styles.textCard}>Servicios</Text>
+          <View style ={{flex: 1/2, justifyContent: 'center', alignItems: 'center'}}>
+            <Text>Servicios</Text>
+          </View>
+          <Text style = {styles.textCard}>Viaje</Text>
+          <View style ={{flex: 1/2, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
+            <ButtonPaper style = {{backgroundColor: '#16A0DB'}} icon="plus" mode="contained" onPress={() => createTrip()}>viaje</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#4d4545'}} icon="highway" mode="contained" onPress={() => drawRoute()}>ruta</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>eliminar</ButtonPaper>
+          </View>
           </CardPassenger>
         </View>
 
@@ -457,6 +486,7 @@ export const Mapas = ({navigation}) => {
             <FAB
             style={styles.fab}
             icon="menu"
+            // icon="plus"
             onPress={() => navigation.navigate('MapCamera')}
             />
         </View>    
@@ -532,9 +562,9 @@ const styles = StyleSheet.create({
         width: "98%"
       },
       scroll: {
-        // flex: 1,
+        flex: 1,
         // flexDirection: 'row',
-        width: '100%',
+        height: '100%',
         borderWidth: 2,
         borderColor: 'blue'
       },
@@ -556,6 +586,13 @@ const styles = StyleSheet.create({
       texto:{
         fontSize: 15,
         color: 'black'
+      },
+      textCard: {
+        fontSize: 17,
+        color: 'black',
+        fontWeight: 'bold',
+        alignSelf: 'flex-start',
+        marginLeft: 35
       }
   })
   

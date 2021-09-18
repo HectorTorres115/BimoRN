@@ -19,7 +19,7 @@ export default function SplashScreen() {
           useSignificantChanges: false, 
           maximumAge: 0
         }
-      )
+    )
 
     return (
         <View style = {styles.container}>
