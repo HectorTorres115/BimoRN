@@ -478,7 +478,7 @@ export const MapasDriver = ({navigation}) => {
             <FAB
             style={styles.fab}
             icon="menu"
-            onPress={() => navigation.openDrawer()}
+            onPress={() => console.log('pressed')}
             />
         </View>    
 

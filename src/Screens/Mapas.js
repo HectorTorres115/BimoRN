@@ -1,6 +1,5 @@
-import React, {useState, useRef, useEffect, useLayoutEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, ScrollView, Text, FlatList, Pressable } from 'react-native'
-import { Avatar, BottomNavigation  } from 'react-native-paper'
+import React, {useState, useRef, useEffect} from 'react'
+import { Button, StyleSheet, View, TextInput, Alert, Text} from 'react-native'
 import gql from 'graphql-tag'
 //Maps
 import MapView, {Marker, Polyline} from 'react-native-maps'
@@ -10,17 +9,12 @@ import { useAddress } from '../Context/AddressContext'
 import { useMutation, useQuery } from 'react-apollo'
 import { FAB } from 'react-native-paper';
 import decodePolyline from '../Functions/DecodePolyline'
-// import Geolocation from '@react-native-community/geolocation'
-import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from '../Redux/Redux-location-store';
-import { set_location } from '../Redux/Redux-actions';
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripUpdated } from '../Listeners/TripUpdated'
-// import DriverPanel from '../Components/DriverPanel'
 import { CardPassenger } from '../Components/CardPassenger'
 import { useTrip } from '../Context/TripContext'
 import {DeleteTrip} from '../Functions/TripStorage'
-// import darkStyle from '../Styles/darkStyle'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Button as ButtonPaper } from 'react-native-paper';
 
@@ -424,61 +418,15 @@ export const Mapas = ({navigation}) => {
         </MapView>
 
         <EvaluateStartSuscription />
-        {/* <EvaluateStartChat /> */}
-
-        {/* <Button title = "Perfil" onPress = {() => navigation.navigate("Perfil")}/>  */}
-        {/* <Button title = "Draw Route" onPress = {() => drawRoute()}/> 
-        <Button title = "Crear Viaje" onPress = {() => createTrip()}/>  */}
-        
-        {/* <View style = {styles.cardContainer}>
-          <CardPassenger>
-            <FlatList 
-              data={services} 
-              key = {(item)=> item.id}
-              keyExtractor = {(item)=> item.id}
-              horizontal= {true}
-              renderItem = { ({item}) => (
-                <View style = {styles.serviceContainer}>
-                  <View >
-                    <Pressable onPress={ ()=> elegirServicio(item)}> 
-                      <Avatar.Image size={40} source={require('../../assets/images/avatar.jpg')} style= {styles.avatar}/>  
-                      <Text style={styles.texto}>Tarifa</Text>
-                      <Text style={styles.texto}>{item.name}</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ) }
-              >
-            </FlatList>
-            <ScrollView contentContainerStyle = {styles.scroll} horizontal = {true}>
-              <Button title = 'Draw route'></Button>
-              <Button title = 'Create Trip' onPress = {() => createTrip()}></Button>
-              <Button title = 'Delete Trip' onPress = {() => {
-                setTrip(null)
-                DeleteTrip()
-              }}></Button>
-            </ScrollView>
-          </CardPassenger>
-        </View> */}
 
         <View style = {styles.cardContainer}>
-          <CardPassenger>
-          <Text style = {styles.textCard}>Metodos de pago</Text>
-          <View style ={{flex: 1/2, justifyContent: 'space-between', alignItems: 'space-between', flexDirection: 'row'}}>
-            <ButtonPaper icon="credit-card" mode="contained" onPress={() => console.log('Pressed')}>card</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#329239'}} icon="cash" mode="contained" onPress={() => console.log('Pressed')}>cash</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#f7931a'}} icon="bitcoin" mode="contained" onPress={() => console.log('Pressed')}>bitcoin</ButtonPaper>
-          </View>
-          <Text style = {styles.textCard}>Servicios</Text>
-          <View style ={{flex: 1/2, justifyContent: 'center', alignItems: 'center'}}>
-            <Text>Servicios</Text>
-          </View>
-          <Text style = {styles.textCard}>Viaje</Text>
-          <View style ={{flex: 1/2, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
-            <ButtonPaper style = {{backgroundColor: '#16A0DB'}} icon="plus" mode="contained" onPress={() => createTrip()}>Viaje</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#4d4545'}} icon="highway" mode="contained" onPress={() => drawRoute()}>Ruta</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>Eliminar</ButtonPaper>
-          </View>
+          <CardPassenger services = {services}>
+            <Text style = {styles.textCard}>Viaje</Text>
+            <View style ={styles.tripPanel}>
+              <ButtonPaper style = {{backgroundColor: '#16A0DB'}} icon="plus" mode="contained" onPress={() => createTrip()}>Viaje</ButtonPaper>
+              <ButtonPaper style = {{backgroundColor: '#4d4545'}} icon="highway" mode="contained" onPress={() => drawRoute()}>Ruta</ButtonPaper>
+              <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>Eliminar</ButtonPaper>
+            </View>
           </CardPassenger>
         </View>
 
@@ -486,8 +434,7 @@ export const Mapas = ({navigation}) => {
             <FAB
             style={styles.fab}
             icon="menu"
-            // icon="plus"
-            onPress={() => navigation.navigate('MapCamera')}
+            onPress={() => console.log('pressed')}
             />
         </View>    
 
@@ -512,8 +459,12 @@ export const Mapas = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
+    serviceContainer: {
+      flex: 1/2, 
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
     fab: {
-    //   position: 'absolute',
       margin: 16,
       right: 0,
       bottom: 0,
@@ -593,6 +544,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         alignSelf: 'flex-start',
         marginLeft: 35
-      }
+      },
+      tripPanel: {
+        flex: 1/2, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'
+    },
   })
   

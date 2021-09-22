@@ -8,19 +8,9 @@ export const ResumenViaje = ({navigation}) => {
 
     useEffect(() => {
         handleAndroidBackButton(() => navigation.goBack())
-        // return () => setTrip(null);
       }, []) 
 
     const {trip, setTrip} = useTrip();
-
-    // const [originvincity, setOriginVincity] = useState('C. Espino 5080, 80058 Culiacán Rosales, Sin., Mexico');
-    // const [destinationvincity, setDestinationVincity] = useState('Catedral, Prol. Álvaro Obregón, Primer Cuadro, 80000 Culiacán Rosales, Sin., Mexico');
-    // const [fee, setFee] = useState(80);
-    // const [feetaxed, setFeeTaxed] = useState(92.8);
-    // const [commission, setCommission] = useState(72);
-    // const [rawfee, setRawfee] = useState(80);
-    // const [tax, setTax] = useState('16%');
-    // const [distance, setDistance] = useState('10.5km');
 
     return (
 

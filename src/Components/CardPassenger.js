@@ -1,5 +1,7 @@
 import React , {useEffect, useState} from 'react'
 import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
+import { FlatList } from 'react-native-gesture-handler'
+import {Button as ButtonPaper} from 'react-native-paper'
 
 export const CardPassenger = (props) => {
     useEffect(() => {
@@ -24,7 +26,32 @@ export const CardPassenger = (props) => {
     return (
         <View style = {styles.card}>
             {props.children}
-            {/* {EvaluateTrip()} */}
+
+            <Text style = {styles.textCard}>Metodos de pago</Text>
+            <View style ={styles.payentPanel}>
+            <ButtonPaper icon="credit-card" mode="contained" onPress={() => console.log('Pressed')}>card</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#329239'}} icon="cash" mode="contained" onPress={() => console.log('Pressed')}>cash</ButtonPaper>
+            <ButtonPaper style = {{backgroundColor: '#f7931a'}} icon="bitcoin" mode="contained" onPress={() => console.log('Pressed')}>bitcoin</ButtonPaper>
+          </View>
+
+          {/* <Text style = {styles.textCard}>Servicios</Text> */}
+          <View style ={styles.servicesPanel}>
+            <FlatList horizontal = {true}
+            data = {props.services}
+            renderItem = {({item}) => (
+                <View style = {styles.serviceItemStyle}>
+                <ButtonPaper 
+                style = {styles.serviceButton} 
+                icon={item.icon}
+                mode="contained" 
+                onPress={() => console.log(item)}>
+                    {item.name}
+                </ButtonPaper>
+                </View>    
+            )}/>
+          </View>
+
+         
         </View>
     )
 }
@@ -57,5 +84,31 @@ const styles = StyleSheet.create({
     textTrip: {
         fontSize: 20,
         color: 'green'
+    },
+    payentPanel: {
+        flex: 1/2, 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexDirection: 'row'
+    },
+    servicesPanel: {
+        flex: 1/2, 
+        justifyContent: 'center',
+        alignItems: 'center',
+        // borderWidth: 2,
+        // borderColor: 'green',
+        width: '90%',
+        flexDirection: 'row'
+    },
+    tripPanel: {
+        flex: 1/2, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'
+    },
+    serviceItemStyle: {
+        height: '100%',
+        borderRadius: 5
+    },
+    serviceButton: {
+        backgroundColor: '#16A0DB',
+        margin: 10
     }
 })

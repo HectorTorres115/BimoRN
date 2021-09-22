@@ -7,7 +7,6 @@ import { client } from './src/Clients/client'
 import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
 import { AddressProvider , useAddress } from './src/Context/AddressContext'
 import { TripProvider } from './src/Context/TripContext';
-
 //pantallas
 import { Login } from './src/Screens/Login'
 import { LoginDriver } from './src/Screens/LoginDriver'
@@ -40,6 +39,20 @@ const DriverStack = createStackNavigator();
 // const LoginStack = createDrawerNavigator();
 // const MainStack = createDrawerNavigator();
 
+const globalOptions = {
+  headerShown: false
+}
+
+const theme = {
+  ...DefaultTheme,
+  roundness: 2,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#16A0DB',
+    accent: '#ffffff',
+  },
+};
+
 
 const LoginStackScreen = ()=> (
   <LoginStack.Navigator headerMode='none' >
@@ -51,15 +64,15 @@ const LoginStackScreen = ()=> (
 
 const MainStackScreen = ()=> (
   <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
-    <MainStack.Screen name="Mapas" component={Mapas} />
-    <MainStack.Screen name="Animation" component={Animation} />
-    <MainStack.Screen name="Registro" component={Registro} />
-    <MainStack.Screen name="FindAddress" component={FindAddress} />
-    <MainStack.Screen name="MapCamera" component={MapCamera} />
-    <MainStack.Screen name="FixToCenter" component={FixToCenter} />
-    <MainStack.Screen name="Chat" component={Chat} />
-    <MainStack.Screen name="Perfil" component={Perfil} />
-    <MainStack.Screen name="Tracking" component={Tracking} />
+    <MainStack.Screen name="Mapas" component={Mapas} options = {globalOptions}/>
+    <MainStack.Screen name="Animation" component={Animation} options = {globalOptions} />
+    <MainStack.Screen name="Registro" component={Registro} options = {globalOptions}/>
+    <MainStack.Screen name="FindAddress" component={FindAddress} options = {globalOptions} />
+    <MainStack.Screen name="MapCamera" component={MapCamera} options = {globalOptions}/>
+    <MainStack.Screen name="FixToCenter" component={FixToCenter} options = {globalOptions}/>
+    <MainStack.Screen name="Chat" component={Chat} options = {globalOptions}/>
+    <MainStack.Screen name="Perfil" component={Perfil} options = {globalOptions}/>
+    <MainStack.Screen name="Tracking" component={Tracking} options = {globalOptions}/>
   </MainStack.Navigator>
 )
 
@@ -75,7 +88,7 @@ const DriverStackScreen = ()=> (
 )
 
 export default ()=> (
-  <PaperProvider>
+  <PaperProvider theme = {theme}>
   <StripeProvider publishableKey={stripeUrl}>
   <TripProvider>
   <UsuarioProvider>

@@ -1,5 +1,5 @@
 {
-  "name": "BimoDriver",
+  "name": "bimo-driver",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -13,9 +13,10 @@
     "@react-native-community/async-storage": "^1.11.0",
     "@react-native-community/datetimepicker": "^3.5.2",
     "@react-native-community/hooks": "^2.5.1",
-    "@react-native-community/masked-view": "^0.1.10",
+    "@react-native-community/masked-view": "^0.1.10", 
     "@react-native-firebase/app": "^12.1.0",
     "@react-native-firebase/messaging": "^12.1.0",
+    "@react-navigation/drawer": "^6.1.4",
     "@react-navigation/native": "^5.4.2",
     "@react-navigation/stack": "^5.3.9",
     "@stripe/stripe-react-native": "^0.2.0",
