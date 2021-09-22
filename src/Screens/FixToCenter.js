@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
-import { StyleSheet, View, Image, Alert, TextInput} from 'react-native'
+import { StyleSheet, View, Image, Alert, TextInput, Button} from 'react-native'
 import MapView, {Marker} from 'react-native-maps' 
 import gql from 'graphql-tag'
 import { useMutation } from 'react-apollo'
@@ -19,6 +19,7 @@ export const FixToCenter = (props) => {
 
     useEffect(() => {
         handleAndroidBackButton(() => props.navigation.goBack())
+        console.log(props)
       }, []) 
       
     const mapView = useRef(React.Component)
@@ -58,6 +59,10 @@ export const FixToCenter = (props) => {
             <View style = {{position: 'absolute', marginBottom: 200}}>
                 <Icon name="map-marker" size={40} color = "#000000"/>
             </View>
+            <Button title = 'Confirmar direccion' color = 'red' onPress = {() => {
+                props.route.params.setter(address)
+                props.navigation.navigate("Mapas")
+                }} />
         </View>
 
         <View style={styles.inputsContainer}>

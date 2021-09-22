@@ -29,20 +29,20 @@ export const ResumenViaje = ({navigation}) => {
             <Text style = {styles.text}>Hasta: {trip.destinationVincity}</Text>
             <DataTable style = {styles.tablecontainer}> 
                 <DataTable.Row>
-                    <DataTable.Cell style = {styles.text1}>Distancia:</DataTable.Cell>
-                    <DataTable.Cell style = {styles.text2}>{trip.distance}</DataTable.Cell>
+                    <DataTable.Cell style = {styles.text1}><Text style = {styles.text}>Distancia:</Text></DataTable.Cell>
+                    <DataTable.Cell style = {styles.text2}><Text style = {styles.text}>{trip.distance} km</Text></DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
-                    <DataTable.Cell style = {styles.text1}>Subtotal:</DataTable.Cell>
-                    <DataTable.Cell style = {styles.text2}>{trip.fee}</DataTable.Cell>
+                    <DataTable.Cell style = {styles.text1}><Text style = {styles.text}>Subtotal:</Text></DataTable.Cell>
+                    <DataTable.Cell style = {styles.text2}><Text style = {styles.text}>$ {trip.fee.toFixed(2)}</Text></DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
-                    <DataTable.Cell style = {styles.text1}>rawfee:</DataTable.Cell>
-                    <DataTable.Cell style = {styles.text2}>{trip.rawfee}</DataTable.Cell>
+                    <DataTable.Cell style = {styles.text1}><Text style = {styles.text}>rawfee:</Text></DataTable.Cell>
+                    <DataTable.Cell style = {styles.text2}><Text style = {styles.text}>$ {trip.rawfee.toFixed(2)}</Text></DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
-                    <DataTable.Cell style = {styles.text1}>Total:</DataTable.Cell>
-                    <DataTable.Cell style = {styles.text2}>{trip.feeTaxed}</DataTable.Cell>
+                    <DataTable.Cell style = {styles.text1}><Text style = {styles.text}>Total:</Text></DataTable.Cell>
+                    <DataTable.Cell style = {styles.text2}><Text style = {styles.text}>$ {trip.feeTaxed.toFixed(2)}</Text></DataTable.Cell>
                 </DataTable.Row>
             </DataTable>            
             <Button title = 'Cerrar' color = 'red' onPress = {() => {

@@ -108,7 +108,7 @@ export function FindAddress(props) {
             >
             </FlatList>
 
-            <Pressable style = {styles.fixLocationContainer} onPressIn = {() => props.navigation.navigate('FixToCenter')}>
+            <Pressable style = {styles.fixLocationContainer} onPressIn = {() => props.navigation.navigate('FixToCenter',{setter:props.route.params.setter})}>
               <Text style = {styles.texto}>Fijar ubicacion en el mapa</Text>
             </Pressable>
         </View>
