@@ -4,6 +4,7 @@ import gql from 'graphql-tag'
 import MapView, {Marker, Polygon, Polyline} from 'react-native-maps'
 import { useUsuario } from '../Context/UserContext'
 import { useAddress } from '../Context/AddressContext'
+import { useViaje } from '../Context/ViajeContext'
 import { useMutation, useQuery } from 'react-apollo'
 import { FAB } from 'react-native-paper';
 import decodePolyline from '../Functions/DecodePolyline'
@@ -194,12 +195,14 @@ export const MapasDriver = ({navigation}) => {
     const {usuario, setUser} = useUsuario();
     const {trip, setTrip} = useTrip();
     const {address, setAddress} = useAddress();
+    const {viaje, setViaje} = useViaje();
     //State
     const [isonline, setIsOnline] = useState(usuario.isOnline);
     const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
     const [drivers, setDrivers] = useState([]);
     const [driverLocation, setDriverLocation] = useState(ReduxLocationStore.getState());
     const [polyline, setPolyline] = useState([]);
+    const [driverpolyline, setDriverPolyline] = useState([]);
     const [hexagons, setHexagons] = useState([]);
     const [hexagonsdestination, setHexagonsDestination] = useState([]);
     // const [trip, setTrip] = useState({});
@@ -251,6 +254,10 @@ export const MapasDriver = ({navigation}) => {
           setCity(UpdateCity)
           setIndexDriver(UpdateCity.indexH3)
           setDriverLocation(ReduxLocationStore.getState())
+
+          // setViaje({
+          //   indexdriver: UpdateCity.indexH3
+          // })
           // console.log(indexdriver)
           // console.log(indexorigin)
           // console.log(indexdestination)
@@ -309,6 +316,12 @@ export const MapasDriver = ({navigation}) => {
             setTrip(UpdateTrip)
 
             setPolyline(decodePolyline(UpdateTrip.tripPolyline))
+            setDriverPolyline(decodePolyline(UpdateTrip.driverPolyline))
+
+            // setViaje({
+            //   tripPolyline: decodePolyline(UpdateTrip.tripPolyline),
+            //   driverPolyline: decodePolyline(UpdateTrip.driverPolyline)
+            // })
 
             setOriginCoordinates({latitude: UpdateTrip.originLocationLat, longitude: UpdateTrip.originLocationLng})
             setDestinationCoordinates({latitude: UpdateTrip.destinationLocationLat, longitude: UpdateTrip.destinationLocationLng})
@@ -318,13 +331,20 @@ export const MapasDriver = ({navigation}) => {
             get_hexagons({variables:{ lat:UpdateTrip.originLocationLat,lng: UpdateTrip.originLocationLng,res: 10,jumps: 0}}).then(({data})=>{
               setIndexOrigin(data.GetHexagons[0].index)
               setHexagons(data.GetHexagons)
+              // setViaje({
+              //   indexorigin: data.GetHexagons[0].index
+              // })
+
             })
 
             get_hexagons({variables:{ lat: UpdateTrip.destinationLocationLat,lng: UpdateTrip.destinationLocationLng,res: 10,jumps: 0}}).then(({data})=>{
               setIndexDestination(data.GetHexagons[0].index)
               setHexagonsDestination(data.GetHexagons)
+              // setViaje({
+              //   indexdestination: data.GetHexagons[0].index
+              // })
             })
-              SetTripStorage(UpdateTrip)
+              SetTripStorage(UpdateTrip)            
         },
         onError:(error) => {
           console.log(error);
@@ -468,8 +488,10 @@ export const MapasDriver = ({navigation}) => {
 
             {/* <EvaluateMarkers/> */}
 
+            {/* {viaje.tripPolyline !== null ? <Polyline coordinates={viaje.tripPolyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null}
+            {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null} */}
             <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-            {/* {trip !== null ? <Polyline coordinates={decodePolyline(trip.tripPolyline)} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />: null} */}
+            <Polyline coordinates={driverpolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
         </MapView>
 
         <EvaluateCard/>

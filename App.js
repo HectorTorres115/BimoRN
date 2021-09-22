@@ -6,7 +6,9 @@ import { ApolloProvider } from 'react-apollo'
 import { client } from './src/Clients/client'
 import { UsuarioProvider , useUsuario } from './src/Context/UserContext'
 import { AddressProvider , useAddress } from './src/Context/AddressContext'
-import { TripProvider } from './src/Context/TripContext';
+import { TripProvider } from './src/Context/TripContext'
+import { ViajeProvider } from './src/Context/ViajeContext';
+
 //pantallas
 import { Login } from './src/Screens/Login'
 import { LoginDriver } from './src/Screens/LoginDriver'
@@ -77,7 +79,7 @@ const MainStackScreen = ()=> (
 )
 
 const DriverStackScreen = ()=> (
-  <DriverStack.Navigator headerMode='none' initialRouteName={'Viajes'}>
+  <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
     <DriverStack.Screen name="Perfil" component={Perfil} />
     <DriverStack.Screen name="Chat" component={Chat} />
@@ -93,7 +95,9 @@ export default ()=> (
   <TripProvider>
   <UsuarioProvider>
   <AddressProvider>
+  <ViajeProvider>
     <App></App>
+  </ViajeProvider>
   </AddressProvider>
   </UsuarioProvider>
   </TripProvider>
