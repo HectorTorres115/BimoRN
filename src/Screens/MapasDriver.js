@@ -6,15 +6,14 @@ import { useUsuario } from '../Context/UserContext'
 import { useAddress } from '../Context/AddressContext'
 import { useViaje } from '../Context/ViajeContext'
 import { useMutation, useQuery } from 'react-apollo'
-import { FAB } from 'react-native-paper';
 import decodePolyline from '../Functions/DecodePolyline'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
-import MotionSlider from 'react-native-motion-slider';
 import { useTrip } from '../Context/TripContext'
 import {CardTripInfo} from '../Components/CardTripInfo'
 import { SetTrip as SetTripStorage } from '../Functions/TripStorage'
+import {Fab} from '../Components/Fab'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -213,7 +212,6 @@ export const MapasDriver = ({navigation}) => {
     //Marcadores
     const [originCoordinates, setOriginCoordinates] = useState(null);
     const [destinantionCoordinates, setDestinationCoordinates] = useState(null);
-    const [slidervalue, setSliderValue] = useState(0);
 
      //Server requests
     useQuery(QUERY_DRIVERS, {
@@ -240,9 +238,6 @@ export const MapasDriver = ({navigation}) => {
 
     const [get_hexagons] = useMutation(GET_HEXAGONS,{
         fetchPolicy: "no-cache",
-        onCompleted:({GetHexagons})=>{
-          console.log('GetHexagons is working')
-        },
         onError:(error)=>{
           console.log(error);
         }
@@ -254,42 +249,18 @@ export const MapasDriver = ({navigation}) => {
           setCity(UpdateCity)
           setIndexDriver(UpdateCity.indexH3)
           setDriverLocation(ReduxLocationStore.getState())
-
-          // setViaje({
-          //   indexdriver: UpdateCity.indexH3
-          // })
-          // console.log(indexdriver)
-          // console.log(indexorigin)
-          // console.log(indexdestination)
-          // console.log(trip.tripStatusId)
-          // if(indexdriver == indexorigin && trip.tripStatusId !== 4 && trip.tripStatusId !== 6 && trip.tripStatusId !==2){
-          //    console.log('Esperando a pasajero')
-          //   update_trip({variables:{id: trip.id,
-          //     driverId: usuario.id,
-          //     tripStatus: 4}})
-          // } else if (indexdriver == indexorigin && trip.tripStatusId !== 6 && trip.tripStatusId !== 4) {
-          //   console.log('iniciado')
-          //   update_trip({variables:{id: trip.id,
-          //     driverId: usuario.id,
-          //     tripStatus: 6}})
-          // } else if (indexdriver == indexdestination && trip.tripStatusId !== 2){
-          //   console.log('llego a destino')
-          //   update_trip({variables:{id: trip.id,
-          //     driverId: usuario.id,
-          //     tripStatus: 2}})
-          // }
-          if(indexdriver !== indexorigin){
-            console.log('indices son diferentes')
-            console.log(indexdriver)
-            console.log(indexorigin)
-            console.log(trip)
+          if(indexdriver !== indexorigin && indexorigin !== null){
+            // console.log('indices son diferentes')
+            // console.log(indexdriver)
+            // console.log(indexorigin)
+            // console.log(trip)
             if(trip.tripStatus.tripStatus == 'deal'){//En camino
               // update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 1}})
             }
           }else if(indexdriver == indexorigin){
-            console.log('indices son iguales')
-            console.log(indexdriver)
-            console.log(indexorigin)
+            // console.log('indices son iguales')
+            // console.log(indexdriver)
+            // console.log(indexorigin)
             if(trip.tripStatus.tripStatus == 'En Camino'){ //Esperando
               update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 4}})
             }
@@ -298,14 +269,13 @@ export const MapasDriver = ({navigation}) => {
             }
           }
           if(indexdriver == indexdestination){
-            console.log('llego al destino')
-            console.log(indexdriver)
-            console.log(indexdestination)
+            // console.log('llego al destino')
+            // console.log(indexdriver)
+            // console.log(indexdestination)
             if(trip.tripStatus.tripStatus == 'Iniciado'){
               update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 2}})
             }
           }
-      // }console.log(error);
       }
     })
 
@@ -406,46 +376,6 @@ export const MapasDriver = ({navigation}) => {
       } else {return null}
     }
 
-    // function handleSlider(value){
-    //   setSliderValue(value)
-    //   if(value == 40){
-
-    //     console.log('viaje terminado!')
-    //   }
-    // }
-
-    function EvaluateSlider() {
-      // console.log('card')
-       console.log(trip)
-      if(indexdriver == indexdestination && trip.tripStatusId == 6){
-          return (<MotionSlider
-            min={0} 
-            max={40}
-            value={0} 
-            decimalPlaces={10}
-            units={'º'}
-            backgroundColor={['#16A0DB', '#e3d912', '#32a852']}
-            firstMessage = {'Teminar Viaje'}
-            secondMessage = {'Terminando Viaje'}
-            finalMessage = {'Viaje Terminado'}
-            onValueChanged={(value) => {
-              if(value == 40){
-        
-                update_trip({variables:{id: trip.id,
-                  driverId: usuario.id,
-                  tripStatus: 2}})
-            }}}
-            // onDrag={() => console.log('Dragging')}
-      />)
-      } else if(trip.tripStatusId == 2){
-          return (
-              <Text style = {styles.textTrip}>Viaje terminado</Text>
-          )
-        } else {
-          return( <Text style = {styles.textTrip}>Aun no puedes terminar el viaje</Text>)
-        }
-    }
-
     function EvaluateCard() {
       if(trip !== null){
         return (
@@ -495,15 +425,7 @@ export const MapasDriver = ({navigation}) => {
         </MapView>
 
         <EvaluateCard/>
-
-        <View style={styles.fabContainer}>
-            <FAB
-            style={styles.fab}
-            icon="menu"
-            onPress={() => console.log('pressed')}
-            />
-        </View>    
-
+        <Fab navigation = {navigation}/>
         <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip} />
 
         <View style={styles.switchContainer}>

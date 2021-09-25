@@ -1,57 +1,184 @@
 import React , {useEffect, useState} from 'react'
-import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, Button, ScrollView, TouchableOpacity, Touchable } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import {Button as ButtonPaper} from 'react-native-paper'
+import Icon from 'react-native-vector-icons/FontAwesome';
+//
+import gql from 'graphql-tag'
+import {useQuery, useLazyQuery} from 'react-apollo'
+//
+import { useTrip } from '../Context/TripContext'
+import { SetTrip as SetTripStorage} from '../Functions/TripStorage'
+
+const GET_SERVICES = gql`
+query {
+  GetServices {
+    id
+    commissionTypeId
+    icon
+    mapIcon
+    name
+    seats
+    tarifaBase
+    cuotaDeSolicitudPorKm
+    tarifaMinima
+    costoPorTiempo
+    costoPorKm
+    tarifaDeCancelacion
+  }
+}
+
+`
+
+const GET_PAYMENT_METHODS = gql`
+query {
+  GetPaymentMethods{
+    id
+    paymentMethod
+  }
+}
+`
 
 export const CardPassenger = (props) => {
     useEffect(() => {
         console.log('Component did mount');
     }, [])
+    const {trip, setTrip} = useTrip(); 
+    const [payments, setPayments] = useState([]);
+    const [services, setServices] = useState([]);
 
-    const [tripAccepted, setTripAccepted] = useState(false);
-
-    function EvaluateTrip() {
-        if(tripAccepted){
-            return <Text style = {styles.textTrip}>Viaje aceptado.</Text>
-        } else {
-            return (
-            <View style = {styles.buttonContainer}>
-                <Button style = {styles.button} title = 'Aceptar' color = 'blue' onPress = {() => aceptarViaje()}/>
-                <Button style = {styles.button} title = 'Rechazar' color = 'red'/>
-            </View>
-            )
+    useQuery(GET_SERVICES, {
+        fetchPolicy: "no-cache",
+        onCompleted: ({GetServices}) => {
+            console.log(GetServices);
+            setServices(GetServices)
+        },
+        onError: (err) => {
+            console.log(err);
         }
+    })
+
+    useQuery(GET_PAYMENT_METHODS, {
+        fetchPolicy: "no-cache",
+        onCompleted: ({GetPaymentMethods}) => {
+            console.log(GetPaymentMethods);
+            setPayments(GetPaymentMethods)
+        },
+        onError: (err) => {
+            console.log(err);
+        }
+    })
+
+    const [get_services] = useLazyQuery(GET_SERVICES, {
+        fetchPolicy: "no-cache",
+        onCompleted: ({GetServices}) => {
+            console.log(GetServices);
+            setServices(GetServices)
+        },
+        onError: (err) => {
+            console.log(err);
+        }
+    })
+
+    const [get_payments] = useLazyQuery(GET_PAYMENT_METHODS, {
+        fetchPolicy: "no-cache",
+        onCompleted: ({GetPaymentMethods}) => {
+            console.log(GetPaymentMethods);
+            setPayments(GetPaymentMethods)
+        },
+        onError: (err) => {
+            console.log(err);
+        }
+    })
+
+    function filterServices(item) {
+        const filtered = services.filter((service) => service.id === item.id)
+        setServices(filtered)
+    }
+
+    function filterPayments(item) {
+        const filtered = payments.filter((payment) => payment.id === item.id)
+        setPayments(filtered)
     }
 
     return (
         <View style = {styles.card}>
-            {props.children}
+            {/* {props.children} */}
 
-            <Text style = {styles.textCard}>Metodos de pago</Text>
-            <View style ={styles.payentPanel}>
-            <ButtonPaper icon="credit-card" mode="contained" onPress={() => console.log('Pressed')}>card</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#329239'}} icon="cash" mode="contained" onPress={() => console.log('Pressed')}>cash</ButtonPaper>
-            <ButtonPaper style = {{backgroundColor: '#f7931a'}} icon="bitcoin" mode="contained" onPress={() => console.log('Pressed')}>bitcoin</ButtonPaper>
-          </View>
-
-          {/* <Text style = {styles.textCard}>Servicios</Text> */}
-          <View style ={styles.servicesPanel}>
+          {/* <Text style = {styles.textCard}>Metodos de pago</Text> */}
+          <View style ={styles.payentPanel}>
+            { payments.length <= 1 ?( 
+            <TouchableOpacity onPress = {() => get_payments()}>
+                <Icon name="arrow-left" size = {20} style = {{margin: 10}} color = 'gray'/>
+            </TouchableOpacity>
+            ) : null} 
             <FlatList horizontal = {true}
-            data = {props.services}
+            data = {payments}
             renderItem = {({item}) => (
                 <View style = {styles.serviceItemStyle}>
-                <ButtonPaper 
-                style = {styles.serviceButton} 
-                icon={item.icon}
-                mode="contained" 
-                onPress={() => console.log(item)}>
-                    {item.name}
-                </ButtonPaper>
+                    <ButtonPaper 
+                    style = {styles.paymentButton} 
+                    icon={item.icon}
+                    mode="contained" 
+                    onPress={() => filterPayments(item)}>
+                        {item.paymentMethod}
+                    </ButtonPaper>
                 </View>    
             )}/>
           </View>
 
-         
+          {/* <Text style = {styles.textCard}>Servicios</Text> */}
+          <View style ={styles.servicesPanel}>
+            { services.length <= 1 ?( 
+            <TouchableOpacity onPress = {() => get_services()}>
+                <Icon name="arrow-left" size = {20} style = {{margin: 10}} color = 'gray'/>
+            </TouchableOpacity>
+            ) : null} 
+            <FlatList horizontal = {true}
+            data = {services}
+            renderItem = {({item}) => (
+                <View style = {styles.serviceItemStyle}>
+                    <ButtonPaper 
+                    style = {styles.serviceButton} 
+                    icon={item.icon}
+                    mode="contained" 
+                    onPress={() => filterServices(item)}>
+                        {item.name}
+                    </ButtonPaper>
+                </View>    
+            )}/>
+          </View>
+
+          {/* <Text style = {styles.textCard}>Panel</Text> */}
+          <View style = {styles.tripPanel}>
+            <ButtonPaper 
+            style = {{backgroundColor: 'darkblue', margin: 10}}
+            icon={'plus'}
+            mode="contained" 
+            onPress={() => props.props.viaje()}>
+            Viaje
+            </ButtonPaper>
+
+            <ButtonPaper 
+            style = {{backgroundColor: '#000000', margin: 10}}
+            icon={'highway'}
+            mode="contained" 
+            onPress={() => props.props.ruta()}>
+            Ruta    
+            </ButtonPaper>
+
+            <ButtonPaper 
+            style = {{backgroundColor: '#000000', margin: 10}}
+            icon={'highway'}
+            mode="contained" 
+            onPress={() => {
+                setTrip(null)
+                SetTripStorage(null)
+            }}>
+            DEL    
+            </ButtonPaper>
+          </View>
+
         </View>
     )
 }
@@ -89,19 +216,28 @@ const styles = StyleSheet.create({
         flex: 1/2, 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        flexDirection: 'row'
+        flexDirection: 'row',
+        width: '90%',
+        // borderWidth: 2,
+        // borderColor: 'yellow',
     },
     servicesPanel: {
         flex: 1/2, 
         justifyContent: 'center',
         alignItems: 'center',
+        width: '90%',
+        flexDirection: 'row',
         // borderWidth: 2,
         // borderColor: 'green',
-        width: '90%',
-        flexDirection: 'row'
     },
     tripPanel: {
-        flex: 1/2, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'
+        flex: 1/2, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        flexDirection: 'row',
+        // borderWidth: 2,
+        // borderColor: 'red',
+        width: '90%',
     },
     serviceItemStyle: {
         height: '100%',
@@ -109,6 +245,10 @@ const styles = StyleSheet.create({
     },
     serviceButton: {
         backgroundColor: '#16A0DB',
+        margin: 10
+    },
+    paymentButton: {
+        backgroundColor: '#329239',
         margin: 10
     }
 })

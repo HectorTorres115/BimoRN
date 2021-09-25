@@ -1,42 +1,13 @@
-import React, {useState,useEffect,useRef} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import { StyleSheet, Text, View, TextInput,Button, FlatList } from 'react-native'
 import gql from 'graphql-tag'
 import { useMutation, useQuery } from 'react-apollo'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { useUsuario } from '../Context/UserContext'
 import { ChatListener } from '../Listeners/ChatListener'
+import { useTrip } from '../Context/TripContext'
+import {Fab} from '../Components/Fab'
 
-const CREATE_CHAT = gql`
-mutation create_chat($tripId: Int!, $driverId: Int!, $passengerId: Int!){
-  CreateChat(input:{
-    tripId:$tripId
-    driverId:$driverId
-    passengerId:$passengerId
-  }){
-    id
-    createdAt
-    status
-    driverId
-    passengerId
-    driver{
-      id
-      name
-      email
-    }
-    passenger
-    {
-      id
-      name
-      email
-    }
-    messages{
-      id
-      message
-      sender
-    }
-  }
-}
-`
 const GET_CHAT_BY_TRIPID = gql`
 query get_chat_by_tripId($tripId: Int!){
   GetChatByTripId(tripId: $tripId){
@@ -91,8 +62,9 @@ export const Chat = (props) => {
         }
       }, []) 
 
+    const {trip} = useTrip();
     const lista = useRef(React.Component)
-    const [trip, setTrip] = useState(props.route.params.trip)
+    // const [trip, setTrip] = useState(props.route.params.trip)
     const [chat, setChat] = useState({})
     const [message, setMessage] = useState({})
     const [messages, setMessages] = useState([])
@@ -103,43 +75,15 @@ export const Chat = (props) => {
     useQuery(GET_CHAT_BY_TRIPID,{
         fetchPolicy: "no-cache",
         variables:{
-            tripId: props.route.params.trip.id
+            tripId: trip.id
         },
         onCompleted:async ({GetChatByTripId}) => {
-            if(GetChatByTripId !== null){
-                console.log('Hay chat creado')
-                setChat(GetChatByTripId)
-                setMessages(GetChatByTripId.messages)
-            } else {
-                console.log('No Hay chat creado')
-                await create_chat()
-            }
+          console.log(GetChatByTripId);
         },
         onError:(err) => {
             console.log(err);
         }
     })
-
-    const [create_chat] = useMutation(CREATE_CHAT, {
-        fetchPolicy: "no-cache",
-        variables: {
-            tripId: props.route.params.trip.id,
-            passengerId: props.route.params.trip.passengerId,
-            driverId: props.route.params.trip.driverId
-        },
-        onCompleted:({CreateChat}) => {
-            setChat(CreateChat)
-            setMessages(CreateChat.messages)
-        },
-        onError: (error)=>{
-          console.log({
-            tripId: props.route.params.trip.id,
-            passengerId: props.route.params.trip.passengerId,
-            driverId: props.route.params.trip.driverId
-          })
-          console.log(error);
-        }
-      })
 
     const [create_message] = useMutation(CREATE_MESSAGE,{
         fetchPolicy: "no-cache",
@@ -149,8 +93,7 @@ export const Chat = (props) => {
             sender: usuario.email
           },
         onCompleted:({CreateMessage})=>{
-            // console.log(CreateMessage);
-            setMessage('')
+            console.log(CreateMessage);
         },
         onError: (err) =>{
             console.log({
@@ -193,7 +136,7 @@ export const Chat = (props) => {
     }
 
     return (
-        <View style={styles.container}>
+      <View style={styles.container}>
             <View style={styles.chatContainer}>
                 <FlatList 
                 ref= {lista}
@@ -208,6 +151,7 @@ export const Chat = (props) => {
                 <TextInput placeholder={'Message'} placeholderTextColor={'gray'} onChangeText={(message)=>setMessage(message)} value={message} style={styles.inputText}/>
                 <Button title='Send' onPress={async ()=> await create_message()}></Button>
             </View>
+            <Fab navigation = {props.navigation}/>
         </View>
     )
 }

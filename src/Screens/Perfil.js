@@ -5,6 +5,7 @@ import { useUsuario } from '../Context/UserContext'
 import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
 import {CardField} from '@stripe/stripe-react-native'
 import AsyncStorage from '@react-native-community/async-storage'
+import {Fab} from '../Components/Fab'
 
 const BasicInfoRoute = () => {
 const [card, setCard] = useState({});
@@ -175,6 +176,7 @@ const [routes] = React.useState([
     return (
         <>
         <EvaluateNavigation  />
+        <Fab navigation = {props.navigation}/>
         </>
     )
 }

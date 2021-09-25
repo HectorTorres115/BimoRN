@@ -8,7 +8,7 @@ import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import ReduxLocationStore from '../Redux/Redux-location-store';
 import { TripCreated } from '../Listeners/TripCreated'
 import { appMode } from '../Clients/client-config'
-
+import {Fab} from '../Components/Fab'
 
 const UPDATE_DRIVER_LOCATION = gql`
 mutation update_driver_location($citiId: Int!, $lat: Float!,$lng: Float! ){
@@ -331,6 +331,7 @@ export const Tracking = (props) => {
             console.log(indexpassenger)
           }
         }/> 
+        <Fab navigation = {props.navigation}/>
         </>
     )
 }

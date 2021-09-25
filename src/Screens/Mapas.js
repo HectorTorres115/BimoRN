@@ -17,6 +17,7 @@ import { useTrip } from '../Context/TripContext'
 import {DeleteTrip} from '../Functions/TripStorage'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Button as ButtonPaper } from 'react-native-paper';
+import {Fab} from '../Components/Fab'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -420,23 +421,17 @@ export const Mapas = ({navigation}) => {
         <EvaluateStartSuscription />
 
         <View style = {styles.cardContainer}>
-          <CardPassenger services = {services}>
-            <Text style = {styles.textCard}>Viaje</Text>
+          <CardPassenger props = {{ruta: drawRoute, viaje: createTrip}}>
+            {/* <Text style = {styles.textCard}>Viaje</Text>
             <View style ={styles.tripPanel}>
               <ButtonPaper style = {{backgroundColor: '#16A0DB'}} icon="plus" mode="contained" onPress={() => createTrip()}>Viaje</ButtonPaper>
               <ButtonPaper style = {{backgroundColor: '#4d4545'}} icon="highway" mode="contained" onPress={() => drawRoute()}>Ruta</ButtonPaper>
               <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>Eliminar</ButtonPaper>
-            </View>
+            </View> */}
           </CardPassenger>
         </View>
 
-        <View style={styles.fabContainer}>
-            <FAB
-            style={styles.fab}
-            icon="menu"
-            onPress={() => console.log('pressed')}
-            />
-        </View>    
+        <Fab navigation = {navigation}/> 
 
         <View style={styles.inputsContainer}>
             <TextInput 

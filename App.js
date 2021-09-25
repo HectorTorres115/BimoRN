@@ -38,11 +38,13 @@ import { stripeUrl } from './src/Clients/client-config'
 const LoginStack = createStackNavigator();
 const MainStack = createStackNavigator();
 const DriverStack = createStackNavigator();
+// const DriverStack = createDrawerNavigator();
 // const LoginStack = createDrawerNavigator();
 // const MainStack = createDrawerNavigator();
 
 const globalOptions = {
-  headerShown: false
+  headerShown: false, 
+  unmountOnBlur: true
 }
 
 const theme = {
@@ -58,9 +60,9 @@ const theme = {
 
 const LoginStackScreen = ()=> (
   <LoginStack.Navigator headerMode='none' >
-    <LoginStack.Screen name="Login" component={Login} />
-    <LoginStack.Screen name="LoginDriver" component={LoginDriver} />
-    <LoginStack.Screen name="Register" component={Registro} />
+    <LoginStack.Screen name="Login" component={Login} options = {globalOptions}/>
+    <LoginStack.Screen name="LoginDriver" component={LoginDriver} options = {globalOptions}/>
+    <LoginStack.Screen name="Register" component={Registro} options = {globalOptions}/>
   </LoginStack.Navigator>
 )
 
@@ -80,12 +82,12 @@ const MainStackScreen = ()=> (
 
 const DriverStackScreen = ()=> (
   <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
-    <DriverStack.Screen name="MapasDriver" component={MapasDriver} />
-    <DriverStack.Screen name="Perfil" component={Perfil} />
-    <DriverStack.Screen name="Chat" component={Chat} />
-    <DriverStack.Screen name="Tracking" component={Tracking} />
-    <DriverStack.Screen name="ResumenViaje" component={ResumenViaje} />
-    <DriverStack.Screen name="Viajes" component={Viajes} />
+    <DriverStack.Screen name="MapasDriver" component={MapasDriver} options = {globalOptions}/>
+    <DriverStack.Screen name="Perfil" component={Perfil} options = {globalOptions}/>
+    <DriverStack.Screen name="Chat" component={Chat} options = {globalOptions}/>
+    <DriverStack.Screen name="Tracking" component={Tracking} options = {globalOptions}/>
+    <DriverStack.Screen name="ResumenViaje" component={ResumenViaje} options = {globalOptions}/>
+    <DriverStack.Screen name="Viajes" component={Viajes} options = {globalOptions}/>
   </DriverStack.Navigator>
 )
 

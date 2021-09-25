@@ -3,11 +3,12 @@ import { Button, StyleSheet, Text, View} from 'react-native'
 import { DataTable } from 'react-native-paper'
 import { useTrip } from '../Context/TripContext'
 import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
+import {Fab} from '../Components/Fab'
 
-export const ResumenViaje = ({navigation}) => {
+export const ResumenViaje = (props) => {
 
     useEffect(() => {
-        handleAndroidBackButton(() => navigation.goBack())
+        handleAndroidBackButton(() => props.navigation.goBack())
       }, []) 
 
     const {trip, setTrip} = useTrip();
@@ -36,9 +37,10 @@ export const ResumenViaje = ({navigation}) => {
                 </DataTable.Row>
             </DataTable>            
             <Button title = 'Cerrar' color = 'red' onPress = {() => {
-                navigation.navigate('MapasDriver') 
+                props.navigation.navigate('MapasDriver') 
                 setTrip(null)
                 }}/> 
+                <Fab navigation = {props.navigation}/>
         </View> 
         : null
     )
