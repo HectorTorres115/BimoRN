@@ -272,17 +272,6 @@ export const Mapas = ({navigation}) => {
         }
     })
 
-    const [create_chat] = useMutation(CREATE_CHAT, {
-      fetchPolicy: "no-cache",
-      onCompleted:({CreateChat})=>{
-          console.log(CreateChat)
-          setChat(CreateChat)
-      },
-      onError: (error)=>{
-        console.log(error);
-      }
-    })
-
     //Callbacks for components on mapview
     async function drawMarkers(object){
         if(location.length < 1){
@@ -319,7 +308,7 @@ export const Mapas = ({navigation}) => {
               "origin": ReduxLocationStore.getState(),
               "destination":  destination.placeId,
               paymentMethod: 1,
-              note:""
+              note: ""
             }
           });
       }
@@ -364,7 +353,7 @@ export const Mapas = ({navigation}) => {
 
     function EvaluateStartChat() {
       if(trip !== null){
-          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat", { trip: trip })}/> 
+          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat")}/> 
       } else{
           return null
       }
@@ -421,14 +410,7 @@ export const Mapas = ({navigation}) => {
         <EvaluateStartSuscription />
 
         <View style = {styles.cardContainer}>
-          <CardPassenger props = {{ruta: drawRoute, viaje: createTrip}}>
-            {/* <Text style = {styles.textCard}>Viaje</Text>
-            <View style ={styles.tripPanel}>
-              <ButtonPaper style = {{backgroundColor: '#16A0DB'}} icon="plus" mode="contained" onPress={() => createTrip()}>Viaje</ButtonPaper>
-              <ButtonPaper style = {{backgroundColor: '#4d4545'}} icon="highway" mode="contained" onPress={() => drawRoute()}>Ruta</ButtonPaper>
-              <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>Eliminar</ButtonPaper>
-            </View> */}
-          </CardPassenger>
+          <CardPassenger props = {{ruta: drawRoute, viaje: createTrip}}/>
         </View>
 
         <Fab navigation = {navigation}/> 

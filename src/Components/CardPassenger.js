@@ -101,6 +101,67 @@ export const CardPassenger = (props) => {
         setPayments(filtered)
     }
 
+    function deleteFromStorage() {
+        setTrip(null);
+        SetTripStorage(null);
+    }
+
+    function EvaluateTrip() {
+        if(trip !== null){
+            console.log(trip);
+            return (
+                <View style = {styles.tripPanel}>
+                <ButtonPaper 
+                style = {{backgroundColor: 'darkblue', margin: 10}}
+                icon={'plus'}
+                mode="contained" 
+                onPress={() => props.props.viaje()}>
+                Viaje
+                </ButtonPaper>
+    
+                <ButtonPaper 
+                style = {{backgroundColor: '#000000', margin: 10}}
+                icon={'highway'}
+                mode="contained" 
+                onPress={() => props.props.ruta()}>
+                Ruta    
+                </ButtonPaper>
+    
+                <ButtonPaper 
+                style = {{backgroundColor: '#000000', margin: 10}}
+                icon={'highway'}
+                mode="contained" 
+                onPress={() => {
+                    setTrip(null)
+                    SetTripStorage(null)
+                }}>
+                DEL    
+                </ButtonPaper>
+              </View>
+            )
+        } else {
+            return (
+                <View style = {styles.tripPanel}>
+                    <ButtonPaper 
+                    style = {{backgroundColor: '#000000', margin: 10}}
+                    icon={'death-star'}
+                    mode="contained" 
+                    onPress={() => props.navigation.navigate('Chat')}>
+                    CHAT   
+                    </ButtonPaper>
+
+                    <ButtonPaper 
+                    style = {{backgroundColor: '#000000', margin: 10}}
+                    icon={'death-star'}
+                    mode="contained" 
+                    onPress={() => deleteFromStorage()}>
+                    CANCELAR VIAJE    
+                    </ButtonPaper>
+                </View>
+            )
+        }
+    }
+
     return (
         <View style = {styles.card}>
             {/* {props.children} */}
@@ -150,7 +211,7 @@ export const CardPassenger = (props) => {
           </View>
 
           {/* <Text style = {styles.textCard}>Panel</Text> */}
-          <View style = {styles.tripPanel}>
+          {/* <View style = {styles.tripPanel}>
             <ButtonPaper 
             style = {{backgroundColor: 'darkblue', margin: 10}}
             icon={'plus'}
@@ -177,7 +238,8 @@ export const CardPassenger = (props) => {
             }}>
             DEL    
             </ButtonPaper>
-          </View>
+          </View> */}
+          <EvaluateTrip/>
 
         </View>
     )
