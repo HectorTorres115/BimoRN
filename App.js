@@ -35,12 +35,15 @@ import { set_location } from './src/Redux/Redux-actions';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { stripeUrl } from './src/Clients/client-config'
 
-const LoginStack = createStackNavigator();
-const MainStack = createStackNavigator();
-const DriverStack = createStackNavigator();
-// const DriverStack = createDrawerNavigator();
-// const LoginStack = createDrawerNavigator();
-// const MainStack = createDrawerNavigator();
+//DRAWER COMPONENT
+import { DrawerItem } from './src/Components/DrawerItem'
+
+// const LoginStack = createStackNavigator();
+// const MainStack = createStackNavigator();
+// const DriverStack = createStackNavigator();
+const DriverStack = createDrawerNavigator();
+const LoginStack = createDrawerNavigator();
+const MainStack = createDrawerNavigator();
 
 const globalOptions = {
   headerShown: false, 
@@ -67,7 +70,7 @@ const LoginStackScreen = ()=> (
 )
 
 const MainStackScreen = ()=> (
-  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'}>
+  <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'} drawerContent = {(props) => <DrawerItem {...props}/>}>
     <MainStack.Screen name="Mapas" component={Mapas} options = {globalOptions}/>
     <MainStack.Screen name="Animation" component={Animation} options = {globalOptions} />
     <MainStack.Screen name="Registro" component={Registro} options = {globalOptions}/>
@@ -81,7 +84,7 @@ const MainStackScreen = ()=> (
 )
 
 const DriverStackScreen = ()=> (
-  <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'}>
+  <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'} drawerContent = {(props) => <DrawerItem {...props}/>}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} options = {globalOptions}/>
     <DriverStack.Screen name="Perfil" component={Perfil} options = {globalOptions}/>
     <DriverStack.Screen name="Chat" component={Chat} options = {globalOptions}/>
