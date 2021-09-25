@@ -3,20 +3,6 @@ import gql from 'graphql-tag'
 import {useLazyQuery} from 'react-apollo'
 import DatePicker from 'react-native-datepicker'
 
-const get_date_messages = gql`
-query getdatemessages($type: String!, $date: String!) {
-  GetDateMessages(input: { type: $type, date: $date }) {
-    id
-    user
-    message
-    type
-    date
-    hour
-    longitude
-    latitude
-  }
-}
-`
 
 const currentDate = () => {
     const date = new Date();
@@ -33,27 +19,22 @@ export const DateFetcher = ({props}) => {
         console.log('Did mount')
         console.log('PROPS: ' + {props})
     }, [])
+
     //State
     const [date, setDate] = useState(currentDate());
-    //Get date messages query
-    const [getdatemessages] = useLazyQuery(get_date_messages, {
-        fetchPolicy: "no-cache",
-        onCompleted: (data) => {
-            console.log(data);
-            props.setter_messages(data.GetDateMessages)
-        },
-        onError: (err) => {
-            console.log(err);
-        }
-    })
+
+    
+
     //OnChange DatePicker
     const fetch_date_msgs = (date) => {
         if(date == currentDate()){
             console.log('SAME DATE')
             props.setter_today(true)
+            setDate(date)
         } else {
             console.log('DIFF DATE');
             props.setter_today(false)
+            setDate(date)
         }
         setDate(date)
         console.log(date)

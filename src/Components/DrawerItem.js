@@ -5,7 +5,9 @@ import { Button } from 'react-native-paper';
 
 export const DrawerItem = (props) => {
     const [screens, setScreens] = useState([
-      {id: 1, name: "Maps", icon: "google-maps"},
+      {id: 1, name: "Mapas", icon: "google-maps"},
+      {id: 2, name: "Perfil", icon: "account"},
+      {id: 3, name: "Viajes", icon: "text-box-outline"},
     ]);
     return (
         <DrawerContentScrollView {...props}>

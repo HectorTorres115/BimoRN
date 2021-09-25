@@ -57,6 +57,7 @@ subscription trip_updated($tripId: Int!){
     discount
     originVincity
     driverPolyline
+    chatId
   }
 }
 `

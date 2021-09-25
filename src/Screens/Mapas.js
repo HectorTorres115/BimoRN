@@ -128,6 +128,7 @@ mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $p
       rawfee
       tax
       tripPolyline
+      chatId
     }
   }
 `
@@ -363,8 +364,8 @@ export const Mapas = ({navigation}) => {
     }
 
     function EvaluateStartChat() {
-      if(trip !== null){
-          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat", { trip: trip })}/> 
+      if(trip !== null && trip.chatId !== null){
+          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat")}/> 
       } else{
           return null
       }
@@ -429,6 +430,7 @@ export const Mapas = ({navigation}) => {
               <ButtonPaper style = {{backgroundColor: '#ad1717'}} icon="delete-circle" mode="contained" onPress={() => deleteStorage()}>Eliminar</ButtonPaper>
             </View> */}
           </CardPassenger>
+          <EvaluateStartChat/>
         </View>
 
         <Fab navigation = {navigation}/> 
