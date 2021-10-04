@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 
 export const ViajeContext = React.createContext();
 
@@ -9,26 +9,43 @@ export const ViajeProvider = (props) => {
         driverPolyline: null,
         indexdriver: null,
         indexorigin: null,
-        indexdestination: null
+        indexdestination: null,
+        paymentMethod: null,
+        service: null,
+        route: {
+            startAdress: null,
+            endAdress: null,
+            polyline: null,
+            distance: null,
+            time: null
+        },
+        origin: {
+            name: null,
+            placeId: null
+        },
+        destination: {
+            name: null,
+            placeId: null
+        }
     });
     //Did mount
-    
+
     const value = useMemo(() => {
-        return({
+        return ({
             viaje,
             setViaje
         })
     }, [viaje, setViaje])
 
-    return <ViajeContext.Provider value = {value} {...props}/>
+    return <ViajeContext.Provider value={value} {...props} />
 }
 //Export consumer
 export const ViajeConsumer = ViajeContext.Consumer
 //Custom hook created in context
 export const useViaje = () => {
     const context = React.useContext(ViajeContext);
-    if(!context){
+    if (!context) {
         throw new Error('useViaje debe estar dentro del proveedor ViajeContext')
-    } 
+    }
     return context
 }

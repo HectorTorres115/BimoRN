@@ -352,8 +352,8 @@ export const MapasDriver = ({navigation}) => {
     }
 
     function EvaluateChatButton() {
-      if(trip !== null){
-        return <Button title = 'Chat' onPress = {() => navigation.navigate('Chat', {trip: trip})}/> 
+      if(trip !== null && trip.chatId !== null){
+        return <Button title = 'Chat' onPress = {() => navigation.navigate('Chat')}/> 
       } else {
         return null
       }
@@ -425,6 +425,7 @@ export const MapasDriver = ({navigation}) => {
         </MapView>
 
         <EvaluateCard/>
+        <EvaluateChatButton/>
         <Fab navigation = {navigation}/>
         <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip} />
 

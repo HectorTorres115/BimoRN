@@ -9,6 +9,9 @@ export const ResumenViaje = (props) => {
 
     useEffect(() => {
         handleAndroidBackButton(() => props.navigation.goBack())
+        return () => {
+            handleAndroidBackButton(() => backAction())
+        }
       }, []) 
 
     const {trip, setTrip} = useTrip();
@@ -37,7 +40,7 @@ export const ResumenViaje = (props) => {
                 </DataTable.Row>
             </DataTable>            
             <Button title = 'Cerrar' color = 'red' onPress = {() => {
-                props.navigation.navigate('MapasDriver') 
+                props.navigation.goBack()
                 setTrip(null)
                 }}/> 
                 <Fab navigation = {props.navigation}/>

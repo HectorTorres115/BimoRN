@@ -71,7 +71,7 @@ const LoginStackScreen = ()=> (
 
 const MainStackScreen = ()=> (
   <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'} drawerContent = {(props) => <DrawerItem {...props}/>}>
-    <MainStack.Screen name="Mapas" component={Mapas} options = {globalOptions}/>
+    <MainStack.Screen name="Mapas" component={Mapas} options = {{headerShown: false}}/>
     <MainStack.Screen name="Animation" component={Animation} options = {globalOptions} />
     <MainStack.Screen name="Registro" component={Registro} options = {globalOptions}/>
     <MainStack.Screen name="FindAddress" component={FindAddress} options = {globalOptions} />
@@ -80,6 +80,8 @@ const MainStackScreen = ()=> (
     <MainStack.Screen name="Chat" component={Chat} options = {globalOptions}/>
     <MainStack.Screen name="Perfil" component={Perfil} options = {globalOptions}/>
     <MainStack.Screen name="Tracking" component={Tracking} options = {globalOptions}/>
+    <DriverStack.Screen name="Viajes" component={Viajes} options = {globalOptions}/>
+    <DriverStack.Screen name="ResumenViaje" component={ResumenViaje} options = {globalOptions}/>
   </MainStack.Navigator>
 )
 

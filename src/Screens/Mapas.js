@@ -1,23 +1,22 @@
-import React, {useState, useRef, useEffect} from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, Text} from 'react-native'
+import React, { useState, useRef, useEffect } from 'react'
+import { Button, StyleSheet, View, TextInput, Alert, Text } from 'react-native'
 import gql from 'graphql-tag'
-//Maps
-import MapView, {Marker, Polyline} from 'react-native-maps'
-import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
-import { useUsuario } from '../Context/UserContext'
-import { useAddress } from '../Context/AddressContext'
 import { useMutation, useQuery } from 'react-apollo'
-import { FAB } from 'react-native-paper';
+//Maps
+import MapView, { Marker, Polyline } from 'react-native-maps'
 import decodePolyline from '../Functions/DecodePolyline'
 import ReduxLocationStore from '../Redux/Redux-location-store';
+//Back handler
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
-import { TripUpdated } from '../Listeners/TripUpdated'
-import { CardPassenger } from '../Components/CardPassenger'
+//Context
+import { useUsuario } from '../Context/UserContext'
 import { useTrip } from '../Context/TripContext'
-import {DeleteTrip} from '../Functions/TripStorage'
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { Button as ButtonPaper } from 'react-native-paper';
-import {Fab} from '../Components/Fab'
+import { useViaje } from '../Context/ViajeContext'
+//Custom componentss
+import { TripUpdated } from '../Listeners/TripUpdated'
+import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
+import { CardPassenger } from '../Components/CardPassenger'
+import { Fab } from '../Components/Fab'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -60,7 +59,9 @@ mutation get_route_info($object: JSON){
 `
 const CURRENT_ADDRESS = gql`
 mutation get_address($lat: Float!, $lng: Float!){
-  GetAddress(lat: $lat, lng: $lng)
+  GetAddress(lat: $lat, lng: $lng){
+    name, placeId, direction
+  }
 }
 `
 const CREATE_TRIP = gql`
@@ -128,402 +129,374 @@ mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $p
       rawfee
       tax
       tripPolyline
+      chatId
     }
   }
 `
-const CREATE_CHAT = gql`
-mutation create_chat($tripId: Int!,$driverId: Int!,$passengerId: Int!){
-  CreateChat(input:{
-    tripId:$tripId
-    driverId:$driverId
-    passengerId:$passengerId
-  }){
-    id
-    createdAt
-    status
-    driverId
-    passengerId
-    driver{
-      id
-      name
-      email
-    }
-    passenger
-    {
-      id
-      name
-      email
-    }
-    messages{
-      id
-      message
-      sender
+
+export const Mapas = ({ navigation }) => {
+  //Config objects
+  const initialCameraConfig = {
+    center: {
+      // longitude: -107.45220333333332,
+      // latitude: 24.82172166666667,
+      longitude: ReduxLocationStore.getState().longitude,
+      latitude: ReduxLocationStore.getState().latitude,
+      latitudeDelta: 0.08,
+      longitudeDelta: 0.08
+    },
+    pitch: 1,
+    heading: 0,
+    zoom: 12,
+    altitude: 0
+  }
+  //Referencias
+  const globalMapView = useRef(React.Component);
+  const driverMarker = useRef(React.Component);
+  //Global states
+  const { usuario, setUser } = useUsuario();
+  const { trip, setTrip } = useTrip();
+  const { viaje, setViaje } = useViaje();
+  //State
+  const [driverLocation, setDriverLocation] = useState(null);
+  const [drivers, setDrivers] = useState([]);
+  const [route, setRoute] = useState({});
+  const [driverState, setDriverState] = useState(null);
+  const [services, setServices] = useState([]);
+
+  //Lifecycle methods
+  useEffect(() => {
+    get_address({ variables: { 
+      lat: ReduxLocationStore.getState().latitude, 
+      lng: ReduxLocationStore.getState().longitude } 
+    })
+    handleAndroidBackButton(() => backAction(setUser))
+  }, [])
+
+  function CutAddress(address) {
+    if(address !== null) {
+      return address.split(',')[0]
+    } else {
+      return 'Dirección'
     }
   }
-}
-`
 
-export const Mapas = ({navigation}) => {
-    //Config objects
-    const initialCameraConfig = {
-        center: {
-            longitude: -107.45220333333332, 
-            latitude: 24.82172166666667,
-            latitudeDelta: 0.08, 
-            longitudeDelta: 0.08
-        },
-        pitch: 1,
-        heading: 0,
-        zoom: 12,
-        altitude: 0
+  //Server requests
+  useQuery(QUERY_DRIVERS, {
+    fetchPolicy: 'no-cache',
+    onCompleted: ({ GetCities }) => {
+      setDrivers(GetCities)
+    },
+    onError: (error) => {
+      console.log(error);
     }
-    //Lifecycle methods
-    useEffect(() => {
-        handleAndroidBackButton(() => backAction(setUser))
-        console.log(trip);
-    }, [])
-    //Referencias
-    const globalMarker = useRef(React.Component);
-    const globalMapView = useRef(React.Component);
-    const driverMarker = useRef(React.Component);
-    //Global states
-    const {usuario, setUser} = useUsuario();
-    const {address, setAddress} = useAddress();
-    const {trip, setTrip} = useTrip();
-    //State
-    const [coords, setCoords] = useState(ReduxLocationStore.getState());
-    const [location, setLocation] = useState([]);
-    const [search, setSearch] = useState({});
-    const [origin, setOrigin] = useState({});
-    const [destination, setDestination] = useState({});
-    const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
-    const [driverLocation, setDriverLocation] = useState({longitude: -107.45220333333332,latitude: 24.82172166666667});
-    const [drivers, setDrivers] = useState([]);
-    const [route, setRoute] = useState({});
-    const [polyline, setPolyline] = useState([]);
-    const [driverPolyline, setDriverPolyline] = useState([]);
-    const [startsuscription, setStartSuscription] = useState(false);
-    // const [trip, setTrip] = useState(null);
-    const [chat, setChat] = useState(null);
-    const [driverState, setDriverState] = useState(null);
-    const [services, setServices] = useState([]);
+  })
 
-    //Server requests
-    useQuery(QUERY_DRIVERS, {
-        fetchPolicy:'no-cache',
-        onCompleted:({GetCities})=>{
-            setDrivers(GetCities)
-          },
-          onError:(error)=>{
-            console.log(error);
-          }
-    })
-
-    useQuery(QUERY_SERVICES, {
-      fetchPolicy:'no-cache',
-      onCompleted:({GetServices})=>{
-          setServices(GetServices)
-        },
-        onError:(error)=>{
-          console.log(error);
-        }
-    })
-
-    const [get_route_info] = useMutation(DRAW_ROUTE,{
-        fetchPolicy: "no-cache",
-        onCompleted:({GetRouteInfo})=>{
-        // console.log(GetRouteInfo)
-        setRoute(GetRouteInfo)
-        setPolyline(decodePolyline(GetRouteInfo.polyline))
-        animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
-        },
-        onError:(error)=>{
-          console.log(error);
-        }
-    })
-
-    const [get_address] = useMutation(CURRENT_ADDRESS, {
-        fetchPolicy: "no-cache",
-        onCompleted:({GetAddress})=>{
-          console.log(GetAddress)
-          console.log(ReduxLocationStore.getState())
-            const shortAddress = GetAddress.split(',')
-            setOrigin({name: shortAddress[0]})
-        },
-        onError: (error)=>{
-          console.log(error);
-        }
-    })
-
-    const [create_trip] = useMutation(CREATE_TRIP, {
-        fetchPolicy: "no-cache",
-        onCompleted:(data)=>{
-
-          console.log(data.CreateTrip.destinationLocationLat)
-          console.log(data.CreateTrip.destinationLocationLng)
-          setTrip(data.CreateTrip)
-          setPolyline(decodePolyline(data.CreateTrip.tripPolyline))
-          animateCameraToPolylineCenter(decodePolyline(data.CreateTrip.tripPolyline))
-
-          
-        },
-        onError: (error)=>{
-          console.log(error);
-        }
-    })
-
-    //Callbacks for components on mapview
-    async function drawMarkers(object){
-        if(location.length < 1){
-            setLocation([...location, {color: "#00FF00", ...object}])
-        } else if (location.length == 1) {
-            setLocation([...location, {color: "#0000FF", ...object}])
-        } else {
-            setLocation([]);
-        }
+  useQuery(QUERY_SERVICES, {
+    fetchPolicy: 'no-cache',
+    onCompleted: ({ GetServices }) => {
+      setServices(GetServices)
+    },
+    onError: (error) => {
+      console.log(error);
     }
+  })
 
-    async function drawRoute(){
-      
-        if(origin == null || destination == null){
-            Alert.alert("No se ha asignado localizacion")
-        } else{
-            get_route_info({variables:{
-                "object":{  
-                  "start": ReduxLocationStore.getState(), 
-                  "end": destination.placeId
-                }
-              }
-
-            });
-        }
+  const [get_route_info] = useMutation(DRAW_ROUTE, {
+    fetchPolicy: "no-cache",
+    onCompleted: ({ GetRouteInfo }) => {
+      // console.log(GetRouteInfo)
+      // setRoute(GetRouteInfo)
+      // setPolyline(decodePolyline(GetRouteInfo.polyline))
+      setViaje({
+        ...viaje, 
+        tripPolyline: decodePolyline(GetRouteInfo.polyline),
+        route: GetRouteInfo
+      })
+      animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
+    },
+    onError: (error) => {
+      console.log(error);
     }
+  })
 
-    async function createTrip(){
-      if(origin == null || destination == null){
-          Alert.alert("No se ha asignado localizacion")
-      } else{
-        create_trip({variables:{
-              passengerId: usuario.id,
-              "origin": ReduxLocationStore.getState(),
-              "destination":  destination.placeId,
-              paymentMethod: 1,
-              note: ""
+  const [get_address] = useMutation(CURRENT_ADDRESS, {
+    fetchPolicy: "no-cache",
+    onCompleted: ({ GetAddress }) => {
+      // console.log(GetAddress)
+      // console.log(ReduxLocationStore.getState())
+      // const shortAddress = GetAddress.name.split(',')
+      // viaje.origin.name = shortAddress[0]
+      setViaje({...viaje, origin: {...viaje.origin, name: CutAddress(GetAddress.name)}})
+      // setOrigin({ name: shortAddress[0] })
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  })
+
+  const [create_trip] = useMutation(CREATE_TRIP, {
+    fetchPolicy: "no-cache",
+    onCompleted: (data) => {
+      // console.log(data.CreateTrip.destinationLocationLat)
+      // console.log(data.CreateTrip.destinationLocationLng)
+      setTrip(data.CreateTrip)
+      // setPolyline(decodePolyline(data.CreateTrip.tripPolyline))
+      setViaje({
+        polyline: decodePolyline(data.CreateTrip.tripPolyline),
+        ...viaje
+      })
+      animateCameraToPolylineCenter(decodePolyline(data.CreateTrip.tripPolyline))
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  })
+
+  async function drawRoute() {
+    if (viaje.origin == null || viaje.destination == null) {
+      Alert.alert("No se ha asignado localizacion")
+    } else {
+      if(viaje.origin.placeId == null) {
+        get_route_info({
+          variables: {
+            "object": {
+              "start": ReduxLocationStore.getState(),
+              "end": viaje.destination.placeId
             }
-          });
-      }
-    }
-
-    async function getCurrentDirection() {
-        if(ReduxLocationStore.getState() !== null){
-          get_address({variables: {lat: ReduxLocationStore.getState().latitude, lng: ReduxLocationStore.getState().longitude}})
-          return ReduxLocationStore.getState()
-        } else{
-            setOrigin({name:"Ubicacion Actual"})
-        }
-
-    }
-
-    async function animateCameraToPolylineCenter(polyline){
-        const polylineCenterCoords = polyline[parseInt(polyline.length / 2)];
-        
-        globalMapView.current.animateCamera({
-            center: {
-            latitude: polylineCenterCoords.latitude,
-            longitude: polylineCenterCoords.longitude
-            },
-            pitch: 1,
-            heading: 0,
-            zoom: 13,
-            altitude: 0
-        }, {duration: 1000}) 
-    }
-
-    function EvaluateStartSuscription() {
-        if(trip !== null){
-            return <TripUpdated 
-            // setDriverPolyline ={setDriverPolyline}
-            trip={trip} setTrip = {setTrip}
-            driverState={driverState} setDriverState = {setDriverState}
-            />
-        } else {
-          return null 
-        }
-    }
-
-    function EvaluateStartChat() {
-      if(trip !== null){
-          return <Button title = "Chat" onPress = {() => navigation.navigate("Chat")}/> 
-      } else{
-          return null
-      }
-    }
-
-    function EvaluateCityDriver() {
-      if(driverState !== null){
-        // console.log(driverState)
-        return (
-          <DriverLocationUpdated 
-          setter={setDriverLocation} 
-          driverId={driverState.id} 
-          driverMarker= {driverMarker} 
-          duration={4000} />
-        )
+          }
+        });
       } else {
-        return null
+        console.log('Hay origin placeId en DrawRoute')
+        get_route_info({
+          variables: {
+            "object": {
+              "start": viaje.origin.placeId,
+              "end": viaje.destination.placeId
+            }
+          }
+        });
       }
     }
+  }
 
-    const elegirServicio = (item)=>{
-      console.log(item)
+  async function createTrip() {
+    if(viaje.origin.placeId !== null) {
+      console.log('Origin tiene placeid');
+      create_trip({
+        variables: {
+          passengerId: usuario.id,
+          "origin": viaje.origin.placeId,
+          "destination": viaje.destination.placeId,
+          paymentMethod: viaje.paymentMethod.id,
+          note: "From emulator"
+        }
+      });
+    } else if(viaje.origin.placeId == null){
+      console.log('Origin tiene coordenadas');
+      create_trip({
+        variables: {
+          passengerId: usuario.id,
+          "origin": ReduxLocationStore.getState(),
+          "destination": viaje.destination.placeId,
+          paymentMethod: viaje.paymentMethod.id,
+          note: "From emulator"
+        }
+      });
     }
+  }
 
-    function deleteStorage() {
-      setTrip(null);
-      setPolyline([])
-      DeleteTrip()
+  async function animateCameraToPolylineCenter(polyline) {
+    const polylineCenterCoords = polyline[parseInt(polyline.length / 2)];
+    globalMapView.current.animateCamera({
+      center: {
+        latitude: polylineCenterCoords.latitude,
+        longitude: polylineCenterCoords.longitude
+      },
+      pitch: 1,
+      heading: 0,
+      zoom: 13,
+      altitude: 0
+    }, { duration: 1000 })
+  }
+
+  function EvaluateStartSuscription() {
+    if (trip !== null) {
+      return <TripUpdated
+        // setDriverPolyline ={setDriverPolyline}
+        trip={trip} setTrip={setTrip}
+        driverState={driverState} setDriverState={setDriverState}
+      />
+    } else {
+      return null
     }
+  }
 
-    return (
-        <>
-        <MapView
+  function EvaluateStartChat() {
+    if (trip !== null && trip.chatId !== null) {
+      return <Button title="Chat" onPress={() => navigation.navigate("Chat")} />
+    } else {
+      return null
+    }
+  }
+
+  function EvaluateCityDriver() {
+    if (driverState !== null) {
+      // console.log(driverState)
+      return (
+        <DriverLocationUpdated
+          setter={setDriverLocation}
+          driverId={driverState.id}
+          driverMarker={driverMarker}
+          duration={4000} />
+      )
+    } else {
+      return null
+    }
+  }
+
+  return (
+    <>
+      <MapView
         // customMapStyle = {darkStyle}
-        ref = {globalMapView}
-        onMapReady = { () => getCurrentDirection() }
-        showsUserLocation = {true}
-        showsMyLocationButton = {false}
+        ref={globalMapView}
+        showsUserLocation={true}
+        showsMyLocationButton={false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
-        initialCamera = {initialCameraConfig}>
-            {location.map(coord => {
-                return <Marker key = {coord.lat} ref = {globalMarker} coordinate = {coord} pinColor={coord.color}/>
-            })} 
-            {drivers.map(coord => {
-                return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
-            })}
-            {/* //Driver marker */}
-            <Marker ref  = {driverMarker} key = {115} coordinate = {driverLocation} icon = {require('../../assets/images/map-taxi.png')}/>
-            {/* //Trip polyline */}
-            <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-            <Polyline coordinates={driverPolyline} strokeWidth={6} strokeColor ={"#000000"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-        </MapView>
+        initialCamera={initialCameraConfig}>
+        {/* //Driver marker */}
+        {driverLocation !== null ? 
+        <Marker 
+        ref={driverMarker} 
+        key={115} 
+        coordinate={driverLocation} 
+        icon={require('../../assets/images/map-taxi.png')} />
+        : null}
+        {/* //Trip polyline */}
+        {viaje.tripPolyline !== null ? <Polyline coordinates={viaje.tripPolyline} strokeWidth={6} strokeColor={"#16A1DC"} strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} /> : null}
+        {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor={"#000000"} strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} /> : null}
+      </MapView>
 
-        <EvaluateStartSuscription />
+      <EvaluateStartSuscription />
 
-        <View style = {styles.cardContainer}>
-          <CardPassenger props = {{ruta: drawRoute, viaje: createTrip}}/>
-        </View>
+      <View style={styles.cardContainer}>
+        <CardPassenger props={{ ruta: drawRoute, viaje: createTrip }} />
+        <EvaluateStartChat />
+      </View>
 
-        <Fab navigation = {navigation}/> 
+      <Fab navigation={navigation} />
 
-        <View style={styles.inputsContainer}>
-            <TextInput 
-            placeholder="Origen" 
-            placeholderTextColor="gray" 
-            value= {origin.name}
-            style={styles.input} 
-            onPressIn= {()=> {navigation.navigate("FindAddress", {setter:setOrigin, setter_search: setSearch, search, drawRoute: drawRoute})}}/>
-            <TextInput 
-            placeholder="Destino" 
-            placeholderTextColor="gray" 
-            value= {destination.name}
-            style={styles.input}
-            onPressIn= {()=> navigation.navigate("FindAddress", {setter:setDestination, setter_search: setSearch, search, drawRoute: drawRoute})} /> 
-        </View>  
+      <View style={styles.inputsContainer}>
+        <TextInput
+          placeholder="Origen"
+          placeholderTextColor="gray"
+          value={viaje.origin.name}
+          style={styles.input}
+          onPressIn={() => { navigation.navigate("FindAddress", {type: 'origin'}) }} />
+        <TextInput
+          placeholder="Destino"
+          placeholderTextColor="gray"
+          value={CutAddress(viaje.destination.name)}
+          style={styles.input}
+          onPressIn={() => { navigation.navigate("FindAddress", {type: 'destination'}) }} />
+      </View>
 
-        <EvaluateCityDriver/>
-        </>
-    )
+      <EvaluateCityDriver />
+    </>
+  )
 }
 
 const styles = StyleSheet.create({
-    serviceContainer: {
-      flex: 1/2, 
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    fab: {
-      margin: 16,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "#16A0DB"
-    },
-    fabContainer:{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        position: "absolute",
-        height: "10%",
-        width: "20%"
-    },
-    inputsContainer:{
-        height: 120,
-        position: "absolute",
-        // backgroundColor: "black",
-        justifyContent: "center",
-        alignItems: "center",
-        // borderWidth:2,
-        // borderColor: "red",
-        width:"100%",
-        marginTop:80
-    },
-    input:{
-        backgroundColor:"rgba(255,255,255,0.5)",
-        borderRadius:5,
-        borderWidth:2,
-        borderColor:"gray",
-        fontSize: 20,
-        color: "black",
-        width: '95%',
-        // borderRadius:25,
-        margin: 5,
-        height: "50%",
-        paddingLeft: 10
-      },
-      cardContainer: {
-        marginBottom: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
-        alignContent: 'center',
-        position: "relative",
-        height: "30%",
-        width: "98%"
-      },
-      scroll: {
-        flex: 1,
-        // flexDirection: 'row',
-        height: '100%',
-        borderWidth: 2,
-        borderColor: 'blue'
-      },
-      serviceContainer: {
-        flex: 1,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth:2,
-        borderColor:"gray",
-        margin:10
-      },
-      avatar:{
-        marginTop:10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        margin: 5,
-      },
-      texto:{
-        fontSize: 15,
-        color: 'black'
-      },
-      textCard: {
-        fontSize: 17,
-        color: 'black',
-        fontWeight: 'bold',
-        alignSelf: 'flex-start',
-        marginLeft: 35
-      },
-      tripPanel: {
-        flex: 1/2, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'
-    },
-  })
-  
+  serviceContainer: {
+    flex: 1 / 2,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  fab: {
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#16A0DB"
+  },
+  fabContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    height: "10%",
+    width: "20%"
+  },
+  inputsContainer: {
+    height: 120,
+    position: "absolute",
+    // backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    // borderWidth:2,
+    // borderColor: "red",
+    width: "100%",
+    marginTop: 80
+  },
+  input: {
+    backgroundColor: "rgba(255,255,255,0.5)",
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: "gray",
+    fontSize: 20,
+    color: "black",
+    width: '95%',
+    // borderRadius:25,
+    margin: 5,
+    height: "50%",
+    paddingLeft: 10
+  },
+  cardContainer: {
+    marginBottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    alignContent: 'center',
+    position: "relative",
+    height: "30%",
+    width: "98%"
+  },
+  scroll: {
+    flex: 1,
+    // flexDirection: 'row',
+    height: '100%',
+    borderWidth: 2,
+    borderColor: 'blue'
+  },
+  serviceContainer: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: "gray",
+    margin: 10
+  },
+  avatar: {
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 5,
+  },
+  texto: {
+    fontSize: 15,
+    color: 'black'
+  },
+  textCard: {
+    fontSize: 17,
+    color: 'black',
+    fontWeight: 'bold',
+    alignSelf: 'flex-start',
+    marginLeft: 35
+  },
+  tripPanel: {
+    flex: 1 / 2, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    flexDirection: 'row'
+  },
+})

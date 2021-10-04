@@ -9,6 +9,7 @@ import {useQuery, useLazyQuery} from 'react-apollo'
 //
 import { useTrip } from '../Context/TripContext'
 import { SetTrip as SetTripStorage} from '../Functions/TripStorage'
+import { useViaje } from '../Context/ViajeContext';
 
 const GET_SERVICES = gql`
 query {
@@ -44,6 +45,7 @@ export const CardPassenger = (props) => {
         console.log('Component did mount');
     }, [])
     const {trip, setTrip} = useTrip(); 
+    const {viaje, setViaje} = useViaje();
     const [payments, setPayments] = useState([]);
     const [services, setServices] = useState([]);
 
@@ -94,11 +96,13 @@ export const CardPassenger = (props) => {
     function filterServices(item) {
         const filtered = services.filter((service) => service.id === item.id)
         setServices(filtered)
+        setViaje({...viaje, service: filtered[0]})
     }
 
     function filterPayments(item) {
         const filtered = payments.filter((payment) => payment.id === item.id)
         setPayments(filtered)
+        setViaje({...viaje, paymentMethod: filtered[0]})
     }
 
     function deleteFromStorage() {
@@ -211,7 +215,7 @@ export const CardPassenger = (props) => {
           </View>
 
           {/* <Text style = {styles.textCard}>Panel</Text> */}
-          {/* <View style = {styles.tripPanel}>
+          <View style = {styles.tripPanel}>
             <ButtonPaper 
             style = {{backgroundColor: 'darkblue', margin: 10}}
             icon={'plus'}
@@ -238,8 +242,8 @@ export const CardPassenger = (props) => {
             }}>
             DEL    
             </ButtonPaper>
-          </View> */}
-          <EvaluateTrip/>
+          </View>
+          {/* <EvaluateTrip/> */}
 
         </View>
     )

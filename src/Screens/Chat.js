@@ -32,8 +32,9 @@ query get_chat_by_tripId($tripId: Int!){
         message
         sender
         hour
+        readed
       }
-      readed
+      
   }
 }
 `
@@ -55,7 +56,7 @@ mutation create_message($chatid: Int!,$message: String!,$sender: String!){
 export const Chat = (props) => {
 
     useEffect(() => {
-        console.log(trip.id)
+        // console.log(trip)
         handleAndroidBackButton(() => props.navigation.goBack())
         return () => {
             handleAndroidBackButton(() => backAction(setUser))
@@ -78,26 +79,30 @@ export const Chat = (props) => {
             tripId: trip.id
         },
         onCompleted:async ({GetChatByTripId}) => {
-          console.log(GetChatByTripId);
+        //   console.log(GetChatByTripId);
+          setChat(GetChatByTripId)
+          setMessages(GetChatByTripId.messages)
         },
         onError:(err) => {
             console.log(err);
+            console.log(trip.id);
         }
     })
 
     const [create_message] = useMutation(CREATE_MESSAGE,{
         fetchPolicy: "no-cache",
         variables:{
-            chatid: chat.id,
+            chatid: trip.chatId,
             message: message,
             sender: usuario.email
           },
         onCompleted:({CreateMessage})=>{
             console.log(CreateMessage);
+            setMessage('')
         },
         onError: (err) =>{
             console.log({
-              chatid: chat.id,
+              chatid: trip.chatId,
               message: message,
               sender: usuario.email
             })
@@ -119,21 +124,13 @@ export const Chat = (props) => {
             return (
                 <View style={styles.testAlt}>
                     <View style={styles.MessagesContainer}>
-                        <Text style={styles.textName}>{item.sender}</Text>
+                        <Text style={styles.textName}>{usuario.name}</Text>
                         <Text style={styles.textMessage}>{item.message}</Text>
                     </View>
                 </View>
             )
         }
     } 
-
-    function EvaluateChatListener () {
-      if(chat !== {}){
-        return  <ChatListener messages={messages} setter={setMessages} chatId= {chat.id} lista={lista}/>
-      } else {
-        return null
-      }
-    }
 
     return (
       <View style={styles.container}>
@@ -144,8 +141,7 @@ export const Chat = (props) => {
                 key = {(item)=> item.id}
                 keyExtractor = {(item)=> item.id}
                 renderItem = { ({item})=> (evaluateMessage(item))} />
-                {/* <ChatListener messages={messages} setter={setMessages} chatId= {chat.id} lista={lista}/> */}
-                <EvaluateChatListener/>
+                <ChatListener messages={messages} setter={setMessages} chatId= {trip.chatId} lista={lista}/>
             </View>
             <View style={styles.inputContainer}>
                 <TextInput placeholder={'Message'} placeholderTextColor={'gray'} onChangeText={(message)=>setMessage(message)} value={message} style={styles.inputText}/>
