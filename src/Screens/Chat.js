@@ -79,7 +79,7 @@ export const Chat = (props) => {
             tripId: trip.id
         },
         onCompleted:async ({GetChatByTripId}) => {
-        //   console.log(GetChatByTripId);
+        //   console.log(GetChatByTripId.messages);
           setChat(GetChatByTripId)
           setMessages(GetChatByTripId.messages)
         },
@@ -147,7 +147,7 @@ export const Chat = (props) => {
                 <TextInput placeholder={'Message'} placeholderTextColor={'gray'} onChangeText={(message)=>setMessage(message)} value={message} style={styles.inputText}/>
                 <Button title='Send' onPress={async ()=> await create_message()}></Button>
             </View>
-            <Fab navigation = {props.navigation}/>
+            {/* <Fab navigation = {props.navigation}/> */}
         </View>
     )
 }

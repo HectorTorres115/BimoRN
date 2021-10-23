@@ -153,6 +153,7 @@ function App() {
     )
   } else { 
     if(usuario.__typename=="Passenger" && address !== null){
+    // if(usuario.__typename=="Passenger"){
         return(
           <ApolloProvider client={client} >
             <NavigationContainer>
@@ -161,6 +162,7 @@ function App() {
           </ApolloProvider>
         )
     } else if (usuario.__typename=="Driver" && address !== null){
+    // } else if (usuario.__typename=="Driver"){
       return(
         <ApolloProvider client={client} >
           <NavigationContainer>

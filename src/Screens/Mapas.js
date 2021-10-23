@@ -160,9 +160,12 @@ export const Mapas = ({ navigation }) => {
   //State
   const [driverLocation, setDriverLocation] = useState(null);
   const [drivers, setDrivers] = useState([]);
-  const [route, setRoute] = useState({});
   const [driverState, setDriverState] = useState(null);
   const [services, setServices] = useState([]);
+  //Optional states
+  const [route, setRoute] = useState({});
+  const [driverPolyline, setDriverPolyline] = useState(null);
+  const [tripPolyline, setTripPolyline] = useState(null);
 
   //Lifecycle methods
   useEffect(() => {
@@ -204,15 +207,15 @@ export const Mapas = ({ navigation }) => {
 
   const [get_route_info] = useMutation(DRAW_ROUTE, {
     fetchPolicy: "no-cache",
-    onCompleted: ({ GetRouteInfo }) => {
+    onCompleted: async ({ GetRouteInfo }) => {
       // console.log(GetRouteInfo)
-      // setRoute(GetRouteInfo)
-      // setPolyline(decodePolyline(GetRouteInfo.polyline))
-      setViaje({
-        ...viaje, 
-        tripPolyline: decodePolyline(GetRouteInfo.polyline),
-        route: GetRouteInfo
-      })
+      setRoute(GetRouteInfo)
+      setTripPolyline(decodePolyline(GetRouteInfo.polyline))
+      // setViaje({
+      //   ...viaje, 
+      //   tripPolyline: decodePolyline(GetRouteInfo.polyline),
+      //   route: GetRouteInfo
+      // })
       animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
     },
     onError: (error) => {
@@ -252,7 +255,7 @@ export const Mapas = ({ navigation }) => {
       console.log(error);
     }
   })
-
+  
   async function drawRoute() {
     if (viaje.origin == null || viaje.destination == null) {
       Alert.alert("No se ha asignado localizacion")
@@ -355,6 +358,36 @@ export const Mapas = ({ navigation }) => {
     }
   }
 
+  function EvaluateTripPolyline() {
+    if(tripPolyline !== null){
+      return (
+        <Polyline 
+        coordinates={tripPolyline} 
+        strokeWidth={6} 
+        strokeColor={"#16A1DC"} 
+        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
+        />
+      )
+    } else {
+      return null
+    }
+  }
+
+  function EvaluateDriverPolyline() {
+    if(driverPolyline !== null){
+      return (
+        <Polyline 
+        coordinates={driverPolyline} 
+        strokeWidth={6} 
+        strokeColor={"#16A1DC"} 
+        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
+        />
+      )
+    } else {
+      return null
+    }
+  }
+
   return (
     <>
       <MapView
@@ -373,15 +406,15 @@ export const Mapas = ({ navigation }) => {
         icon={require('../../assets/images/map-taxi.png')} />
         : null}
         {/* //Trip polyline */}
-        {viaje.tripPolyline !== null ? <Polyline coordinates={viaje.tripPolyline} strokeWidth={6} strokeColor={"#16A1DC"} strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} /> : null}
-        {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor={"#000000"} strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} /> : null}
+        <EvaluateTripPolyline/>
+        <EvaluateDriverPolyline/>
       </MapView>
 
       <EvaluateStartSuscription />
 
       <View style={styles.cardContainer}>
-        <CardPassenger props={{ ruta: drawRoute, viaje: createTrip }} />
-        <EvaluateStartChat />
+        <CardPassenger props={{ ruta: drawRoute, viaje: createTrip, navigation }} />
+        {/* <EvaluateStartChat /> */}
       </View>
 
       <Fab navigation={navigation} />

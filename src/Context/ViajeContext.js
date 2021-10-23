@@ -5,7 +5,7 @@ export const ViajeContext = React.createContext();
 export const ViajeProvider = (props) => {
     //State
     const [viaje, setViaje] = useState({
-        tripPolyline: null,
+        polyline: null,
         driverPolyline: null,
         indexdriver: null,
         indexorigin: null,
