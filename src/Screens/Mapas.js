@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Button, StyleSheet, View, TextInput, Alert, Text } from 'react-native'
 import gql from 'graphql-tag'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery, useLazyQuery } from 'react-apollo'
 //Maps
 import MapView, { Marker, Polyline } from 'react-native-maps'
 import decodePolyline from '../Functions/DecodePolyline'
@@ -17,6 +17,10 @@ import { TripUpdated } from '../Listeners/TripUpdated'
 import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
 import { CardPassenger } from '../Components/CardPassenger'
 import { Fab } from '../Components/Fab'
+//Local storage
+import { viajeDefaultState } from '../Context/ViajeContext'
+import { SetViaje as SetViajeStorage, DeleteViaje as DeleteViajeStorage} from '../Functions/ViajeStorage'
+import { SetTrip as SetTripStorage, DeleteTrip as DeleteTripStorage} from '../Functions/TripStorage'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -133,6 +137,19 @@ mutation create_trip($passengerId: Int!, $origin: JSON!, $destination: JSON!, $p
     }
   }
 `
+const GET_COST = gql`
+mutation get_cost($serviceId:Int!, $distance: String!, $time:String!){
+  GetCost(input: {
+    serviceId: $serviceId
+    distance: $distance
+    time: $time
+  }){
+    rawfee,
+    feeTaxed,
+    fee
+  }
+}
+`
 
 export const Mapas = ({ navigation }) => {
   //Config objects
@@ -162,13 +179,15 @@ export const Mapas = ({ navigation }) => {
   const [drivers, setDrivers] = useState([]);
   const [driverState, setDriverState] = useState(null);
   const [services, setServices] = useState([]);
-  //Optional states
-  const [route, setRoute] = useState({});
-  const [driverPolyline, setDriverPolyline] = useState(null);
-  const [tripPolyline, setTripPolyline] = useState(null);
 
   //Lifecycle methods
   useEffect(() => {
+    if(trip !== null){
+      console.log('Hay un TRIP guardado')
+    }
+    if(viaje !== viajeDefaultState) {
+      console.log('Hay un VIAJE guardado')
+    }
     get_address({ variables: { 
       lat: ReduxLocationStore.getState().latitude, 
       lng: ReduxLocationStore.getState().longitude } 
@@ -182,6 +201,29 @@ export const Mapas = ({ navigation }) => {
     } else {
       return 'Dirección'
     }
+  }
+
+  function SaveTrip(trip) {
+    setTrip(trip)
+    SetTripStorage(trip)
+  }
+
+  function SaveViaje(viajeprop) {
+    setViaje({
+      polyline: decodePolyline(viajeprop.tripPolyline),
+      ...viaje
+    })
+    SetViajeStorage(viaje)
+  }
+
+  function DeleteTrip() {
+    setTrip(null)
+    DeleteTripStorage()
+  }
+
+  function DeleteViaje() {
+    setViaje(viaje)
+    DeleteViajeStorage()
   }
 
   //Server requests
@@ -205,17 +247,25 @@ export const Mapas = ({ navigation }) => {
     }
   })
 
+  const [get_cost] = useMutation(GET_COST, {
+    onCompleted: ({GetCost}) => {
+      console.log(GetCost)
+    },
+    onError: (err) => {
+      console.log(err);
+    }
+  })
+
   const [get_route_info] = useMutation(DRAW_ROUTE, {
     fetchPolicy: "no-cache",
     onCompleted: async ({ GetRouteInfo }) => {
       // console.log(GetRouteInfo)
-      setRoute(GetRouteInfo)
-      setTripPolyline(decodePolyline(GetRouteInfo.polyline))
-      // setViaje({
-      //   ...viaje, 
-      //   tripPolyline: decodePolyline(GetRouteInfo.polyline),
-      //   route: GetRouteInfo
-      // })
+      // setRoute(GetRouteInfo)
+      setViaje({
+        ...viaje, 
+        tripPolyline: decodePolyline(GetRouteInfo.polyline),
+        route: GetRouteInfo
+      })
       animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
     },
     onError: (error) => {
@@ -240,16 +290,12 @@ export const Mapas = ({ navigation }) => {
 
   const [create_trip] = useMutation(CREATE_TRIP, {
     fetchPolicy: "no-cache",
-    onCompleted: (data) => {
+    onCompleted: ({CreateTrip}) => {
       // console.log(data.CreateTrip.destinationLocationLat)
       // console.log(data.CreateTrip.destinationLocationLng)
-      setTrip(data.CreateTrip)
-      // setPolyline(decodePolyline(data.CreateTrip.tripPolyline))
-      setViaje({
-        polyline: decodePolyline(data.CreateTrip.tripPolyline),
-        ...viaje
-      })
-      animateCameraToPolylineCenter(decodePolyline(data.CreateTrip.tripPolyline))
+      SaveTrip(CreateTrip)
+      SaveViaje(CreateTrip)
+      animateCameraToPolylineCenter(decodePolyline(CreateTrip.tripPolyline))
     },
     onError: (error) => {
       console.log(error);
@@ -261,7 +307,7 @@ export const Mapas = ({ navigation }) => {
       Alert.alert("No se ha asignado localizacion")
     } else {
       if(viaje.origin.placeId == null) {
-        get_route_info({
+        return await get_route_info({
           variables: {
             "object": {
               "start": ReduxLocationStore.getState(),
@@ -271,7 +317,7 @@ export const Mapas = ({ navigation }) => {
         });
       } else {
         console.log('Hay origin placeId en DrawRoute')
-        get_route_info({
+        return await get_route_info({
           variables: {
             "object": {
               "start": viaje.origin.placeId,
@@ -323,7 +369,7 @@ export const Mapas = ({ navigation }) => {
     }, { duration: 1000 })
   }
 
-  function EvaluateStartSuscription() {
+  const EvaluateStartSuscription = () => {
     if (trip !== null) {
       return <TripUpdated
         // setDriverPolyline ={setDriverPolyline}
@@ -335,15 +381,7 @@ export const Mapas = ({ navigation }) => {
     }
   }
 
-  function EvaluateStartChat() {
-    if (trip !== null && trip.chatId !== null) {
-      return <Button title="Chat" onPress={() => navigation.navigate("Chat")} />
-    } else {
-      return null
-    }
-  }
-
-  function EvaluateCityDriver() {
+  const EvaluateCityDriver = () => {
     if (driverState !== null) {
       // console.log(driverState)
       return (
@@ -359,10 +397,10 @@ export const Mapas = ({ navigation }) => {
   }
 
   function EvaluateTripPolyline() {
-    if(tripPolyline !== null){
+    if(viaje.tripPolyline !== null){
       return (
         <Polyline 
-        coordinates={tripPolyline} 
+        coordinates={viaje.tripPolyline} 
         strokeWidth={6} 
         strokeColor={"#16A1DC"} 
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
@@ -374,10 +412,10 @@ export const Mapas = ({ navigation }) => {
   }
 
   function EvaluateDriverPolyline() {
-    if(driverPolyline !== null){
+    if(viaje.driverPolyline !== null){
       return (
         <Polyline 
-        coordinates={driverPolyline} 
+        coordinates={viaje.driverPolyline} 
         strokeWidth={6} 
         strokeColor={"#16A1DC"} 
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
@@ -413,7 +451,13 @@ export const Mapas = ({ navigation }) => {
       <EvaluateStartSuscription />
 
       <View style={styles.cardContainer}>
-        <CardPassenger props={{ ruta: drawRoute, viaje: createTrip, navigation }} />
+        <CardPassenger props={{ 
+          drawRoute: drawRoute, 
+          createTrip: createTrip,
+          DeleteTrip: DeleteTrip,
+          DeleteViaje: DeleteViaje,
+          get_cost: get_cost,
+          navigation }} />
         {/* <EvaluateStartChat /> */}
       </View>
 

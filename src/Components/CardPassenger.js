@@ -102,6 +102,7 @@ query {
 }
 `
 
+
 export const CardPassenger = (props) => {
 
     useEffect(() => {
@@ -115,6 +116,7 @@ export const CardPassenger = (props) => {
     const { viaje, setViaje } = useViaje();
     const [payments, setPayments] = useState([]);
     const [services, setServices] = useState([]);
+    const [cost, setCost] = useState(null);
 
     const [get_trip_by_id] = useLazyQuery(GET_TRIP_BY_ID, {
         onCompleted: ({ GetTripById }) => {
@@ -149,6 +151,7 @@ export const CardPassenger = (props) => {
             console.log(err);
         }
     })
+
     useQuery(GET_SERVICES, {
         fetchPolicy: "no-cache",
         onCompleted: ({ GetServices }) => {
@@ -160,6 +163,7 @@ export const CardPassenger = (props) => {
             console.log(err);
         }
     })
+
     useQuery(GET_PAYMENT_METHODS, {
         fetchPolicy: "no-cache",
         onCompleted: ({ GetPaymentMethods }) => {
@@ -184,11 +188,6 @@ export const CardPassenger = (props) => {
         setViaje({ ...viaje, paymentMethod: filtered[0] })
     }
 
-    function deleteFromStorage() {
-        setTrip(null);
-        SetTripStorage(null);
-    }
-
     function GoToChat() {
         console.log(props.props);
         // console.log('Go to chat');
@@ -200,12 +199,25 @@ export const CardPassenger = (props) => {
         console.log('Cancel trip');
     }
 
-    function DrawRoutePolyline() {
-        props.props.viaje();
+    async function DrawRoutePolyline() {
+        try {
+           const resRoute = await props.props.drawRoute();
+           const res = await props.props.get_cost({
+                variables: {
+                    serviceId: services[0].id,
+                    distance: resRoute.data.GetRouteInfo.distance.split(" ")[0],
+                    time: resRoute.data.GetRouteInfo.time.split(" ")[0]
+                }
+            })
+            setCost(res.data.GetCost)
+            // console.log(res);
+        } catch (error) {
+            throw new Error(error)
+        }
     }
 
-    function CreateTrip() {
-        props.props.route();
+    async function CreateTrip() {
+        props.props.createTrip()
     }
 
     const NormalCard = () => (
@@ -231,7 +243,7 @@ export const CardPassenger = (props) => {
                                 {item.paymentMethod}
                             </ButtonPaper>
                         </View>
-                    )} />
+                )} />
             </View>
 
             <View style={styles.servicesPanel}>
@@ -256,29 +268,33 @@ export const CardPassenger = (props) => {
             </View>
 
             <View style={styles.tripPanel}>
-                <ButtonPaper
-                    style={{ backgroundColor: 'darkblue', margin: 10 }}
-                    icon={'plus'}
-                    mode="contained"
-                    onPress={() => CreateTrip()}>
-                    Viaje
-                </ButtonPaper>
-
-                <ButtonPaper
-                    style={{ backgroundColor: '#000000', margin: 10 }}
-                    icon={'highway'}
-                    mode="contained"
-                    onPress={() => DrawRoutePolyline()}>
-                    Ruta
-                </ButtonPaper>
+                    {/* <ButtonPaper
+                        style={{ backgroundColor: 'darkblue', margin: 10 }}
+                        icon={'plus'}
+                        mode="contained"
+                        onPress={() => CreateTrip()}>
+                        Viaje
+                    </ButtonPaper> */}
+    
+                    <ButtonPaper
+                        style={{ backgroundColor: '#000000', margin: 10 }}
+                        icon={'highway'}
+                        mode="contained"
+                        onPress={() => DrawRoutePolyline()}>
+                        Ver precio
+                    </ButtonPaper>
+                    {/* <EvaluateCostExist/> */}
             </View>
         </View>
     )
 
     const WaitingCard = () => (
-        <View>
+        <View style = {styles.card}>
             <ActivityIndicator size='large' color='orange' />
-            <Button title = 'Log viaje ' onPress = {() => console.log(viaje)}/>
+            <Button title = 'Clean storage ' onPress = {() => {
+                props.props.DeleteTrip()
+                props.props.DeleteViaje()
+            }}/>
         </View>
     )
 
@@ -312,14 +328,32 @@ export const CardPassenger = (props) => {
     )
 
     function EvaluateTrip() {
-        if (trip == null) {
+        if (trip == null && cost == null) {
             return <NormalCard />
-        } else if (trip !== null && trip.driver !== null) {
+        } else if (trip !== null && trip.driver !== null && cost !== null) {
             return <OnCourseCard />
         } else if (trip !== null && trip.driver == null) {
             return <WaitingCard />
-        } else if (trip !== null && trip.tripStatus.tripStatus == "Terminado" || "Cancelado") {
+        } else if (trip !== null && trip.tripStatus.tripStatus == "Terminado" || "Cancelado" && cost == null) {
             return <FinishedCard />
+        } else if( trip == null && cost !== null){
+            return (
+                <View style = {styles.card}>
+                    <Text style = {styles.text}>Distancia: {viaje.route.distance}</Text>                    
+                    <Text style = {styles.text}>Tiempo estimado: {viaje.route.time}</Text>                    
+                    <Text style = {styles.text}>Precio: ${cost.feeTaxed}</Text> 
+                    <View style = {{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                    <MaterialCommunityIcons size = {24} name = {'arrow-left'} onPress = {() => setCost(null)}/>  
+                        <ButtonPaper
+                            style={{ backgroundColor: 'darkblue', margin: 10 }}
+                            icon={'plus'}
+                            mode="contained"
+                            onPress={() => CreateTrip()}>
+                            Viaje
+                        </ButtonPaper>         
+                    </View>  
+                </View>
+            )
         }
     }
 

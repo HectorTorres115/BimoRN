@@ -64,14 +64,14 @@ export const TripProvider = (props) => {
     // }
     // );
     //Did mount
-    // useEffect(() => {
-    //     GetTrip()
-    //     .then((data) => {
-    //         console.log(data)
-    //         setTrip(data)
-    //     })
-    //     .catch((err) => console.log(err))
-    // }, [])
+    useEffect(() => {
+        GetTrip()
+        .then((data) => {
+            // console.log(data)
+            setTrip(data)
+        })
+        .catch((err) => console.log(err))
+    }, [])
     
     const value = useMemo(() => {
         return({

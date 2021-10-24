@@ -1,34 +1,45 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect} from 'react'
+import { GetViaje } from '../Functions/ViajeStorage';
 
 export const ViajeContext = React.createContext();
 
+export const viajeDefaultState = {
+    tripPolyline: null,
+    driverPolyline: null,
+    indexdriver: null,
+    indexorigin: null,
+    indexdestination: null,
+    paymentMethod: null,
+    service: null,
+    route: {
+        startAdress: null,
+        endAdress: null,
+        polyline: null,
+        distance: null,
+        time: null
+    },
+    origin: {
+        name: null,
+        placeId: null
+    },
+    destination: {
+        name: null,
+        placeId: null
+    }
+}
+
 export const ViajeProvider = (props) => {
     //State
-    const [viaje, setViaje] = useState({
-        polyline: null,
-        driverPolyline: null,
-        indexdriver: null,
-        indexorigin: null,
-        indexdestination: null,
-        paymentMethod: null,
-        service: null,
-        route: {
-            startAdress: null,
-            endAdress: null,
-            polyline: null,
-            distance: null,
-            time: null
-        },
-        origin: {
-            name: null,
-            placeId: null
-        },
-        destination: {
-            name: null,
-            placeId: null
-        }
-    });
+    const [viaje, setViaje] = useState(viajeDefaultState);
     //Did mount
+    useEffect(() => {
+        GetViaje()
+        .then((data) => {
+            // console.log(data)
+            setViaje(data)
+        })
+        .catch((err) => console.log(err))
+    }, [])
 
     const value = useMemo(() => {
         return ({
