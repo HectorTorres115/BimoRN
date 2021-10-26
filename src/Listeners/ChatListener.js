@@ -24,7 +24,7 @@ export class ChatListener extends Component {
           onSubscriptionData = {(data) => {
               console.log(data.subscriptionData.data)
               this.props.setter([...this.props.messages,data.subscriptionData.data.MessageCreated])
-              this.props.lista.current.scrollToEnd()
+              // this.props.lista.current.scrollToEnd()
           }}>
           {({loading, error}) => {
               // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>

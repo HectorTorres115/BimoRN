@@ -83,19 +83,19 @@ export class TripUpdated extends Component {
           variables= {{tripId: this.props.trip.id}}
           onSubscriptionData = {(data) => {
               // console.log(data.subscriptionData.data)
-              if(data.subscriptionData.data.TripUpdated.tripStatus.id === 4){
-                Alert.alert("El conductor ha llegado")
-              } else {
-                console.log(data.subscriptionData.data.TripUpdated.tripStatus)
-              }
+              // if(data.subscriptionData.data.TripUpdated.tripStatus.id === 4){
+              //   Alert.alert("El conductor ha llegado")
+              // } else {
+              //   console.log(data.subscriptionData.data.TripUpdated.tripStatus)
+              // }
 
-              if(data.subscriptionData.data.TripUpdated.tripStatus.id === 2){
-                Alert.alert("El viaje ha terminado")
-                SetTripStorage(null)
-                this.props.setTrip(null)
-              } else {
-                console.log(data.subscriptionData.data.TripUpdated.tripStatus)
-              }
+              // if(data.subscriptionData.data.TripUpdated.tripStatus.id === 2){
+              //   Alert.alert("El viaje ha terminado")
+              //   SetTripStorage(null)
+              //   this.props.setTrip(null)
+              // } else {
+              //   console.log(data.subscriptionData.data.TripUpdated.tripStatus)
+              // }
               // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
               // this.props.setDriverPolyline(data.subscriptionData.data.TripUpdated.driverPolyline)

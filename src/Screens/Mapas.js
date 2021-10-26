@@ -187,6 +187,7 @@ export const Mapas = ({ navigation }) => {
     }
     if(viaje !== viajeDefaultState) {
       console.log('Hay un VIAJE guardado')
+      console.log(viaje);
     }
     get_address({ variables: { 
       lat: ReduxLocationStore.getState().latitude, 
@@ -293,6 +294,7 @@ export const Mapas = ({ navigation }) => {
     onCompleted: ({CreateTrip}) => {
       // console.log(data.CreateTrip.destinationLocationLat)
       // console.log(data.CreateTrip.destinationLocationLng)
+      console.log(CreateTrip.id)
       SaveTrip(CreateTrip)
       SaveViaje(CreateTrip)
       animateCameraToPolylineCenter(decodePolyline(CreateTrip.tripPolyline))
@@ -304,7 +306,7 @@ export const Mapas = ({ navigation }) => {
   
   async function drawRoute() {
     if (viaje.origin == null || viaje.destination == null) {
-      Alert.alert("No se ha asignado localizacion")
+      Alert.alert("No se ha asigno destino")
     } else {
       if(viaje.origin.placeId == null) {
         return await get_route_info({
@@ -457,6 +459,7 @@ export const Mapas = ({ navigation }) => {
           DeleteTrip: DeleteTrip,
           DeleteViaje: DeleteViaje,
           get_cost: get_cost,
+          get_address: get_address,
           navigation }} />
         {/* <EvaluateStartChat /> */}
       </View>

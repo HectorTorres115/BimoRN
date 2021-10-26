@@ -36,7 +36,9 @@ export const ViajeProvider = (props) => {
         GetViaje()
         .then((data) => {
             // console.log(data)
-            setViaje(data)
+            if(data !== null){
+                setViaje(data)
+            }
         })
         .catch((err) => console.log(err))
     }, [])

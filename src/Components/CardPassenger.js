@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Text, View, Button, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { Text, View, Button, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import { Button as ButtonPaper, Avatar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -7,16 +7,19 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import gql from 'graphql-tag'
 import { useQuery, useLazyQuery } from 'react-apollo'
 //
-import { useTrip } from '../Context/TripContext'
-import { SetTrip as SetTripStorage } from '../Functions/TripStorage'
-import { useViaje } from '../Context/ViajeContext';
 import { styles } from '../Styles/CardPassenger'
+import { useTrip } from '../Context/TripContext'
+import { useViaje, viajeDefaultState } from '../Context/ViajeContext';
+import { DeleteViaje as DeleteViajeStorage} from '../Functions/ViajeStorage'
+import { SetTrip as SetTripStorage, DeleteTrip as DeleteTripStorage} from '../Functions/TripStorage'
+import ReduxLocationStore from '../Redux/Redux-location-store';
 
 const GET_TRIP_BY_ID = gql`
 query get_trip_by_id($id:Int!){
   GetTripById(id: $id){
     id
     opt
+    chatId
     driver {
       id
       name
@@ -108,7 +111,7 @@ export const CardPassenger = (props) => {
     useEffect(() => {
         console.log('Component did mount (Card Passenger)');
         if (trip !== null) {
-            get_trip_by_id();
+            get_trip_by_id({ variables: { id: trip.id } });
         }
     }, [])
 
@@ -118,10 +121,33 @@ export const CardPassenger = (props) => {
     const [services, setServices] = useState([]);
     const [cost, setCost] = useState(null);
 
+    function DeleteTrip() {
+        setTrip(null)
+        DeleteTripStorage()
+      }
+    
+      function DeleteViaje() {
+        setViaje(viajeDefaultState)
+        DeleteViajeStorage()
+        props.props.get_address({ variables: { 
+            lat: ReduxLocationStore.getState().latitude, 
+            lng: ReduxLocationStore.getState().longitude } 
+          })
+      }
+
     const [get_trip_by_id] = useLazyQuery(GET_TRIP_BY_ID, {
         onCompleted: ({ GetTripById }) => {
-            console.log(GetTripById);
+            console.log(GetTripById.tripStatus.tripStatus);
             setTrip(GetTripById)
+            if (GetTripById.tripStatus.tripStatus == "Cancelado" ) {
+                Alert.alert('El viaje se ha cancelado')
+                DeleteViaje()
+                DeleteTrip()
+            } else if (GetTripById.tripStatus.tripStatus == "Terminado") {
+                Alert.alert('El viaje ha finalizado')
+                DeleteViaje()
+                DeleteTrip()
+            }
         },
         onError: (err) => {
             console.log(err);
@@ -197,12 +223,14 @@ export const CardPassenger = (props) => {
     function CancelTripButton() {
         console.log(props.props);
         console.log('Cancel trip');
+        setTrip(null)
+        SetTripStorage(null)
     }
 
     async function DrawRoutePolyline() {
         try {
-           const resRoute = await props.props.drawRoute();
-           const res = await props.props.get_cost({
+            const resRoute = await props.props.drawRoute();
+            const res = await props.props.get_cost({
                 variables: {
                     serviceId: services[0].id,
                     distance: resRoute.data.GetRouteInfo.distance.split(" ")[0],
@@ -212,7 +240,7 @@ export const CardPassenger = (props) => {
             setCost(res.data.GetCost)
             // console.log(res);
         } catch (error) {
-            throw new Error(error)
+            Alert.alert('No se asigno destino')
         }
     }
 
@@ -243,7 +271,7 @@ export const CardPassenger = (props) => {
                                 {item.paymentMethod}
                             </ButtonPaper>
                         </View>
-                )} />
+                    )} />
             </View>
 
             <View style={styles.servicesPanel}>
@@ -268,33 +296,33 @@ export const CardPassenger = (props) => {
             </View>
 
             <View style={styles.tripPanel}>
-                    {/* <ButtonPaper
+                {/* <ButtonPaper
                         style={{ backgroundColor: 'darkblue', margin: 10 }}
                         icon={'plus'}
                         mode="contained"
                         onPress={() => CreateTrip()}>
                         Viaje
                     </ButtonPaper> */}
-    
-                    <ButtonPaper
-                        style={{ backgroundColor: '#000000', margin: 10 }}
-                        icon={'highway'}
-                        mode="contained"
-                        onPress={() => DrawRoutePolyline()}>
-                        Ver precio
-                    </ButtonPaper>
-                    {/* <EvaluateCostExist/> */}
+
+                <ButtonPaper
+                    style={{ backgroundColor: '#000000', margin: 10 }}
+                    icon={'highway'}
+                    mode="contained"
+                    onPress={() => DrawRoutePolyline()}>
+                    Ver precio
+                </ButtonPaper>
+                {/* <EvaluateCostExist/> */}
             </View>
         </View>
     )
 
     const WaitingCard = () => (
-        <View style = {styles.card}>
-            <ActivityIndicator size='large' color='orange' />
-            <Button title = 'Clean storage ' onPress = {() => {
+        <View style={styles.card}>
+            <ActivityIndicator size='large' color='blue' />
+            <Button title='Cancelar viaje ' onPress={() => {
                 props.props.DeleteTrip()
                 props.props.DeleteViaje()
-            }}/>
+            }} />
         </View>
     )
 
@@ -307,6 +335,7 @@ export const CardPassenger = (props) => {
                 }
                 <Text style={styles.driverName}>{trip.driver.name}</Text>
                 <Text style={styles.placa}>{trip.driver.plate}</Text>
+                {/* <Text style={styles.placa}>{trip.tripStatus.tripStatus}</Text> */}
             </View>
 
             <View style={styles.tripOptions}>
@@ -323,37 +352,40 @@ export const CardPassenger = (props) => {
 
     const FinishedCard = () => (
         <View>
+            <Text style={styles.text}>El viaje ha terminado</Text>
             <MaterialCommunityIcons name='cancel' size={42} color='red' />
+        </View>
+    )
+
+    const TripInfoCard = () => (
+        <View style={styles.card}>
+            <Text style={styles.text}>Distancia: {viaje.route.distance}</Text>
+            <Text style={styles.text}>Tiempo estimado: {viaje.route.time}</Text>
+            <Text style={styles.text}>Precio: ${cost.feeTaxed}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <MaterialCommunityIcons size={24} name={'arrow-left'} onPress={() => setCost(null)} />
+                <ButtonPaper
+                    style={{ backgroundColor: 'darkblue', margin: 10 }}
+                    icon={'plus'}
+                    mode="contained"
+                    onPress={() => CreateTrip()}>
+                    Viaje
+                </ButtonPaper>
+            </View>
         </View>
     )
 
     function EvaluateTrip() {
         if (trip == null && cost == null) {
             return <NormalCard />
-        } else if (trip !== null && trip.driver !== null && cost !== null) {
+        } else if (trip !== null && trip.driver !== null) {
             return <OnCourseCard />
         } else if (trip !== null && trip.driver == null) {
             return <WaitingCard />
-        } else if (trip !== null && trip.tripStatus.tripStatus == "Terminado" || "Cancelado" && cost == null) {
-            return <FinishedCard />
-        } else if( trip == null && cost !== null){
-            return (
-                <View style = {styles.card}>
-                    <Text style = {styles.text}>Distancia: {viaje.route.distance}</Text>                    
-                    <Text style = {styles.text}>Tiempo estimado: {viaje.route.time}</Text>                    
-                    <Text style = {styles.text}>Precio: ${cost.feeTaxed}</Text> 
-                    <View style = {{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                    <MaterialCommunityIcons size = {24} name = {'arrow-left'} onPress = {() => setCost(null)}/>  
-                        <ButtonPaper
-                            style={{ backgroundColor: 'darkblue', margin: 10 }}
-                            icon={'plus'}
-                            mode="contained"
-                            onPress={() => CreateTrip()}>
-                            Viaje
-                        </ButtonPaper>         
-                    </View>  
-                </View>
-            )
+        } else if (trip == null && cost !== null) {
+            return <TripInfoCard />
+        } else {
+            return <Text>No render for this state</Text>
         }
     }
 
