@@ -78,8 +78,8 @@ export const Chat = (props) => {
         variables:{
             tripId: trip.id
         },
-        onCompleted:async ({GetChatByTripId}) => {
-        //   console.log(GetChatByTripId.messages);
+        onCompleted: ({GetChatByTripId}) => {
+          console.log(GetChatByTripId.messages);
           setChat(GetChatByTripId)
           setMessages(GetChatByTripId.messages)
         },

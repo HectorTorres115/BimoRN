@@ -80,7 +80,7 @@ mutation get_hexagons($lat: Float!,$lng: Float!, $res: Int!, $jumps: Int!) {
   }
 `
 const ACCEPT_TRIP = gql`
-mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
+mutation update_trip($id: Int!, $driverId: Int, $tripStatus: Int!) {
   UpdateTrip(
     input: { id: $id, driverId: $driverId, tripStatusId: $tripStatus }
   ) {
@@ -139,6 +139,7 @@ mutation update_trip($id: Int!, $driverId: Int!, $tripStatus: Int!) {
     feeTaxed
     rawfee
     distance
+    chatId
   }
 }
 
@@ -262,10 +263,10 @@ export const MapasDriver = ({navigation}) => {
             // console.log(indexdriver)
             // console.log(indexorigin)
             if(trip.tripStatus.tripStatus == 'En Camino'){ //Esperando
-              update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 4}})
+              update_trip({variables:{id: trip.id, driverId: usuario.id,tripStatus: 4}})
             }
             if(trip.tripStatus.tripStatus == 'Esperando'){ //Iniciado
-              update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 6}})
+              update_trip({variables:{id: trip.id, driverId: usuario.id,tripStatus: 6}})
             }
           }
           if(indexdriver == indexdestination){
@@ -273,7 +274,7 @@ export const MapasDriver = ({navigation}) => {
             // console.log(indexdriver)
             // console.log(indexdestination)
             if(trip.tripStatus.tripStatus == 'Iniciado'){
-              update_trip({variables:{id: trip.id,driverId: usuario.id,tripStatus: 2}})
+              update_trip({variables:{id: trip.id, driverId: usuario.id,tripStatus: 2}})
             }
           }
       }
@@ -390,39 +391,40 @@ export const MapasDriver = ({navigation}) => {
       }
     }
 
-    return(
+    return (
         <>
-        <MapView
-        // customMapStyle = {darkStyle}
-        ref = {globalMapView}
-        showsUserLocation = {true}
-        showsMyLocationButton = {false}
-        style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
-        initialRegion = {region}>
 
-            {drivers.map(coord => {
-                return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
-            })}
-
-            {hexagons.map(hexagon => {
-                return <Polygon fillColor = {'rgba(22, 161, 220, 0.5)'} key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} />
-            })}
-            {hexagonsdestination.map(hexagon => {
-                return <Polygon fillColor = {'rgba(22, 161, 220, 0.5)'} key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} />
-            })}
-            {/* Marcador del driver */}
-            <Marker key = {Math.floor(1000 + Math.random() * 9000)} 
-            ref={driverMarker} 
-            coordinate = {driverLocation}    
-            icon={require('../../assets/images/map-taxi.png')}/>
-
-            {/* <EvaluateMarkers/> */}
-
-            {/* {viaje.tripPolyline !== null ? <Polyline coordinates={viaje.tripPolyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null}
-            {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null} */}
-            <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-            <Polyline coordinates={driverpolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-        </MapView>
+<MapView
+          // customMapStyle = {darkStyle}
+          ref = {globalMapView}
+          showsUserLocation = {true}
+          showsMyLocationButton = {false}
+          style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
+          initialRegion = {region}>
+  
+              {drivers.map(coord => {
+                  return <Marker key = {coord.lat} coordinate = {{latitude:coord.lat, longitude:coord.lng}} pinColor={coord.color}/>
+              })}
+  
+              {hexagons.map(hexagon => {
+                  return <Polygon fillColor = {'rgba(22, 161, 220, 0.5)'} key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} />
+              })}
+              {hexagonsdestination.map(hexagon => {
+                  return <Polygon fillColor = {'rgba(22, 161, 220, 0.5)'} key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} />
+              })}
+              {/* Marcador del driver */}
+              <Marker key = {Math.floor(1000 + Math.random() * 9000)} 
+              ref={driverMarker} 
+              coordinate = {driverLocation}    
+              icon={require('../../assets/images/map-taxi.png')}/>
+  
+              {/* <EvaluateMarkers/> */}
+  
+              {/* {viaje.tripPolyline !== null ? <Polyline coordinates={viaje.tripPolyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null}
+              {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null} */}
+              <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
+              <Polyline coordinates={driverpolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
+          </MapView>
 
         <EvaluateCard/>
         <EvaluateChatButton/>

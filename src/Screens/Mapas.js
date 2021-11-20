@@ -5,13 +5,17 @@ import { useMutation, useQuery, useLazyQuery } from 'react-apollo'
 //Maps
 import MapView, { Marker, Polyline } from 'react-native-maps'
 import decodePolyline from '../Functions/DecodePolyline'
+//Geolocation
+import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from '../Redux/Redux-location-store';
+import { set_location } from '../Redux/Redux-actions';
 //Back handler
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 //Context
 import { useUsuario } from '../Context/UserContext'
 import { useTrip } from '../Context/TripContext'
 import { useViaje } from '../Context/ViajeContext'
+import {useAddress} from '../Context/AddressContext'
 //Custom componentss
 import { TripUpdated } from '../Listeners/TripUpdated'
 import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
@@ -150,7 +154,6 @@ mutation get_cost($serviceId:Int!, $distance: String!, $time:String!){
   }
 }
 `
-
 export const Mapas = ({ navigation }) => {
   //Config objects
   const initialCameraConfig = {
@@ -174,12 +177,13 @@ export const Mapas = ({ navigation }) => {
   const { usuario, setUser } = useUsuario();
   const { trip, setTrip } = useTrip();
   const { viaje, setViaje } = useViaje();
+  const { address, setAddress } = useAddress();
   //State
   const [driverLocation, setDriverLocation] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [driverState, setDriverState] = useState(null);
   const [services, setServices] = useState([]);
-
+  
   //Lifecycle methods
   useEffect(() => {
     if(trip !== null){
@@ -187,13 +191,15 @@ export const Mapas = ({ navigation }) => {
     }
     if(viaje !== viajeDefaultState) {
       console.log('Hay un VIAJE guardado')
-      console.log(viaje);
+      // console.log(viaje);
     }
     get_address({ variables: { 
       lat: ReduxLocationStore.getState().latitude, 
       lng: ReduxLocationStore.getState().longitude } 
     })
     handleAndroidBackButton(() => backAction(setUser))
+
+    console.log(driverLocation);
   }, [])
 
   function CutAddress(address) {
@@ -375,8 +381,11 @@ export const Mapas = ({ navigation }) => {
     if (trip !== null) {
       return <TripUpdated
         // setDriverPolyline ={setDriverPolyline}
-        trip={trip} setTrip={setTrip}
-        driverState={driverState} setDriverState={setDriverState}
+        trip={trip} 
+        setTrip={SaveTrip}
+        driverState={driverState} 
+        setDriverState={setDriverState}
+        setDriverLocation={setDriverLocation}
       />
     } else {
       return null
@@ -428,29 +437,36 @@ export const Mapas = ({ navigation }) => {
     }
   }
 
-  return (
-    <>
-      <MapView
-        // customMapStyle = {darkStyle}
-        ref={globalMapView}
-        showsUserLocation={true}
-        showsMyLocationButton={false}
-        style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
-        initialCamera={initialCameraConfig}>
-        {/* //Driver marker */}
-        {driverLocation !== null ? 
+  function EvaluateDriverMarker() {
+    if(driverLocation !== null){
+      // console.log('The marker exists');
+      return(
         <Marker 
         ref={driverMarker} 
         key={115} 
         coordinate={driverLocation} 
         icon={require('../../assets/images/map-taxi.png')} />
-        : null}
-        {/* //Trip polyline */}
+      )
+    } else {
+      // console.log('The marker doesnt exists ' + driverLocainon);
+      return null
+    }
+  }
+
+  return (
+    <>
+
+      <MapView
+        ref={globalMapView} 
+        showsCompass = {false}
+        showsUserLocation={true}
+        showsMyLocationButton={false}
+        style={styles.map}
+        initialCamera={initialCameraConfig}>
+        <EvaluateDriverMarker/>
         <EvaluateTripPolyline/>
         <EvaluateDriverPolyline/>
       </MapView>
-
-      <EvaluateStartSuscription />
 
       <View style={styles.cardContainer}>
         <CardPassenger props={{ 
@@ -481,12 +497,18 @@ export const Mapas = ({ navigation }) => {
           onPressIn={() => { navigation.navigate("FindAddress", {type: 'destination'}) }} />
       </View>
 
+      {/* Suscriptions */}
+
+      <EvaluateStartSuscription />
       <EvaluateCityDriver />
     </>
   )
 }
 
 const styles = StyleSheet.create({
+  map: {
+    flex: 1, width: '100%', height: '100%', zIndex: -1
+  },
   serviceContainer: {
     flex: 1 / 2,
     justifyContent: 'center',

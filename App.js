@@ -12,6 +12,7 @@ import { ViajeProvider } from './src/Context/ViajeContext';
 import { Login } from './src/Screens/Login'
 import { LoginDriver } from './src/Screens/LoginDriver'
 import { MapasDriver } from './src/Screens/MapasDriver'
+import { MapasPassenger } from './src/Screens/MapasPassenger'
 import { Registro } from './src/Screens/Registro'
 import { Mapas } from './src/Screens/Mapas'
 import { MapCamera } from './src/Screens/MapCamera'
@@ -24,25 +25,23 @@ import { Tracking } from './src/Screens/Tracking';
 import SplashScreen from './src/Screens/SplashScreen';
 import { ResumenViaje } from './src/Screens/ResumenViaje';
 import { Viajes } from './src/Screens/Viajes';
-//React native paper provider
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+//Geolocation
 import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from './src/Redux/Redux-location-store';
 import { set_location } from './src/Redux/Redux-actions';
-
+//React native paper provider
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 //Stripe
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { stripeUrl } from './src/Clients/client-config'
-
 //DRAWER COMPONENT
 import { DrawerItem } from './src/Components/DrawerItem'
 
-// const LoginStack = createStackNavigator();
-// const MainStack = createStackNavigator();
-// const DriverStack = createStackNavigator();
 const DriverStack = createDrawerNavigator();
 const LoginStack = createDrawerNavigator();
 const MainStack = createDrawerNavigator();
+
+import {requestPermission} from './src/Functions/MapsPermissions'
 
 const globalOptions = {
   headerShown: false, 
@@ -71,6 +70,7 @@ const LoginStackScreen = ()=> (
 const MainStackScreen = ()=> (
   <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'} drawerContent = {(props) => <DrawerItem {...props}/>}>
     <MainStack.Screen name="Mapas" component={Mapas} options = {{headerShown: false}}/>
+    <MainStack.Screen name="MapasPassenger" component={MapasPassenger} options = {{headerShown: false}}/>
     <MainStack.Screen name="Animation" component={Animation} options = {globalOptions} />
     <MainStack.Screen name="Registro" component={Registro} options = {globalOptions}/>
     <MainStack.Screen name="FindAddress" component={FindAddress} options = {globalOptions} />
@@ -113,33 +113,29 @@ export default ()=> (
 
 function App() {
 
-  const {address, setAddress} = useAddress();
+  React.useEffect(() => {
+    requestPermission()
+  }, [])
+
   const {usuario} = useUsuario();
-
-  const geolocationConfig = {
-    enableHighAccuracy: true, 
-    distanceFilter: 0, 
-    useSignificantChanges: false, 
-    maximumAge: 0
-  }
-
-  // const {address, setAddress} = useAddress();
-  // const {usuario} = useUsuario();
+  const {address, setAddress} = useAddress();
 
   Geolocation.watchPosition(
     // ({coords}) => {setAddress(coords)},
     ({coords}) => {
-      // console.log(coords)
       ReduxLocationStore.dispatch(set_location(coords))
       setAddress(coords)
     },
     (error) => {console.log(error)},
-    {enableHighAccuracy: true, 
+    {
+      enableHighAccuracy: true, 
       distanceFilter: 0, 
       useSignificantChanges: false, 
-      maximumAge: 0}
+      maximumAge: 0,
+      forceRequestLocation: true,
+      forceLocationManager: true
+    }
   )
-
   
   // console.log(usuario);
   if(usuario == null){
@@ -170,7 +166,6 @@ function App() {
         </ApolloProvider>
       )
     } else {
-      console.log(address);
       return <SplashScreen/>
     }
   }

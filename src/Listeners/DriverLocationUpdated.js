@@ -25,6 +25,7 @@ export class DriverLocationUpdated extends Component {
           variables = {{driverId: this.props.driverId}}
           onSubscriptionData = {(data) => {
               // console.log(data.subscriptionData.data)
+              // console.log(this.props.driverMarker.current.animateMarkerToCoordinate)
               this.props.driverMarker.current.animateMarkerToCoordinate({
                 latitude: data.subscriptionData.data.DriverLocationUpdated.lat,
                 longitude: data.subscriptionData.data.DriverLocationUpdated.lng

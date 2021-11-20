@@ -91,7 +91,7 @@ export const CardTripInfo = (props) => {
                         value={0} 
                         decimalPlaces={10}
                         units={'º'}
-                        backgroundColor={['#16A0DB', '#e3d912', '#32a852']}
+                        backgroundColor={['#16A0DB', '#32a852']}
                         firstMessage = {'Teminar Viaje'}
                         secondMessage = {'Terminando Viaje'}
                         finalMessage = {'Viaje Terminado'}
@@ -99,7 +99,7 @@ export const CardTripInfo = (props) => {
                         if(value == 40){
                             actualizarViaje(2)
                             deleteFromStorage()
-                            props.navigation.navigate('ResumenViaje')  
+                            // props.navigation.navigate('ResumenViaje')  
                         }}}
                         // onDrag={() => console.log('Dragging')}
                 />

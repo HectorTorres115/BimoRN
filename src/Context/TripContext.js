@@ -3,6 +3,12 @@ import { GetTrip } from '../Functions/TripStorage';
 
 export const TripContext = React.createContext();
 
+export const tripDefaultState = {
+    driver: {
+        city: null
+    }
+}
+
 export const TripProvider = (props) => {
     //State
     const [trip, setTrip] = useState(null);

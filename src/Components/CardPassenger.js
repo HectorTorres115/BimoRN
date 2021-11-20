@@ -215,13 +215,13 @@ export const CardPassenger = (props) => {
     }
 
     function GoToChat() {
-        console.log(props.props);
+        // console.log(props.props);
         // console.log('Go to chat');
         props.props.navigation.navigate('Chat');
     }
 
     function CancelTripButton() {
-        console.log(props.props);
+        // console.log(props.props);
         console.log('Cancel trip');
         setTrip(null)
         SetTripStorage(null)

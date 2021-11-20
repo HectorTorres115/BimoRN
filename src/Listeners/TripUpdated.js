@@ -97,12 +97,16 @@ export class TripUpdated extends Component {
               //   console.log(data.subscriptionData.data.TripUpdated.tripStatus)
               // }
               // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
+              // console.log(data.subscriptionData.data.TripUpdated);
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
-              // this.props.setDriverPolyline(data.subscriptionData.data.TripUpdated.driverPolyline)
               this.props.setDriverState(data.subscriptionData.data.TripUpdated.driver)
+              this.props.setDriverLocation({
+                latitude: data.subscriptionData.data.TripUpdated.driver.city.lat,
+                longitude: data.subscriptionData.data.TripUpdated.driver.city.lng
+              })
           }}>
           {({loading, error}) => {
-              // if(loading) return <ActivityIndicator size = 'large' color = 'blue'/>
+              // if(loading) return <ActivityIndicator size = 'large' color = 'green'/>
               if(loading) return null
               if(error) {
                 console.log(error)
