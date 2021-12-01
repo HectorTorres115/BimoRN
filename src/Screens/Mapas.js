@@ -1,14 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Button, StyleSheet, View, TextInput, Alert, Text } from 'react-native'
+import { Button, StyleSheet, View, TextInput, Alert, Text, Image} from 'react-native'
 import gql from 'graphql-tag'
 import { useMutation, useQuery, useLazyQuery } from 'react-apollo'
 //Maps
-import MapView, { Marker, Polyline } from 'react-native-maps'
+import MapView, { Marker, MarkerAnimated, Polyline } from 'react-native-maps'
+import AnimatedPolyline from 'react-native-maps-animated-polyline'
 import decodePolyline from '../Functions/DecodePolyline'
 //Geolocation
-import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from '../Redux/Redux-location-store';
-import { set_location } from '../Redux/Redux-actions';
 //Back handler
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 //Context
@@ -20,11 +19,15 @@ import {useAddress} from '../Context/AddressContext'
 import { TripUpdated } from '../Listeners/TripUpdated'
 import { DriverLocationUpdated } from '../Listeners/DriverLocationUpdated'
 import { CardPassenger } from '../Components/CardPassenger'
+import { AnimatedMarker } from '../Components/AnimatedMarker'
+import { AnimatedMarkerDef } from '../Components/AnimatedMarkerDef'
 import { Fab } from '../Components/Fab'
 //Local storage
 import { viajeDefaultState } from '../Context/ViajeContext'
 import { SetViaje as SetViajeStorage, DeleteViaje as DeleteViajeStorage} from '../Functions/ViajeStorage'
 import { SetTrip as SetTripStorage, DeleteTrip as DeleteTripStorage} from '../Functions/TripStorage'
+//Driver store
+import ReduxDriverStore from '../Redux/Redux-driver-store'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -393,14 +396,16 @@ export const Mapas = ({ navigation }) => {
   }
 
   const EvaluateCityDriver = () => {
-    if (driverState !== null) {
+    if (driverLocation !== null) {
       // console.log(driverState)
       return (
         <DriverLocationUpdated
           setter={setDriverLocation}
           driverId={driverState.id}
-          driverMarker={driverMarker}
-          duration={4000} />
+          // driverMarker={driverMarker}
+          // setTripAlt = {setTripAlt}
+          // duration={4000} 
+          />
       )
     } else {
       return null
@@ -410,12 +415,21 @@ export const Mapas = ({ navigation }) => {
   function EvaluateTripPolyline() {
     if(viaje.tripPolyline !== null){
       return (
+        <>
         <Polyline 
+        coordinates={viaje.tripPolyline} 
+        strokeWidth={6} 
+        strokeColor={"#000000"} 
+        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
+        />
+        <AnimatedPolyline 
+        interval = {100}
         coordinates={viaje.tripPolyline} 
         strokeWidth={6} 
         strokeColor={"#16A1DC"} 
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
         />
+        </>
       )
     } else {
       return null
@@ -439,13 +453,19 @@ export const Mapas = ({ navigation }) => {
 
   function EvaluateDriverMarker() {
     if(driverLocation !== null){
-      // console.log('The marker exists');
+      // console.log(driverLocation);
       return(
-        <Marker 
-        ref={driverMarker} 
-        key={115} 
-        coordinate={driverLocation} 
-        icon={require('../../assets/images/map-taxi.png')} />
+        // <AnimatedMarker
+        //   heading = {ReduxDriverStore.getState().heading}
+        //   coordinate = {{
+        //   latitude: ReduxDriverStore.getState().lat,
+        //   longitude: ReduxDriverStore.getState().lng,
+        //   latitudeDelta: 0.08,
+        //   longitudeDelta: 0.08
+        //   }} 
+        //   duration = {4000}
+        // />
+        <AnimatedMarkerDef data = {driverLocation}/>
       )
     } else {
       // console.log('The marker doesnt exists ' + driverLocainon);
@@ -463,10 +483,16 @@ export const Mapas = ({ navigation }) => {
         showsMyLocationButton={false}
         style={styles.map}
         initialCamera={initialCameraConfig}>
-        <EvaluateDriverMarker/>
+        {/* <EvaluateDriverMarker/> */}
+        {driverLocation !== null ? <AnimatedMarkerDef data = {driverLocation}/>: null}
         <EvaluateTripPolyline/>
         <EvaluateDriverPolyline/>
       </MapView>
+
+      {/* Suscriptions */}
+
+      <EvaluateCityDriver />
+      <EvaluateStartSuscription />
 
       <View style={styles.cardContainer}>
         <CardPassenger props={{ 
@@ -477,7 +503,6 @@ export const Mapas = ({ navigation }) => {
           get_cost: get_cost,
           get_address: get_address,
           navigation }} />
-        {/* <EvaluateStartChat /> */}
       </View>
 
       <Fab navigation={navigation} />
@@ -496,11 +521,6 @@ export const Mapas = ({ navigation }) => {
           style={styles.input}
           onPressIn={() => { navigation.navigate("FindAddress", {type: 'destination'}) }} />
       </View>
-
-      {/* Suscriptions */}
-
-      <EvaluateStartSuscription />
-      <EvaluateCityDriver />
     </>
   )
 }

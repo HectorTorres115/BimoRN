@@ -1,14 +1,13 @@
 import React, {useState, useRef, useEffect } from 'react'
 import { Button, StyleSheet, View, Alert, Switch, Text } from 'react-native'
 import gql from 'graphql-tag'
-import MapView, {Marker, Polyline} from 'react-native-maps'
+import MapView, {AnimatedRegion, MarkerAnimated} from 'react-native-maps'
 import { useUsuario } from '../Context/UserContext'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation } from 'react-apollo'
 import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import ReduxLocationStore from '../Redux/Redux-location-store';
-import { TripCreated } from '../Listeners/TripCreated'
 import { appMode } from '../Clients/client-config'
-import {Fab} from '../Components/Fab'
+import { AnimatedMarker } from '../Components/AnimatedMarker'
 
 const UPDATE_DRIVER_LOCATION = gql`
 mutation update_driver_location($citiId: Int!, $lat: Float!,$lng: Float! ){
@@ -152,27 +151,16 @@ export const Tracking = (props) => {
     //Lifecycle methods
     useEffect(() => {
       handleAndroidBackButton(() => backAction(setUser))
-      
-      
-      // const interval = setInterval(() => {
-      //   console.log(indexdriver)
-      //   console.log(indexpassenger)
-      //     if(indexdriver === indexpassenger){
-      //       console.log('Esperando a pasajero')
-      //     }
-      //     else {
-      //       console.log('Ya voooooy')
-      //     }
-      // }, 4000);
-      // return () => clearInterval(interval);
     }, [])
 
     const globalMapView = useRef(React.Component);
     const driverMaker = useRef(React.Component);
     const {usuario, setUser} = useUsuario();
-    const [coords, setCoords] = useState(ReduxLocationStore.getState());
     const [location, setLocation] = useState([]);
-    const [region] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
+
+    const [region, setRegion] = useState({longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08});
+    const [heading, setHeading] = useState(0);
+
     const [polyline,setPolyline] = useState([]);
     const [driverloc,setDriverLoc] = useState({longitude: -107.45174869894981, latitude: 24.822962763444405});
     const [index,setIndex] = useState(0);
@@ -180,7 +168,6 @@ export const Tracking = (props) => {
     const [listenerchat, setListenerChat] = useState(false);
     const [city, setCity] = useState(usuario.city);
     const [indexdriver, setIndexDriver] = useState(null);
-    const [indexdestination, setIndexDestination] = useState(null);
     const [indexpassenger, setIndexPassenger] = useState(null);
     const [hexagons,setHexagons] = useState([]);
 
@@ -302,38 +289,50 @@ export const Tracking = (props) => {
 
     }
 
+    function UpdateAnimatedMarker() {
+      setRegion({...location[location.length - 1], latitudeDelta: 0.08, longitudeDelta: 0.08})
+      setHeading(95);
+    }
+
     return (
         <>
         <MapView
             ref = {globalMapView}
-            // onMapReady = { ()=> getCurrentDirection() }
             onPoiClick = {(e) => drawMarkers(e.nativeEvent.coordinate)}
             onPress = {(e) => drawMarkers(e.nativeEvent.coordinate)}
-            showsUserLocation = {true}
+            showsUserLocation = {false}
             showsMyLocationButton = {false}
             style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
             initialRegion = {region}>
-            <Polyline coordinates={polyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-            {location.map((location)=>{
-                return <Marker key = {Math.floor(1000 + Math.random() * 9000)}  coordinate={location} color="blue"></Marker>
-            })}
-            {hexagons.map(hexagon => {
-                return <Polyline key = {hexagon.index} coordinates = {hexagon.boundaries} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} />
-            })}
-            <Marker ref={driverMaker} key = {driverloc.latitude} coordinate = {{latitude:driverloc.latitude, longitude:driverloc.longitude}} icon={require('../../assets/images/map-taxi3.png')}/>
+              {/* <AnimatedMarker 
+              coordinate = {region} 
+              duration = {1000} 
+              heading = {heading}/> */}
+
+              <AnimatedMarker 
+                heading = {ReduxLocationStore.getState().heading}
+                coordinate = {{
+                latitude: ReduxLocationStore.getState().latitude,
+                longitude: ReduxLocationStore.getState().longitude,
+                latitudeDelta: 0.08,
+                longitudeDelta: 0.08
+              }} 
+              duration = {4000}
+              />
+
+              {location.map((coord) =>{
+                return <MarkerAnimated
+                key = {Math.floor(1000 + Math.random() * 9000)} 
+                coordinate = {coord} 
+                // icon={require('../../assets/images/map-taxi3.png')}}
+                />
+              })}
+
         </MapView>
-        <TripCreated userId = {usuario.id} acceptTrip = {accept_trip} setTrip={setTrip}/>
-        <Button title = "DrawHexagon" onPress = {() => drawHexagons()}/> 
-        <Button title = "Guardar Ubicacion" onPress = {() => guardarUbicacion()}/> 
-        <Button title = "Limpiar" onPress = {() => limpiar()}/> 
-        <Button title = "Imprime" onPress = {() =>{ 
-            console.log(indexdriver)
-            console.log(indexpassenger)
-          }
-        }/> 
-        <Fab navigation = {props.navigation}/>
-        </>
+
+        <Button title = 'Clean markers' onPress = {() => limpiar()}/>
+        <Button title = 'Update marker' onPress = {() => UpdateAnimatedMarker()}/>
+
+        </> 
     )
 }
-
-const styles = StyleSheet.create({})

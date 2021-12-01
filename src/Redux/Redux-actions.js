@@ -20,4 +20,3 @@ export const set_driver = (data) => {
         payload: data
     }
 }
-

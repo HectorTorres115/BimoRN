@@ -105,7 +105,6 @@ query {
 }
 `
 
-
 export const CardPassenger = (props) => {
 
     useEffect(() => {
@@ -124,16 +123,16 @@ export const CardPassenger = (props) => {
     function DeleteTrip() {
         setTrip(null)
         DeleteTripStorage()
-      }
+    }
     
-      function DeleteViaje() {
+    function DeleteViaje() {
         setViaje(viajeDefaultState)
         DeleteViajeStorage()
         props.props.get_address({ variables: { 
             lat: ReduxLocationStore.getState().latitude, 
             lng: ReduxLocationStore.getState().longitude } 
           })
-      }
+    }
 
     const [get_trip_by_id] = useLazyQuery(GET_TRIP_BY_ID, {
         onCompleted: ({ GetTripById }) => {
@@ -222,9 +221,9 @@ export const CardPassenger = (props) => {
 
     function CancelTripButton() {
         // console.log(props.props);
-        console.log('Cancel trip');
-        setTrip(null)
-        SetTripStorage(null)
+        DeleteTrip()
+        DeleteViaje()
+        setCost(null)
     }
 
     async function DrawRoutePolyline() {
@@ -310,6 +309,17 @@ export const CardPassenger = (props) => {
                     mode="contained"
                     onPress={() => DrawRoutePolyline()}>
                     Ver precio
+                </ButtonPaper>
+
+                <ButtonPaper
+                    style={{ backgroundColor: '#ff0000', margin: 10 }}
+                    icon={'plus'}
+                    mode="contained"
+                    onPress={() => {
+                        DeleteViaje()
+                        DeleteTrip()
+                    }}>
+                    Borrar viaje
                 </ButtonPaper>
                 {/* <EvaluateCostExist/> */}
             </View>

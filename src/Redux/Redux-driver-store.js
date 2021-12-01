@@ -1,4 +1,4 @@
 import {createStore} from 'redux';
-import {location_reducer} from './Redux-reducers'
+import {driver_reducer} from './Redux-reducers'
 
-export default LocationStore = createStore(location_reducer);
+export default DriverStore = createStore(driver_reducer);

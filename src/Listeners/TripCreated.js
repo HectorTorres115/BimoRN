@@ -61,7 +61,6 @@ subscription trip_created{
 export class TripCreated extends Component {
   render() {
       return (
-        // <TripContext.Consumer>
           <ApolloProvider client = {subClient}>
           <Subscription subscription = {SUSCRIPTION_TRIP}
           onSubscriptionData = {(data) => {
@@ -76,7 +75,6 @@ export class TripCreated extends Component {
           }}
           </Subscription>
           </ApolloProvider>
-          // </TripContext.Consumer>
       )
   }
 }

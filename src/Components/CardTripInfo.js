@@ -1,7 +1,7 @@
 import React , {useEffect, useState} from 'react'
-import { StyleSheet, Text, View, Button, ScrollView } from 'react-native'
-import {useTrip} from '../Context/TripContext'
-import {DeleteTrip} from '../Functions/TripStorage'
+import { StyleSheet, Text, View, Button } from 'react-native'
+import { useTrip } from '../Context/TripContext'
+import { DeleteTrip } from '../Functions/TripStorage'
 import { useUsuario } from '../Context/UserContext'
 import MotionSlider from 'react-native-motion-slider';
 
@@ -28,30 +28,6 @@ export const CardTripInfo = (props) => {
             driverId: usuario.id
         }})  
     }
-
-    // function EvaluateSlider() {
-    //     console.log('card')
-    //     console.log(props.trip.tripStatusId)
-    //     if(props.trip.tripStatusId == 2){
-    //         return <MotionSlider
-    //         title={'Choose the desired temperature'} 
-    //         min={0} 
-    //         max={40}
-    //         value={0} 
-    //         decimalPlaces={10}
-    //         units={'º'}
-    //         backgroundColor={['rgb(3, 169, 244)', 'rgb(255, 152, 0)', 'rgb(255, 87, 34)']}
-    //         onValueChanged={(value) => console.log(value)}
-    //         onPressIn={() => console.log('Pressed in')}
-    //         onPressOut={() => console.log('Pressed out')}
-    //         onDrag={() => console.log('Dragging')}
-    //     />
-    //     } else {
-    //         return (
-    //             <Text style = {styles.textTrip}>Aun no puedes terminar el viaje</Text>
-    //         )
-    //     }
-    // }
 
     function EvaluateTripStatus() {
         if(trip.tripStatus.tripStatus == 'deal'){
@@ -81,10 +57,6 @@ export const CardTripInfo = (props) => {
         } else if (trip.tripStatus.tripStatus == 'Iniciado') {
             return (
                 <>
-                {/* <Button title = 'Terminar Viaje' color = 'red' onPress = {() => {
-                    actualizarViaje(2)
-                    props.navigation.navigate('ResumenViaje')    
-                }}/> */}
                 <MotionSlider
                         min={0} 
                         max={40}
@@ -125,68 +97,28 @@ export const CardTripInfo = (props) => {
                             deleteFromStorage()
                             props.navigation.navigate('ResumenViaje')  
                         }}}
-                        // onDrag={() => console.log('Dragging')}
                 />
-                {/* <Button title = 'Terminar Viaje' color = 'red' onPress = {() => {
-                    // actualizarViaje(2)
-                    props.navigation.navigate('ResumenViaje')    
-                }}/> */}
-                {/* <Button title = 'Cancelar Viaje' color = 'red' onPress = {() => console.log(3)}/> */}
-                {/* <Button title = 'Delete' color = 'red' onPress = {() => deleteFromStorage()}/> */}
                 </>
             )
-        } else
-        {
+        } else {
             return null
         }
     }
 
     async function deleteFromStorage() {
-        // setTrip(null)
+        setTrip(null)
         await DeleteTrip()
     }
 
-    // return (
-    //     <View style = {styles.card}>
-    //         <Text style = {styles.text}>Pasajero: {trip.passenger.name}</Text> 
-    //         <Text style = {styles.text}>Origen: {origin}</Text>
-    //         <Text style = {styles.text}>Destino: {destination}</Text>
-    //         <View style = {styles.buttonContainer}>
-    //             <Button 
-    //             style = {styles.button}
-    //             title = 'Aceptar Viaje' 
-    //             color = 'green' 
-    //             onPress = {() => aceptarViaje()}/>
-    //             <Button 
-    //             style = {styles.button}
-    //             title = 'Delete from storage' 
-    //             color = 'red' 
-    //             onPress = {() => deleteFromStorage()}/>
-    //         </View>
-    //     </View>
-    // )
-
     return (
         <View style = {styles.card}>
-            {/* {props.children} */}
             <Text style = {styles.text}>Pasajero: {trip.passenger.name}</Text> 
              <Text style = {styles.text}>Origen: {trip.originVincity.split(',')[0]}</Text>
              <Text style = {styles.text}>Destino: {trip.destinationVincity.split(',')[1]}</Text>
 
              <View style = {styles.buttonContainer}>
-                {/* <Button 
-                style = {styles.button}
-                title = 'Aceptar Viaje' 
-                color = 'green' 
-                onPress = {() => aceptarViaje()}/>
-                <Button 
-                style = {styles.button}
-                title = 'Delete from storage' 
-                color = 'red' 
-                onPress = {() => deleteFromStorage()}/> */}
                 <EvaluateTripStatus/>
             </View>
-
         </View>
     )
 }

@@ -12,7 +12,6 @@ import { ViajeProvider } from './src/Context/ViajeContext';
 import { Login } from './src/Screens/Login'
 import { LoginDriver } from './src/Screens/LoginDriver'
 import { MapasDriver } from './src/Screens/MapasDriver'
-import { MapasPassenger } from './src/Screens/MapasPassenger'
 import { Registro } from './src/Screens/Registro'
 import { Mapas } from './src/Screens/Mapas'
 import { MapCamera } from './src/Screens/MapCamera'
@@ -25,6 +24,8 @@ import { Tracking } from './src/Screens/Tracking';
 import SplashScreen from './src/Screens/SplashScreen';
 import { ResumenViaje } from './src/Screens/ResumenViaje';
 import { Viajes } from './src/Screens/Viajes';
+import { CardDriver } from './src/Components/CardDriver';
+import {Payment} from './src/Screens/Payment'
 //Geolocation
 import Geolocation from 'react-native-geolocation-service'
 import ReduxLocationStore from './src/Redux/Redux-location-store';
@@ -70,7 +71,6 @@ const LoginStackScreen = ()=> (
 const MainStackScreen = ()=> (
   <MainStack.Navigator headerMode='none' initialRouteName={'Mapas'} drawerContent = {(props) => <DrawerItem {...props}/>}>
     <MainStack.Screen name="Mapas" component={Mapas} options = {{headerShown: false}}/>
-    <MainStack.Screen name="MapasPassenger" component={MapasPassenger} options = {{headerShown: false}}/>
     <MainStack.Screen name="Animation" component={Animation} options = {globalOptions} />
     <MainStack.Screen name="Registro" component={Registro} options = {globalOptions}/>
     <MainStack.Screen name="FindAddress" component={FindAddress} options = {globalOptions} />
@@ -87,11 +87,13 @@ const MainStackScreen = ()=> (
 const DriverStackScreen = ()=> (
   <DriverStack.Navigator headerMode='none' initialRouteName={'MapasDriver'} drawerContent = {(props) => <DrawerItem {...props}/>}>
     <DriverStack.Screen name="MapasDriver" component={MapasDriver} options = {globalOptions}/>
+    <DriverStack.Screen name="Payment" component={Payment} options = {globalOptions}/>
     <DriverStack.Screen name="Perfil" component={Perfil} options = {globalOptions}/>
     <DriverStack.Screen name="Chat" component={Chat} options = {globalOptions}/>
     <DriverStack.Screen name="Tracking" component={Tracking} options = {globalOptions}/>
     <DriverStack.Screen name="ResumenViaje" component={ResumenViaje} options = {globalOptions}/>
     <DriverStack.Screen name="Viajes" component={Viajes} options = {globalOptions}/>
+    <DriverStack.Screen name="CardDriver" component={CardDriver} options = {globalOptions}/>
   </DriverStack.Navigator>
 )
 
@@ -123,6 +125,7 @@ function App() {
   Geolocation.watchPosition(
     // ({coords}) => {setAddress(coords)},
     ({coords}) => {
+      // console.log(coords);
       ReduxLocationStore.dispatch(set_location(coords))
       setAddress(coords)
     },
