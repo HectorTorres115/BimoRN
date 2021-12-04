@@ -148,7 +148,7 @@ export function CardDriver(props) {
     }, [])
 
     const { trip, setTrip } = useTrip();
-    const {viaje, setViaje } = useViaje();
+    const { viaje, setViaje } = useViaje();
     const { usuario } = useUsuario();
     const [otp, setOtp] = useState(null);
 

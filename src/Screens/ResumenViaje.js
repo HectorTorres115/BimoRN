@@ -4,6 +4,8 @@ import { DataTable } from 'react-native-paper'
 import { useTrip } from '../Context/TripContext'
 import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
 import {Fab} from '../Components/Fab'
+import { useViaje, viajeDefaultState } from '../Context/ViajeContext'
+import { DeleteTrip } from '../Functions/TripStorage'
 
 export const ResumenViaje = (props) => {
 
@@ -15,6 +17,13 @@ export const ResumenViaje = (props) => {
       }, []) 
 
     const {trip, setTrip} = useTrip();
+    const {viaje, setViaje} = useViaje();
+
+    function DestroyTrip() {
+        DeleteTrip();
+        setTrip(null);
+        setViaje(viajeDefaultState);
+    }
 
     return (
 
@@ -41,7 +50,7 @@ export const ResumenViaje = (props) => {
             </DataTable>            
             <Button title = 'Cerrar' color = 'red' onPress = {() => {
                 props.navigation.goBack()
-                setTrip(null)
+                DestroyTrip();
                 }}/> 
                 <Fab navigation = {props.navigation}/>
         </View> 
