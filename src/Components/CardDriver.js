@@ -268,7 +268,7 @@ export function CardDriver(props) {
                         <Text style={styles.text}>Aceptar viaje</Text>
                     </View>
                     <View style={styles.button}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress = {() => DestroyTrip()}>
                             <MaterialCommunityIcons color={'red'} size={70} name={'close-box'} />
                         </TouchableOpacity>
                         <Text style={styles.text}>Rechazar viaje</Text>

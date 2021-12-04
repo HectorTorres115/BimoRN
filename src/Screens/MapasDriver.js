@@ -402,19 +402,6 @@ export const MapasDriver = ({ navigation }) => {
           coordinate={driverLocation}
           icon={require('../../assets/images/map-taxi.png')} />
 
-        {/* {driverLocation !== null ? <AnimatedMarkerDef data = {driverLocation}/>: null} */}
-
-        {/* <EvaluateMarkers/> */}
-
-        {/* {viaje.tripPolyline !== null ? <Polyline coordinates={viaje.tripPolyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null}
-              {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null}*/} 
-       {/* { viaje.polyline !== null ? <Polyline 
-        coordinates={viaje.polyline} 
-        strokeWidth={6} 
-        strokeColor={"#16A1DC"} 
-        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
-        /> : null} */}
-
         { viaje.polyline !== null ? <AnimatedPolyline 
         interval = {100}
         coordinates={viaje.polyline} 
@@ -430,12 +417,6 @@ export const MapasDriver = ({ navigation }) => {
         strokeColor={"green"} 
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
         />: null}
-{/*         
-        { viaje.driverPolyline !== null ? <Polyline 
-        coordinates={viaje.driverpolyline} 
-        strokeWidth={6} 
-        strokeColor={"green"} 
-        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} />: null} */}
 
       </MapView>
 

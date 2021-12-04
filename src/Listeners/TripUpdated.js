@@ -82,34 +82,21 @@ export class TripUpdated extends Component {
           <Subscription subscription = {SUSCRIPTION_TRIP}
           variables= {{tripId: this.props.trip.id}}
           onSubscriptionData = {(data) => {
-              // console.log(data.subscriptionData.data)
-              // if(data.subscriptionData.data.TripUpdated.tripStatus.id === 4){
-              //   Alert.alert("El conductor ha llegado")
-              // } else {
-              //   console.log(data.subscriptionData.data.TripUpdated.tripStatus)
-              // }
-
+              console.log(data.subscriptionData.data)
+              console.log('Se actualizo el trip');
               if(data.subscriptionData.data.TripUpdated.tripStatus.id === 2){
-                Alert.alert("El viaje ha terminado")
-                // SetTripStorage(null)
-                // this.props.setTrip(null)
-                this.props.DeleteTrip()
+                Alert.alert("El viaje ha terminado");
+                this.props.DeleteTrip();
               } else {
                 console.log(data.subscriptionData.data.TripUpdated.tripStatus)
               }
-              // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
-              // console.log(data.subscriptionData.data.TripUpdated);
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
               this.props.setDriverState(data.subscriptionData.data.TripUpdated.driver)
-              // this.props.setDriverLocation({
-              //   latitude: data.subscriptionData.data.TripUpdated.driver.city.lat,
-              //   longitude: data.subscriptionData.data.TripUpdated.driver.city.lng
-              // })
               this.props.setDriverLocation(true)
           }}>
           {({loading, error}) => {
-              // if(loading) return <ActivityIndicator size = 'large' color = 'green'/>
-              if(loading) return null
+              if(loading) return <ActivityIndicator size = 'large' color = 'green'/>
+              // if(loading) return null
               if(error) {
                 console.log(error)
                 return <ActivityIndicator size = 'large' color = 'red'/>
@@ -124,10 +111,6 @@ export class TripUpdated extends Component {
 }
 
 export class TripUpdatedDriver extends Component {
-  componentDidMount(){
-    console.log('Componente montado')
-    console.log(this.props)
-  }
   render() {
       return (
           <ApolloProvider client = {subClient}>
@@ -144,12 +127,6 @@ export class TripUpdatedDriver extends Component {
                 console.log(error)
                 return <ActivityIndicator size = 'large' color = 'red'/>
               }
-              if(data.TripUpdated.chatId !== null){
-                // console.log(data.TripUpdated)
-                // return <TripInfo driver = {data.TripUpdated.driver}/> 
-                return <Button title = "Chat" onPress = {() => props.navigation.navigate("Chat",{chatId: data.TripUpdated.chatId})}/> 
-              }
-              return null
           }}
           </Subscription>
           </ApolloProvider>

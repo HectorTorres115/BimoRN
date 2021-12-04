@@ -273,7 +273,7 @@ export const Mapas = ({ navigation }) => {
       // setRoute(GetRouteInfo)
       setViaje({
         ...viaje, 
-        tripPolyline: decodePolyline(GetRouteInfo.polyline),
+        polyline: decodePolyline(GetRouteInfo.polyline),
         route: GetRouteInfo
       })
       animateCameraToPolylineCenter(decodePolyline(GetRouteInfo.polyline))
@@ -476,14 +476,45 @@ export const Mapas = ({ navigation }) => {
         initialCamera={initialCameraConfig}>
         {/* <EvaluateDriverMarker/> */}
         {driverLocation !== null ? <AnimatedMarkerDef data = {driverLocation}/>: null}
+
         <EvaluateTripPolyline/>
+
+        {/* {viaje.polyline !== null ? 
+        <>
+        <Polyline 
+        coordinates={viaje.polyline} 
+        strokeWidth={6} 
+        strokeColor={"#000000"} 
+        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
+        />
+        <AnimatedPolyline 
+        interval = {100}
+        coordinates={viaje.polyline} 
+        strokeWidth={6} 
+        strokeColor={"#16A1DC"} 
+        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
+        />
+        </>
+        :null} */}
         <EvaluateDriverPolyline/>
+
       </MapView>
 
       {/* Suscriptions */}
 
       <EvaluateCityDriver />
-      <EvaluateStartSuscription />
+
+      {/* <EvaluateStartSuscription /> */}
+
+      {trip !== null ? <TripUpdated
+        // setDriverPolyline ={setDriverPolyline}
+        trip={trip} 
+        setTrip={SaveTrip}
+        driverState={driverState} 
+        setDriverState={setDriverState}
+        setDriverLocation={setDriverLocation}
+        deleteTrip={DeleteTrip}
+      /> : null}
 
       <View style={styles.cardContainer}>
         <CardPassenger props={{ 
