@@ -389,6 +389,7 @@ export const Mapas = ({ navigation }) => {
         driverState={driverState} 
         setDriverState={setDriverState}
         setDriverLocation={setDriverLocation}
+        deleteTrip={DeleteTrip}
       />
     } else {
       return null

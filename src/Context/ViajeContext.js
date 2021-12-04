@@ -5,7 +5,7 @@ export const ViajeContext = React.createContext();
 
 export const viajeDefaultState = {
     tripPolyline: null,
-    driverPolyline: null,
+    driverPolyline: [],
     indexdriver: null,
     indexorigin: null,
     indexdestination: null,

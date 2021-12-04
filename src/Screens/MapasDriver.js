@@ -407,7 +407,7 @@ export const MapasDriver = ({ navigation }) => {
         {/* <EvaluateMarkers/> */}
 
         {/* {viaje.tripPolyline !== null ? <Polyline coordinates={viaje.tripPolyline} strokeWidth={6} strokeColor ={"#16A1DC"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null}
-              {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null} */}
+              {viaje.driverPolyline !== null ? <Polyline coordinates={viaje.driverPolyline} strokeWidth={6} strokeColor ={"green"} strokeColors={['#7F0000','#00000000', '#B24112','#E5845C','#238C23','#7F0000']} /> : null}*/} 
         <Polyline coordinates={polyline} strokeWidth={6} strokeColor={"#16A1DC"} strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} />
         
         <AnimatedPolyline 

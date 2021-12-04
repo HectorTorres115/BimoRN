@@ -89,13 +89,14 @@ export class TripUpdated extends Component {
               //   console.log(data.subscriptionData.data.TripUpdated.tripStatus)
               // }
 
-              // if(data.subscriptionData.data.TripUpdated.tripStatus.id === 2){
-              //   Alert.alert("El viaje ha terminado")
-              //   SetTripStorage(null)
-              //   this.props.setTrip(null)
-              // } else {
-              //   console.log(data.subscriptionData.data.TripUpdated.tripStatus)
-              // }
+              if(data.subscriptionData.data.TripUpdated.tripStatus.id === 2){
+                Alert.alert("El viaje ha terminado")
+                // SetTripStorage(null)
+                // this.props.setTrip(null)
+                this.props.DeleteTrip()
+              } else {
+                console.log(data.subscriptionData.data.TripUpdated.tripStatus)
+              }
               // Alert.alert('Tu conductor es: ' + data.subscriptionData.data.TripUpdated.driver.name)
               // console.log(data.subscriptionData.data.TripUpdated);
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
