@@ -4,8 +4,8 @@ import { GetViaje } from '../Functions/ViajeStorage';
 export const ViajeContext = React.createContext();
 
 export const viajeDefaultState = {
-    tripPolyline: null,
-    driverPolyline: [],
+    polyline: null,
+    driverPolyline: null,
     indexdriver: null,
     indexorigin: null,
     indexdestination: null,

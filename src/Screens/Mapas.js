@@ -414,18 +414,18 @@ export const Mapas = ({ navigation }) => {
   }
 
   function EvaluateTripPolyline() {
-    if(viaje.tripPolyline !== null){
+    if(viaje.polyline !== null){
       return (
         <>
         <Polyline 
-        coordinates={viaje.tripPolyline} 
+        coordinates={viaje.polyline} 
         strokeWidth={6} 
         strokeColor={"#000000"} 
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
         />
         <AnimatedPolyline 
         interval = {100}
-        coordinates={viaje.tripPolyline} 
+        coordinates={viaje.polyline} 
         strokeWidth={6} 
         strokeColor={"#16A1DC"} 
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
@@ -456,16 +456,6 @@ export const Mapas = ({ navigation }) => {
     if(driverLocation !== null){
       // console.log(driverLocation);
       return(
-        // <AnimatedMarker
-        //   heading = {ReduxDriverStore.getState().heading}
-        //   coordinate = {{
-        //   latitude: ReduxDriverStore.getState().lat,
-        //   longitude: ReduxDriverStore.getState().lng,
-        //   latitudeDelta: 0.08,
-        //   longitudeDelta: 0.08
-        //   }} 
-        //   duration = {4000}
-        // />
         <AnimatedMarkerDef data = {driverLocation}/>
       )
     } else {

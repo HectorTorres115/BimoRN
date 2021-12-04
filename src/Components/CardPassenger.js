@@ -371,7 +371,7 @@ export const CardPassenger = (props) => {
         <View style={styles.card}>
             <Text style={styles.text}>Distancia: {viaje.route.distance}</Text>
             <Text style={styles.text}>Tiempo estimado: {viaje.route.time}</Text>
-            <Text style={styles.text}>Precio: ${cost.feeTaxed}</Text>
+            <Text style={styles.text}>Precio: ${cost.feeTaxed.toFixed(2)}</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <MaterialCommunityIcons size={24} name={'arrow-left'} onPress={() => setCost(null)} />
                 <ButtonPaper

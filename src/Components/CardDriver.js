@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native'
 import { TripCreated } from '../Listeners/TripCreated'
 import { useTrip } from '../Context/TripContext'
-import { SetTrip as setTripStorage, DeleteTrip } from '../Functions/TripStorage'
-import { useUsuario } from '../Context/UserContext'
-import { Avatar, Button } from 'react-native-paper'
+import { SetTrip as setTripStorage, DeleteTrip } from '../Functions/TripStorage';
+import { useUsuario } from '../Context/UserContext';
+import { useViaje, viajeDefaultState } from '../Context/ViajeContext';
+import { Avatar, Button } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MotionSlider from 'react-native-motion-slider';
+import decodePolyline from '../Functions/DecodePolyline';
 
 import gql from 'graphql-tag'
 import { useMutation, useLazyQuery } from 'react-apollo'
@@ -146,12 +148,15 @@ export function CardDriver(props) {
     }, [])
 
     const { trip, setTrip } = useTrip();
+    const {viaje, setViaje } = useViaje();
     const { usuario } = useUsuario();
     const [otp, setOtp] = useState(null);
 
     const [update_trip] = useMutation(UPDATE_TRIP, {
         onCompleted: ({ UpdateTrip }) => {
             SaveTrip(UpdateTrip);
+            // console.log(UpdateTrip);
+            SetPolylines(UpdateTrip);
         },
         onError: (err) => {
             console.log(err);
@@ -186,6 +191,14 @@ export function CardDriver(props) {
         }
     })
 
+    function SetPolylines(param) {
+        setViaje({
+            ...viajeDefaultState,
+            polyline: decodePolyline(param.tripPolyline),
+            driverPolyline: decodePolyline(param.driverPolyline),
+        })
+    }
+
     function GoToChat(props) {
         // console.log(props);
         props.navigation.navigate('Chat');
@@ -199,6 +212,7 @@ export function CardDriver(props) {
     function DestroyTrip() {
         DeleteTrip();
         setTrip(null);
+        setViaje(viajeDefaultState);
     }
 
     function IniciarViaje() {
