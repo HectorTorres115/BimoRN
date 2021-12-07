@@ -213,7 +213,7 @@ export const MapasDriver = ({ navigation }) => {
   const [indexdriver, setIndexDriver] = useState(usuario.city.indexH3);
   const [indexorigin, setIndexOrigin] = useState(null);
   const [indexdestination, setIndexDestination] = useState(null);
-  const [city, setCity] = useState(usuario.city);
+  const [city, setCity] = useState(null);
   //Marcadores
   const [originCoordinates, setOriginCoordinates] = useState(null);
   const [destinantionCoordinates, setDestinationCoordinates] = useState(null);
@@ -394,10 +394,10 @@ export const MapasDriver = ({ navigation }) => {
           return <Polygon fillColor={'rgba(22, 161, 220, 0.5)'} key={hexagon.index} coordinates={hexagon.boundaries} strokeWidth={6} strokeColor={"#16A1DC"} />
         })}
         {/* Marcador del driver */}
-        <Marker key={Math.floor(1000 + Math.random() * 9000)}
+        {/* <Marker key={Math.floor(1000 + Math.random() * 9000)}
         ref={driverMarker}
         coordinate={driverLocation}
-        icon={require('../../assets/images/map-taxi.png')} />
+        icon={require('../../assets/images/map-taxi.png')} /> */}
 
         { viaje.polyline !== null ? <AnimatedPolyline 
         interval = {100}
@@ -415,9 +415,14 @@ export const MapasDriver = ({ navigation }) => {
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
         />: null}
 
-      {ReduxLocationStore.getState().longitude !== null ? 
-      <AnimatedMarkerDef data = {ReduxLocationStore.getState()}/> 
+      {city !== null ? 
+      <AnimatedMarkerDef data = {{
+        lat: ReduxLocationStore.getState().latitude,
+        lng: ReduxLocationStore.getState().longitude,
+        heading: ReduxLocationStore.getState().heading,
+      }}/> 
       : null}
+
       </MapView>
         
       <TripCreated setTrip={setTrip}/>
