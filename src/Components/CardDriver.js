@@ -383,7 +383,7 @@ export function CardDriver(props) {
                 return (
                     <EsperandoButtons />
                 )
-            } else if (trip.tripStatus.tripStatus == 'Esperando') {
+            } else if (trip.tripStatus.tripStatus == 'Iniciado') {
                 return (
                     <IniciadoButtons />
                 )
