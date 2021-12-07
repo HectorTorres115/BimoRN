@@ -378,7 +378,7 @@ export const MapasDriver = ({ navigation }) => {
 
       <MapView
         ref={globalMapView}
-        showsUserLocation={true}
+        showsUserLocation={false}
         showsMyLocationButton={false}
         style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}
         initialRegion={region}>
@@ -415,9 +415,13 @@ export const MapasDriver = ({ navigation }) => {
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
         />: null}
 
+      {ReduxLocationStore.getState().longitude !== null ? 
+      <AnimatedMarkerDef data = {ReduxLocationStore.getState()}/> 
+      : null}
       </MapView>
         
       <TripCreated setTrip={setTrip}/>
+
       
       <CardDriver navigation={navigation}/>
       
