@@ -28,6 +28,7 @@ import { SetViaje as SetViajeStorage, DeleteViaje as DeleteViajeStorage} from '.
 import { SetTrip as SetTripStorage, DeleteTrip as DeleteTripStorage} from '../Functions/TripStorage'
 //Driver store
 import ReduxDriverStore from '../Redux/Redux-driver-store'
+import { TripUpdatedPassenger } from '../Listeners/TripUpdatedPassenger'
 
 const QUERY_DRIVERS = gql`
 query{
@@ -478,24 +479,6 @@ export const Mapas = ({ navigation }) => {
         {driverLocation !== null ? <AnimatedMarkerDef data = {driverLocation}/>: null}
 
         <EvaluateTripPolyline/>
-
-        {/* {viaje.polyline !== null ? 
-        <>
-        <Polyline 
-        coordinates={viaje.polyline} 
-        strokeWidth={6} 
-        strokeColor={"#000000"} 
-        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
-        />
-        <AnimatedPolyline 
-        interval = {100}
-        coordinates={viaje.polyline} 
-        strokeWidth={6} 
-        strokeColor={"#16A1DC"} 
-        strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
-        />
-        </>
-        :null} */}
         <EvaluateDriverPolyline/>
 
       </MapView>
@@ -505,6 +488,8 @@ export const Mapas = ({ navigation }) => {
       <EvaluateCityDriver />
 
       {/* <EvaluateStartSuscription /> */}
+
+      <TripUpdatedPassenger setTrip={setTrip} passengerId = {usuario.id}/>
 
       {trip !== null ? <TripUpdated
         // setDriverPolyline ={setDriverPolyline}

@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Button, StyleSheet, View, Switch, Text } from 'react-native'
 import gql from 'graphql-tag'
-import MapView, { Marker, Polygon, Polyline } from 'react-native-maps'
+import MapView, { Marker, Polygon } from 'react-native-maps'
 import { useUsuario } from '../Context/UserContext'
-import { useAddress } from '../Context/AddressContext'
 import { useViaje } from '../Context/ViajeContext'
 import { useMutation, useQuery } from 'react-apollo'
 import decodePolyline from '../Functions/DecodePolyline'
@@ -11,8 +10,7 @@ import { backAction, handleAndroidBackButton } from '../Functions/BackHandler'
 import { TripCreated } from '../Listeners/TripCreated'
 import ReduxLocationStore from '../Redux/Redux-location-store'
 import { useTrip } from '../Context/TripContext'
-import { CardTripInfo } from '../Components/CardTripInfo'
-import { SetTrip as SetTripStorage } from '../Functions/TripStorage'
+// import { SetTrip as SetTripStorage } from '../Functions/TripStorage'
 import { Fab } from '../Components/Fab'
 import AnimatedPolyline from 'react-native-maps-animated-polyline'
 import { AnimatedMarkerDef } from '../Components/AnimatedMarkerDef'
@@ -201,11 +199,10 @@ export const MapasDriver = ({ navigation }) => {
   //Global states from react context
   const { usuario, setUser } = useUsuario();
   const { trip, setTrip } = useTrip();
-  const { address, setAddress } = useAddress();
   const { viaje, setViaje } = useViaje();
   //State
   const [isonline, setIsOnline] = useState(usuario.isOnline);
-  const [region] = useState({ longitude: -107.45220333333332, latitude: 24.82172166666667, latitudeDelta: 0.08, longitudeDelta: 0.08 });
+  const [region] = useState({ longitude: -107.3657382, latitude: 24.7958256, latitudeDelta: 0.08, longitudeDelta: 0.08 });
   const [drivers, setDrivers] = useState([]);
   const [driverLocation, setDriverLocation] = useState(ReduxLocationStore.getState());
   const [polyline, setPolyline] = useState([]);
@@ -288,46 +285,46 @@ export const MapasDriver = ({ navigation }) => {
   })
 
 
-  const [accept_trip] = useMutation(ACCEPT_TRIP, {
-    fetchPolicy: "no-cache",
-    onCompleted: async ({ UpdateTrip }) => {
-      setTrip(UpdateTrip)
+  // const [accept_trip] = useMutation(ACCEPT_TRIP, {
+  //   fetchPolicy: "no-cache",
+  //   onCompleted: async ({ UpdateTrip }) => {
+  //     setTrip(UpdateTrip)
 
-      setPolyline(decodePolyline(UpdateTrip.tripPolyline))
-      setDriverPolyline(decodePolyline(UpdateTrip.driverPolyline))
+  //     setPolyline(decodePolyline(UpdateTrip.tripPolyline))
+  //     setDriverPolyline(decodePolyline(UpdateTrip.driverPolyline))
 
-      // setViaje({
-      //   tripPolyline: decodePolyline(UpdateTrip.tripPolyline),
-      //   driverPolyline: decodePolyline(UpdateTrip.driverPolyline)
-      // })
+  //     // setViaje({
+  //     //   tripPolyline: decodePolyline(UpdateTrip.tripPolyline),
+  //     //   driverPolyline: decodePolyline(UpdateTrip.driverPolyline)
+  //     // })
 
-      setOriginCoordinates({ latitude: UpdateTrip.originLocationLat, longitude: UpdateTrip.originLocationLng })
-      setDestinationCoordinates({ latitude: UpdateTrip.destinationLocationLat, longitude: UpdateTrip.destinationLocationLng })
+  //     setOriginCoordinates({ latitude: UpdateTrip.originLocationLat, longitude: UpdateTrip.originLocationLng })
+  //     setDestinationCoordinates({ latitude: UpdateTrip.destinationLocationLat, longitude: UpdateTrip.destinationLocationLng })
 
-      animateCameraToPolylineCenter(decodePolyline(UpdateTrip.tripPolyline))
+  //     animateCameraToPolylineCenter(decodePolyline(UpdateTrip.tripPolyline))
 
-      get_hexagons({ variables: { lat: UpdateTrip.originLocationLat, lng: UpdateTrip.originLocationLng, res: 10, jumps: 0 } }).then(({ data }) => {
-        setIndexOrigin(data.GetHexagons[0].index)
-        setHexagons(data.GetHexagons)
-        // setViaje({
-        //   indexorigin: data.GetHexagons[0].index
-        // })
+  //     get_hexagons({ variables: { lat: UpdateTrip.originLocationLat, lng: UpdateTrip.originLocationLng, res: 10, jumps: 0 } }).then(({ data }) => {
+  //       setIndexOrigin(data.GetHexagons[0].index)
+  //       setHexagons(data.GetHexagons)
+  //       // setViaje({
+  //       //   indexorigin: data.GetHexagons[0].index
+  //       // })
 
-      })
+  //     })
 
-      get_hexagons({ variables: { lat: UpdateTrip.destinationLocationLat, lng: UpdateTrip.destinationLocationLng, res: 10, jumps: 0 } }).then(({ data }) => {
-        setIndexDestination(data.GetHexagons[0].index)
-        setHexagonsDestination(data.GetHexagons)
-        // setViaje({
-        //   indexdestination: data.GetHexagons[0].index
-        // })
-      })
-      SetTripStorage(UpdateTrip)
-    },
-    onError: (error) => {
-      console.log(error);
-    }
-  })
+  //     get_hexagons({ variables: { lat: UpdateTrip.destinationLocationLat, lng: UpdateTrip.destinationLocationLng, res: 10, jumps: 0 } }).then(({ data }) => {
+  //       setIndexDestination(data.GetHexagons[0].index)
+  //       setHexagonsDestination(data.GetHexagons)
+  //       // setViaje({
+  //       //   indexdestination: data.GetHexagons[0].index
+  //       // })
+  //     })
+  //     SetTripStorage(UpdateTrip)
+  //   },
+  //   onError: (error) => {
+  //     console.log(error);
+  //   }
+  // })
 
   const [update_trip] = useMutation(ACCEPT_TRIP, {
     fetchPolicy: "no-cache",
@@ -397,10 +394,10 @@ export const MapasDriver = ({ navigation }) => {
           return <Polygon fillColor={'rgba(22, 161, 220, 0.5)'} key={hexagon.index} coordinates={hexagon.boundaries} strokeWidth={6} strokeColor={"#16A1DC"} />
         })}
         {/* Marcador del driver */}
-          <Marker key={Math.floor(1000 + Math.random() * 9000)}
-          ref={driverMarker}
-          coordinate={driverLocation}
-          icon={require('../../assets/images/map-taxi.png')} />
+        <Marker key={Math.floor(1000 + Math.random() * 9000)}
+        ref={driverMarker}
+        coordinate={driverLocation}
+        icon={require('../../assets/images/map-taxi.png')} />
 
         { viaje.polyline !== null ? <AnimatedPolyline 
         interval = {100}
@@ -419,9 +416,11 @@ export const MapasDriver = ({ navigation }) => {
         />: null}
 
       </MapView>
-
+        
+      <TripCreated setTrip={setTrip}/>
+      
       <CardDriver navigation={navigation}/>
-
+      
       <Fab navigation={navigation} />
 
       <View style={styles.switchContainer}>

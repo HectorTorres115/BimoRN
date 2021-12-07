@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
 import { TripCreated } from '../Listeners/TripCreated'
 import { useTrip } from '../Context/TripContext'
 import { SetTrip as setTripStorage, DeleteTrip } from '../Functions/TripStorage';
@@ -150,7 +150,7 @@ export function CardDriver(props) {
     const { trip, setTrip } = useTrip();
     const { viaje, setViaje } = useViaje();
     const { usuario } = useUsuario();
-    const [otp, setOtp] = useState(null);
+    const [ otp, setOtp ] = useState(null);
 
     const [update_trip] = useMutation(UPDATE_TRIP, {
         onCompleted: ({ UpdateTrip }) => {
@@ -383,7 +383,7 @@ export function CardDriver(props) {
                 return (
                     <EsperandoButtons />
                 )
-            } else if (trip.tripStatus.tripStatus == 'Iniciado') {
+            } else if (trip.tripStatus.tripStatus == 'Esperando') {
                 return (
                     <IniciadoButtons />
                 )
@@ -392,9 +392,10 @@ export function CardDriver(props) {
                     <CanceladoButtons />
                 )
             }
-        } else {
-            return <TripCreated setTrip={setTrip} />
-        }
+        } else {return <ActivityIndicator size = 'large' color= 'blue'/>}
+        // else {
+        //     return <TripCreated setTrip={setTrip} />
+        // }
     }
 
     return (

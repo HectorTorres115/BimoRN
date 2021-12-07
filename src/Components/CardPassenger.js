@@ -122,6 +122,7 @@ export const CardPassenger = (props) => {
 
     function DeleteTrip() {
         setTrip(null)
+        setViaje(viajeDefaultState);
         DeleteTripStorage()
     }
     
@@ -361,9 +362,9 @@ export const CardPassenger = (props) => {
     )
 
     const FinishedCard = () => (
-        <View>
+        <View style = {styles.card}>
             <Text style={styles.text}>El viaje ha terminado</Text>
-            <MaterialCommunityIcons name='cancel' size={42} color='red' />
+            <MaterialCommunityIcons name='cancel' size={42} color='red' onPress = {() =>{ DeleteTrip(); DeleteViaje(); setCost(null);}}/>
         </View>
     )
 
@@ -388,12 +389,14 @@ export const CardPassenger = (props) => {
     function EvaluateTrip() {
         if (trip == null && cost == null) {
             return <NormalCard />
-        } else if (trip !== null && trip.driver !== null) {
-            return <OnCourseCard />
-        } else if (trip !== null && trip.driver == null) {
-            return <WaitingCard />
         } else if (trip == null && cost !== null) {
             return <TripInfoCard />
+        } else if (trip !== null && trip.tripStatus.tripStatus == "deal") {
+            return <WaitingCard />
+        } else if (trip !== null && trip.tripStatus.tripStatus == "En Camino") {
+            return <OnCourseCard />
+        } else if (trip !== null && trip.tripStatus.tripStatus == 'Cancelado' || trip.tripStatus.tripStatus == 'Terminado') {
+            return <FinishedCard />
         } else {
             return <Text>No render for this state</Text>
         }
@@ -401,5 +404,6 @@ export const CardPassenger = (props) => {
 
     return (
         <EvaluateTrip props={props} />
+        // <EvaluateCard/>
     )
 }

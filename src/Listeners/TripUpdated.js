@@ -84,19 +84,13 @@ export class TripUpdated extends Component {
           onSubscriptionData = {(data) => {
               console.log(data.subscriptionData.data)
               console.log('Se actualizo el trip');
-              if(data.subscriptionData.data.TripUpdated.tripStatus.id === 2){
-                Alert.alert("El viaje ha terminado");
-                this.props.DeleteTrip();
-              } else {
-                console.log(data.subscriptionData.data.TripUpdated.tripStatus)
-              }
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
               this.props.setDriverState(data.subscriptionData.data.TripUpdated.driver)
               this.props.setDriverLocation(true)
           }}>
           {({loading, error}) => {
-              if(loading) return <ActivityIndicator size = 'large' color = 'green'/>
-              // if(loading) return null
+              // if(loading) return <ActivityIndicator size = 'large' color = 'green'/>
+              if(loading) return null
               if(error) {
                 console.log(error)
                 return <ActivityIndicator size = 'large' color = 'red'/>
