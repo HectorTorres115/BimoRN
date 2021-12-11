@@ -393,7 +393,7 @@ export const CardPassenger = (props) => {
             return <TripInfoCard />
         } else if (trip !== null && trip.tripStatus.tripStatus == "deal") {
             return <WaitingCard />
-        } else if (trip !== null && trip.tripStatus.tripStatus == "En Camino") {
+        } else if (trip !== null && trip.tripStatus.tripStatus == "En Camino" || trip.tripStatus.tripStatus == 'Iniciado') {
             return <OnCourseCard />
         } else if (trip !== null && trip.tripStatus.tripStatus == 'Cancelado' || trip.tripStatus.tripStatus == 'Terminado') {
             return <FinishedCard />

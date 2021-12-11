@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 import React, { Component } from 'react'
-import { ActivityIndicator, Alert } from 'react-native'
+import { ActivityIndicator } from 'react-native'
 import {subClient} from '../Clients/sub-client'
 import {ApolloProvider, Subscription} from 'react-apollo'
 
@@ -71,9 +71,6 @@ export class TripUpdatedPassenger extends Component {
           variables= {{passengerId: this.props.passengerId}}
           onSubscriptionData = {(data) => {
               console.log(data.subscriptionData.data)
-              if(data.subscriptionData.data.TripUpdatedPassenger.tripStatusId == 3){
-                Alert.alert("El viaje ha sido cancelado");
-              }
               this.props.setTrip(data.subscriptionData.data.TripUpdatedPassenger);
           }}>
           {({loading, error}) => {
