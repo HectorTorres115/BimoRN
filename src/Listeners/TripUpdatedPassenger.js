@@ -71,7 +71,9 @@ export class TripUpdatedPassenger extends Component {
           variables= {{passengerId: this.props.passengerId}}
           onSubscriptionData = {(data) => {
               console.log(data.subscriptionData.data)
-              Alert.alert("El viaje ha sido cancelado");
+              if(data.subscriptionData.data.TripUpdatedPassenger.tripStatusId == 3){
+                Alert.alert("El viaje ha sido cancelado");
+              }
               this.props.setTrip(data.subscriptionData.data.TripUpdatedPassenger);
           }}>
           {({loading, error}) => {
