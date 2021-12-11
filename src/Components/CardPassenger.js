@@ -13,6 +13,7 @@ import { useViaje, viajeDefaultState } from '../Context/ViajeContext';
 import { DeleteViaje as DeleteViajeStorage} from '../Functions/ViajeStorage'
 import { SetTrip as SetTripStorage, DeleteTrip as DeleteTripStorage} from '../Functions/TripStorage'
 import ReduxLocationStore from '../Redux/Redux-location-store';
+import decodePolyline from '../Functions/DecodePolyline';
 
 const GET_TRIP_BY_ID = gql`
 query get_trip_by_id($id:Int!){

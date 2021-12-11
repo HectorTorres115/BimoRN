@@ -176,7 +176,8 @@ export const MapasDriver = ({ navigation }) => {
   useEffect(() => {
     handleAndroidBackButton(() => backAction(setUser))
     if (trip !== null) {
-      setPolyline(decodePolyline(trip.tripPolyline))
+      // setPolyline(decodePolyline(trip.tripPolyline))
+      SetSmartPolyline(trip);
       animateCameraToPolylineCenter(decodePolyline(trip.tripPolyline))
     }
     const interval = setInterval(() => {
@@ -195,18 +196,16 @@ export const MapasDriver = ({ navigation }) => {
 
   //Referencias
   const globalMapView = useRef(React.Component);
-  const driverMarker = useRef(React.Component);
   //Global states from react context
   const { usuario, setUser } = useUsuario();
   const { trip, setTrip } = useTrip();
-  const { viaje, setViaje } = useViaje();
+  const { viaje } = useViaje();
   //State
   const [isonline, setIsOnline] = useState(usuario.isOnline);
   const [region] = useState({ longitude: -107.3657382, latitude: 24.7958256, latitudeDelta: 0.08, longitudeDelta: 0.08 });
   const [drivers, setDrivers] = useState([]);
   const [driverLocation, setDriverLocation] = useState(ReduxLocationStore.getState());
   const [polyline, setPolyline] = useState([]);
-  const [driverpolyline, setDriverPolyline] = useState([]);
   const [hexagons, setHexagons] = useState([]);
   const [hexagonsdestination, setHexagonsDestination] = useState([]);
   // const [trip, setTrip] = useState({});
@@ -236,13 +235,6 @@ export const MapasDriver = ({ navigation }) => {
       // console.log(UpdateDriver)
       setIsOnline(UpdateDriver.isOnline)
     },
-    onError: (error) => {
-      console.log(error);
-    }
-  })
-
-  const [get_hexagons] = useMutation(GET_HEXAGONS, {
-    fetchPolicy: "no-cache",
     onError: (error) => {
       console.log(error);
     }
@@ -356,6 +348,14 @@ export const MapasDriver = ({ navigation }) => {
     }, { duration: 1000 })
   }
 
+  function SetSmartPolyline(trip) {
+    if(decodePolyline(trip.tripPolyline).length <= 1){
+      Alert.alert("Ya estas en la localizacion del pasajero.");
+    } else {
+      setPolyline(decodePolyline(trip.tripPolyline));
+    }
+  }
+
   function EvaluateMarkers() {
     if (originCoordinates !== null && destinantionCoordinates !== null) {
       return (
@@ -407,7 +407,7 @@ export const MapasDriver = ({ navigation }) => {
         strokeColors={['#7F0000', '#00000000', '#B24112', '#E5845C', '#238C23', '#7F0000']} 
         />: null}
 
-        { viaje.polyline !== null ? <AnimatedPolyline 
+        { viaje.driverPolyline !== null ? <AnimatedPolyline 
         interval = {100}
         coordinates={viaje.driverPolyline} 
         strokeWidth={6} 

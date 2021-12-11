@@ -241,6 +241,18 @@ export function CardDriver(props) {
         })
     }
 
+    function RejectTrip() {
+        update_trip({
+            variables: {
+                "trip_payload": {
+                    "id": trip.id,
+                    "tripStatusId": 3,  //CANCELADO
+                    "driverId": usuario.id
+                }
+            },
+        }).then(() => DestroyTrip())
+    }
+
     const DealButtons = () => {
         return (
             <>
@@ -295,7 +307,7 @@ export function CardDriver(props) {
                         <MaterialCommunityIcons name='forum' size={40} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => DestroyTrip()}>
+                    <TouchableOpacity onPress={() => RejectTrip()}>
                         <MaterialCommunityIcons name='cancel' size={40} />
                     </TouchableOpacity>
 
@@ -344,7 +356,7 @@ export function CardDriver(props) {
                         <MaterialCommunityIcons name='forum' size={40} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => DestroyTrip()}>
+                    <TouchableOpacity onPress={() => RejectTrip()}>
                         <MaterialCommunityIcons name='cancel' size={40} />
                     </TouchableOpacity>
                 </View>

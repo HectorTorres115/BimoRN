@@ -74,6 +74,7 @@ export function AnimatedMarkerDef(props) {
           coordinate={coords}
           >
           <AnimatedRN.View style={{transform: [{rotate: spin}]}, {perspective: 1000}}>
+          {/* <AnimatedRN.View style={{transform: [{rotate: spin}]}}> */}
             <AnimatedRN.Image
               style={{transform: [{rotate: spin}] }}
               source={require('../../assets/images/map-taxi.png')}
