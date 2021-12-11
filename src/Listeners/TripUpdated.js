@@ -80,10 +80,11 @@ export class TripUpdated extends Component {
       return (
           <ApolloProvider client = {subClient}>
           <Subscription subscription = {SUSCRIPTION_TRIP}
+          shouldResubscribe = {true}
           variables= {{tripId: this.props.trip.id}}
           onSubscriptionData = {(data) => {
-              console.log(data.subscriptionData.data)
-              console.log('Se actualizo el trip');
+              // console.log(data.subscriptionData.data)
+              // console.log('Se actualizo el trip');
               this.props.setTrip(data.subscriptionData.data.TripUpdated)
               this.props.setDriverState(data.subscriptionData.data.TripUpdated.driver)
               this.props.setDriverLocation(true)
