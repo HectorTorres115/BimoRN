@@ -6,13 +6,14 @@ export function AnimatedMarkerDef(props) {
 
     const [coords, setCoords] = useState(
         new AnimatedRegion({
-            longitude: -107.45220333333332,
-            latitude: 24.82172166666667,
+            // longitude: -107.45220333333332,
+            // latitude: 24.82172166666667,
+            longitude: props.data.lng,
+            latitude: props.data.lat,
             longitudeDelta: 0.08,
             latitudeDelta: 0.08
         })
     );
-    const [heading, setHeading] = useState(0);
 
     const [animacion] = useState(new AnimatedRN.Value(0))
     const spin = animacion.interpolate({

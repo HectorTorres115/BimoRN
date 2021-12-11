@@ -139,6 +139,47 @@ mutation confirm_otp($tripId: Int!, $otp: Int!){
 }
 `
 
+const CANCEL_TRIP = gql`
+mutation cancel_trip($tripId: Int!){
+  CancelTrip(tripId: $tripId){
+    id,
+    opt,
+	passengerId,
+    tripStatusId,
+    tripStatus{tripStatus}
+    commissionTypeId,
+    paymentMethodId,
+    serviceId,
+    chatId,
+    promocodeId,
+    driverId,
+    driver{photoUrl, name, plate}
+    passenger{photoUrl, name}
+    commission,
+    commissionValue,
+    createdAt,
+    currency,
+    destinationVincity,
+    originVincity,
+    discount,
+    distance,
+    pickedUpAt,
+    droppedOffAt,
+    fee,
+    feeTaxed
+    feedback,
+    note,
+    rating,
+    rawfee,
+    tax,
+    tripPolyline,
+    driverPolyline,
+    destinationIndex,
+    originIndex
+  }
+}
+`
+
 export function CardDriver(props) {
     useEffect(() => {
         console.log('Component did mount (Card Driver)');
@@ -171,6 +212,15 @@ export function CardDriver(props) {
             console.log(err);
         }
     });
+
+    const [cancel_trip] = useMutation(CANCEL_TRIP, {
+        onCompleted: ({CancelTrip}) => {
+            console.log(CancelTrip);
+        },
+        onError: (err) => {
+            console.log(err);
+        }
+    })
 
     const [get_trip_by_id] = useLazyQuery(GET_TRIP_BY_ID, {
         onCompleted: ({ GetTripById }) => {
@@ -242,15 +292,13 @@ export function CardDriver(props) {
     }
 
     function RejectTrip() {
-        update_trip({
+        cancel_trip({
             variables: {
-                "trip_payload": {
-                    "id": trip.id,
-                    "tripStatusId": 3,  //CANCELADO
-                    "driverId": usuario.id
-                }
+                tripId: trip.id
             },
-        }).then(() => DestroyTrip())
+        }).then(() => {
+            DestroyTrip()
+        })
     }
 
     const DealButtons = () => {
