@@ -6,6 +6,15 @@ import { handleAndroidBackButton, backAction } from '../Functions/BackHandler'
 import {Fab} from '../Components/Fab'
 import { useViaje, viajeDefaultState } from '../Context/ViajeContext'
 import { DeleteTrip } from '../Functions/TripStorage'
+import gql from 'graphql-tag'
+
+const CURRENT_ADDRESS = gql`
+mutation get_address($lat: Float!, $lng: Float!){
+  GetAddress(lat: $lat, lng: $lng){
+    name, placeId, direction
+  }
+}
+`
 
 export const ResumenViaje = (props) => {
 
@@ -18,6 +27,16 @@ export const ResumenViaje = (props) => {
 
     const {trip, setTrip} = useTrip();
     const {viaje, setViaje} = useViaje();
+
+    const [get_address] = useMutation(CURRENT_ADDRESS, {
+        fetchPolicy: "no-cache",
+        onCompleted: ({ GetAddress }) => {
+          setViaje({...viaje, origin: {...viaje.origin, name: CutAddress(GetAddress.name)}})
+        },
+        onError: (error) => {
+          console.log(error);
+        }
+    })
 
     function DestroyTrip() {
         DeleteTrip();
@@ -47,12 +66,16 @@ export const ResumenViaje = (props) => {
                     <DataTable.Cell style = {styles.text1}><Text style = {styles.text}>Total:</Text></DataTable.Cell>
                     <DataTable.Cell style = {styles.text2}><Text style = {styles.text}>$ {trip.feeTaxed.toFixed(2)}</Text></DataTable.Cell>
                 </DataTable.Row>
-            </DataTable>            
+            </DataTable>    
+
             <Button title = 'Cerrar' color = 'red' onPress = {() => {
-                props.navigation.goBack()
-                DestroyTrip();
+                get_address().then(() => {
+                    props.navigation.goBack()
+                    DestroyTrip();
+                })
                 }}/> 
                 <Fab navigation = {props.navigation}/>
+
         </View> 
         : null
     )
