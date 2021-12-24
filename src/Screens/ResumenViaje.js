@@ -8,6 +8,7 @@ import { useViaje, viajeDefaultState } from '../Context/ViajeContext'
 import { DeleteTrip } from '../Functions/TripStorage'
 import gql from 'graphql-tag'
 import { useMutation } from 'react-apollo'
+import ReduxLocationStore from '../Redux/Redux-location-store'
 
 const CURRENT_ADDRESS = gql`
 mutation get_address($lat: Float!, $lng: Float!){
@@ -42,7 +43,7 @@ export const ResumenViaje = (props) => {
     function DestroyTrip() {
         DeleteTrip();
         setTrip(null);
-        setViaje(viajeDefaultState);
+        // setViaje(viajeDefaultState);
     }
 
     return (
@@ -70,7 +71,12 @@ export const ResumenViaje = (props) => {
             </DataTable>    
 
             <Button title = 'Cerrar' color = 'red' onPress = {() => {
-                get_address().then(() => {
+                get_address({
+                    variables: {
+                        lat: ReduxLocationStore.getState().latitude,
+                        lng: ReduxLocationStore.getState().longitude,
+                    }
+                }).then(() => {
                     props.navigation.goBack()
                     DeleteTrip();
                     setTrip(null);
