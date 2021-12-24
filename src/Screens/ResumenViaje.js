@@ -32,7 +32,7 @@ export const ResumenViaje = (props) => {
     const [get_address] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
         onCompleted: ({ GetAddress }) => {
-          setViaje({...viaje, origin: {...viaje.origin, name: CutAddress(GetAddress.name)}})
+          setViaje({...viajeDefaultState, origin: {...viaje.origin, name: CutAddress(GetAddress.name)}})
         },
         onError: (error) => {
           console.log(error);
@@ -72,7 +72,9 @@ export const ResumenViaje = (props) => {
             <Button title = 'Cerrar' color = 'red' onPress = {() => {
                 get_address().then(() => {
                     props.navigation.goBack()
-                    DestroyTrip();
+                    DeleteTrip();
+                    setTrip(null);
+                    // DestroyTrip();
                 })
                 }}/> 
                 <Fab navigation = {props.navigation}/>
