@@ -30,6 +30,14 @@ export const ResumenViaje = (props) => {
     const {trip, setTrip} = useTrip();
     const {viaje, setViaje} = useViaje();
 
+    function CutAddress(address) {
+        if(address !== null) {
+          return address.split(',')[0]
+        } else {
+          return 'Dirección'
+        }
+      }
+
     const [get_address] = useMutation(CURRENT_ADDRESS, {
         fetchPolicy: "no-cache",
         onCompleted: ({ GetAddress }) => {
