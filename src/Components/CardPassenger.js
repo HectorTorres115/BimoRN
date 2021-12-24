@@ -121,6 +121,7 @@ export const CardPassenger = (props) => {
     const [cost, setCost] = useState(null);
 
     function DeleteTrip() {
+        
         setTrip(null)
         setViaje(viajeDefaultState);
         DeleteTripStorage()
@@ -364,7 +365,12 @@ export const CardPassenger = (props) => {
     const FinishedCard = () => (
         <View style = {styles.card}>
             <Text style={styles.text}>El viaje ha terminado</Text>
-            <MaterialCommunityIcons name='cancel' size={42} color='red' onPress = {() =>{ DeleteTrip(); DeleteViaje(); setCost(null);}}/>
+            <MaterialCommunityIcons name='cancel' size={42} color='red' onPress = {() =>{ 
+                props.props.navigation.navigate('ResumenViaje');
+                //DeleteTrip(); 
+                //DeleteViaje(); 
+                setCost(null);
+                }}/>
         </View>
     )
 
